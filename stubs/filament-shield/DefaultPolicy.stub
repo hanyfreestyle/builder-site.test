@@ -1,0 +1,79 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ auth_model_fqcn }};
+use {{ model_fqcn }};
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class {{ modelPolicy }}{
+
+    use HandlesAuthorization;
+
+    public function viewAny({{ auth_model_name }} ${{ auth_model_variable }}): bool{
+        return ${{ auth_model_variable }}->can('{{ ViewAny }}');
+    }
+
+    public function viewAnyCategory({{ auth_model_name }} ${{ auth_model_variable }}): bool{
+        return ${{ auth_model_variable }}->can('{{ ViewAnyCategory }}');
+    }
+
+     public function view({{ auth_model_name }} ${{ auth_model_variable }}, Model $model): bool {
+        return ${{ auth_model_variable }}->can('{{ View }}');
+    }
+
+     public function create({{ auth_model_name }} ${{ auth_model_variable }}): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ Create }}');
+    }
+
+    public function update({{ auth_model_name }} ${{ auth_model_variable }}, Model $model): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ Update }}');
+    }
+
+    public function updateSlug({{ auth_model_name }} ${{ auth_model_variable }}, Model $model): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ UpdateSlug }}');
+    }
+
+    public function delete({{ auth_model_name }} ${{ auth_model_variable }}, Model $model): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ Delete }}');
+    }
+
+    public function deleteAny({{ auth_model_name }} ${{ auth_model_variable }}): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ DeleteAny }}');
+    }
+
+    public function forceDelete({{ auth_model_name }} ${{ auth_model_variable }}, Model $model): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ ForceDelete }}');
+    }
+
+    public function forceDeleteAny({{ auth_model_name }} ${{ auth_model_variable }}): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ ForceDeleteAny }}');
+    }
+
+    public function restore({{ auth_model_name }} ${{ auth_model_variable }}, Model $model): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ Restore }}');
+    }
+
+    public function restoreAny({{ auth_model_name }} ${{ auth_model_variable }}): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ RestoreAny }}');
+    }
+
+    public function replicate({{ auth_model_name }} ${{ auth_model_variable }}, Model $model): bool{
+        return ${{ auth_model_variable }}->can('{{ Replicate }}');
+    }
+
+    public function reorder({{ auth_model_name }} ${{ auth_model_variable }}): bool
+    {
+        return ${{ auth_model_variable }}->can('{{ Reorder }}');
+    }
+}

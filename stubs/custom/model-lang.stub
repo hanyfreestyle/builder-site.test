@@ -1,0 +1,12 @@
+<?php
+return [
+    'navigation_group' => '{modelTitleManage}',
+    'navigation_label' => '{modelTitle}',
+    'model_label' => '{modelTitle}',
+    'plural_model_label' => '{modelTitlePlural}',
+    'add_but_label' => '{modelTitlePlural}',
+
+    'columns' => [
+        // columns_here
+    ],
+];

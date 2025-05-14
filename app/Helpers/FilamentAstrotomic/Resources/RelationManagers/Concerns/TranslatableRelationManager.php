@@ -1,0 +1,1 @@
+<?phpnamespace App\Helpers\FilamentAstrotomic\Resources\RelationManagers\Concerns;use App\Helpers\FilamentAstrotomic\Resources\Concerns\HasLocales;trait TranslatableRelationManager{    use HasLocales;}

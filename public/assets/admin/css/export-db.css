@@ -1,0 +1,16 @@
+.selectDiv{
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.db_table_name{
+    float: right;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.db_table_name li{
+    float: right;
+    margin-bottom: 10px;
+    width: 25%;
+}

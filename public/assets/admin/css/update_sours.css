@@ -1,0 +1,147 @@
+.fi-sidebar-nav-groups {
+    gap: 0.2rem !important; /* أو 1rem حسب اللي يناسبك */
+}
+textarea.cke_source{
+    color: #000000!important;
+}
+
+.badge-blue {
+    background-color: #1d4ed8;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.badge-green {
+    background-color: #28a745;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.badge-orange {
+    background-color: #fd7e14;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.badge-red {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.form-actions-right {
+    background-color: red;
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: 100%;
+}
+
+.form-actions-left {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    background-color: red;
+}
+
+.form-actions-right {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.custom-action-wrapper {
+    display: flex;
+    background-color: red;
+    /*justify-content: flex-end; !* أو flex-start حسب اللغة *!*/
+}
+
+.gallery_container {
+    display: block;
+    min-height: 50vh;
+}
+.gallery_container .select_all{
+    display: block;
+    margin-bottom: 8px;
+}
+
+.deleteSelected{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+
+.gallery_div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.gallery_div_photo {
+    width: calc(25% - 12px);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 0;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, .2);
+}
+
+
+.__img {
+    height: 130px;
+    max-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, .2);
+    cursor: pointer;
+}
+
+.__img img.NeedStyle {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+
+.__allowMultipleDelete,
+.__deleteAction {
+    position: absolute;
+    top: 6px;
+    z-index: 10;
+}
+
+.__allowMultipleDelete {
+    right: 6px;
+}
+
+.__deleteAction {
+    left: 6px;
+}
+
+
+.__deleteAction .btn {
+    font-size: 12px!important;
+    padding: 2px!important;
+    border-radius: 5px!important;
+    border: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    outline: none;
+}
+
+
+
+

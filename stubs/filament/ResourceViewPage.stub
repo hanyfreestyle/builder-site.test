@@ -1,0 +1,19 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ resource }};
+use Filament\Actions;
+use App\Helpers\FilamentAstrotomic\Resources\Pages\Record\ViewTranslatable;
+use {{ baseResourcePage }};
+
+class {{ resourcePageClass }} extends {{ baseResourcePageClass }}{
+    use ViewTranslatable;
+    protected static string $resource = {{ resourceClass }}::class;
+
+    protected function getHeaderActions(): array{
+        return [
+            Actions\EditAction::make(),
+        ];
+    }
+}

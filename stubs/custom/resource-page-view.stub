@@ -1,0 +1,23 @@
+<?php
+namespace {{ namespace }}\{{ resourceClass }}\Pages;
+
+use {{ namespace }}\{{ resourceClass }};
+use App\Helpers\FilamentAstrotomic\Resources\Pages\Record\ViewTranslatable;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions;
+
+class View{{ modelName }} extends ViewRecord {
+    use ViewTranslatable;
+    protected static string $resource = {{ resourceClass }}::class;
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    protected function getHeaderActions(): array{
+        return [
+            Actions\EditAction::make(),
+        ];
+    }
+
+}
+
+

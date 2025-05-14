@@ -1,0 +1,30 @@
+<?php
+namespace {{ namespace }};
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
+
+trait {{ traitClass }}{
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public static function getRecordTitle(?Model $record): Htmlable|string|null {
+        return $record->translation->name ?? null;
+    }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//    public static function getNavigationGroup(): ?string {
+//        return __('filament/folderName/fileName.navigation_group');
+//    }
+//    public static function getNavigationLabel(): string {
+//        return __('filament/folderName/fileName.category.NavigationLabel');
+//    }
+//    public static function getModelLabel(): string {
+//        return __('filament/folderName/fileName.category.ModelLabel');
+//    }
+//    public static function getPluralModelLabel(): string {
+//        return __('filament/folderName/fileName.category.PluralModelLabel');
+//    }
+
+
+}
+

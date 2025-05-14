@@ -1,0 +1,1 @@
+<?phpnamespace App\Helpers\FilamentAstrotomic\Facades;use Illuminate\Support\Facades\Facade;/** * @see \App\Helpers\FilamentAstrotomic\FilamentAstrotomic */class FilamentAstrotomic extends Facade{    protected static function getFacadeAccessor()    {        return \App\Helpers\FilamentAstrotomic\FilamentAstrotomic::class;    }}

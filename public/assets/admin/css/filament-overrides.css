@@ -1,0 +1,309 @@
+/* ========== Buttons ========== */
+
+.btn {
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    cursor: pointer; /* ✅ تغيير شكل الماوس */
+    outline: none;   /* ✅ إلغاء التركيز */
+}
+
+.btn:focus,
+.btn:active {
+    outline: none;
+    box-shadow: none; /* ✅ إلغاء shadow عند الضغط أو التبويب */
+}
+
+/* ألوان الأزرار */
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-secondary {
+    background-color: #6b7280;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #4b5563;
+}
+
+/* ========== Table ========== */
+.table-custom {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+/* الهيدر - Light */
+.table-custom thead {
+    background-color: #f3f4f6;
+    color: #111827;
+    font-weight: bold;
+}
+
+/* الهيدر - Dark */
+.dark .table-custom thead {
+    background-color:  rgba(0,0,0,.2);
+    color: #e5e7eb;
+}
+
+.table-custom thead th {
+    padding: 12px 10px;
+    font-size: 13px;
+}
+
+/* الصفوف */
+.table-custom tbody td {
+    padding: 12px 10px;
+    border-top: 1px solid #e5e7eb;
+    color: #1f2937;
+}
+
+/* الصفوف في Dark */
+.dark .table-custom tbody td {
+    border-top-color: rgba(255,255,255,.1);
+    color: #d1d5db;
+}
+
+/* الصفوف الخلفية */
+
+
+
+
+/* Checkbox alignment */
+.table-custom td input[type="checkbox"] {
+    transform: scale(1.1);
+    margin: 0;
+}
+/* ========== Checkboxes ========== */
+
+input[type="checkbox"].checkbox-custom:focus,
+input[type="checkbox"].checkbox-custom:active {
+    outline: none;
+    box-shadow: none; /* ✅ إلغاء shadow عند الضغط أو التبويب */
+}
+
+input[type="checkbox"].checkbox-custom {
+    width: 16px;
+    height: 16px;
+    appearance: none;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+}
+
+input[type="checkbox"].checkbox-custom:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+input[type="checkbox"].checkbox-custom:checked::after {
+    color: white;
+    position: absolute;
+    top: -1px;
+    left: 3px;
+    font-size: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+    input[type="checkbox"].checkbox-custom {
+        background-color: #1f2937;
+        border-color: #4b5563;
+    }
+
+    input[type="checkbox"].checkbox-custom:checked {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+    }
+}
+
+
+
+.alert {
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* الأنواع */
+.alert-danger {
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+.alert-warning {
+    color: #664d03;
+    background-color: #fff3cd;
+    border-color: #ffecb5;
+}
+
+.alert-info {
+    color: #055160;
+    background-color: #cff4fc;
+    border-color: #b6effb;
+}
+
+.alert-success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #badbcc;
+}
+
+/* زر الإغلاق */
+.alert-dismissible .btn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* دعم للإغلاق التدريجي (اختياري) */
+.alert.fade {
+    transition: opacity 0.15s linear;
+    opacity: 0;
+}
+
+.alert.show {
+    opacity: 1;
+}
+
+
+
+.file_upload_notes{
+    color: #ec942c;
+    border: 1px dotted #ec942c;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+.file_upload_filter_notes span{
+    color: #ec942c;
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+
+/*.user-guide-container {*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    gap: 2rem;*/
+/*    margin-top: 2rem;*/
+/*}*/
+
+/*.user-guide-sidebar {*/
+/*    width: 180px;*/
+/*    background-color: #1f2937;*/
+/*    color: #fff;*/
+/*    padding: 1rem;*/
+/*    border-radius: 4px;*/
+/*}*/
+
+/*.ug-title {*/
+/*    font-size: 1.1rem;*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 1rem;*/
+/*}*/
+
+/*.ug-menu {*/
+/*    list-style: none;*/
+/*    padding: 0;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.ug-menu-link {*/
+/*    display: block;*/
+/*    padding: 0.4rem 0.6rem;*/
+/*    color: #d1d5db;*/
+/*    text-decoration: none;*/
+/*    border-radius: 4px;*/
+/*}*/
+
+/*.ug-menu-link:hover {*/
+/*    background-color: #374151;*/
+/*}*/
+
+/*.ug-menu-link.active {*/
+/*    background-color: #2563eb;*/
+/*    color: #fff;*/
+/*    font-weight: bold;*/
+/*}*/
+
+/*.user-guide-content {*/
+/*    flex-grow: 1;*/
+/*    padding: 0.5rem 1rem;*/
+/*}*/
+
+/*.ug-section-title {*/
+/*    font-size: 1.4rem;*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 1rem;*/
+/*    color: #111827;*/
+/*}*/
+
+/*.ug-markdown {*/
+/*    font-size: 1rem;*/
+/*    line-height: 1.8;*/
+/*    color: #f3f4f6;*/
+/*}*/
+
+/*.ug-markdown h2, .ug-markdown h3 {*/
+/*    margin-top: 1.5rem;*/
+/*    margin-bottom: 0.5rem;*/
+/*    color: #fff;*/
+/*}*/
+
+/*.ug-markdown img {*/
+/*    display: block;*/
+/*    max-width: 100%;*/
+/*    height: auto;*/
+/*    margin: 1rem 0;*/
+/*    border-radius: 4px;*/
+/*}*/
+
+/*.ug-markdown ul, .ug-markdown ol {*/
+/*    margin: 1rem 0;*/
+/*    padding-inline-start: 2rem;*/
+/*}*/
+
+/*.ug-empty {*/
+/*    color: #9ca3af;*/
+/*    font-style: italic;*/
+/*    text-align: center;*/
+/*    padding: 2rem;*/
+/*}*/

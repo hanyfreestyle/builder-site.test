@@ -1,0 +1,1 @@
+<?phpnamespace App\Helpers\FilamentAstrotomic\Resources\Pages\Record;use App\Helpers\FilamentAstrotomic\Resources\Concerns\HasLocales;use Filament\Resources\Pages\ListRecords;/** * @mixin ListRecords */trait ListTranslatable{    use HasLocales;}

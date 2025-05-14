@@ -1,0 +1,1 @@
+<?phpnamespace {{ namespace }};enum {{ class }}: {{ type }}{    //}
