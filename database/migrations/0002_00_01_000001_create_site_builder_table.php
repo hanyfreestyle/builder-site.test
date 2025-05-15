@@ -27,6 +27,8 @@ return new class extends Migration {
             $table->boolean('is_default')->default(false);
             $table->boolean('is_active')->default(true);
             $table->integer('position')->default(0);
+
+            $table->unique(['template_id', 'slug']);
         });
 
         Schema::create('builder_template_block', function (Blueprint $table) {

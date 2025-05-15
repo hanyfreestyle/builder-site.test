@@ -9,6 +9,7 @@ use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource\Table
 use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource\Pages;
 use App\Models\SiteBuilder\BuilderTemplate;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use App\FilamentCustom\Form\Inputs\SlugInput;
@@ -20,6 +21,7 @@ use Filament\Resources\Resource;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Toggle;
+use Illuminate\Validation\Rule;
 
 class BuilderTemplateLayoutResource extends Resource implements HasShieldPermissions {
     use SmartResourceTrait;
@@ -46,11 +48,27 @@ class BuilderTemplateLayoutResource extends Resource implements HasShieldPermiss
         return $form->schema([
             Group::make()->schema([
                 Group::make()->schema([
-                    SlugInput::make('slug'),
+
+                    TextInput::make('slug')
+                        ->extraAttributes(fn() => rtlIfArabic("en"))
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            $slug = Url_Slug($state);
+                            $set('slug', $slug); // ✅ نستخدم الاسم مباشرة
+                        })
+                        ->beforeStateDehydrated(function ($state) {
+                            return Url_Slug($state);
+                        })
+                        ->required()
+                        ->rule(function (callable $get) use ($form) {
+                            return Rule::unique('builder_template_layout', 'slug')
+                                ->where(fn ($query) => $query->where('template_id', $get('template_id')))
+                                ->ignore(optional($form->getRecord())->id); // ✅ استخدم form->getRecord()
+                        })
                 ]),
+
                 Group::make()->schema([
                     Select::make('template_id')
-                        ->label('القالب')
+                        ->label(__('site-builder/builder-template-layout.columns.template_id'))
                         ->options(function () {
                             return  BuilderTemplate::all()
                                 ->pluck('name.ar', 'id'); // استخراج التسمية من JSON مباشرة
@@ -60,7 +78,7 @@ class BuilderTemplateLayoutResource extends Resource implements HasShieldPermiss
                         ->required(),
 
                     Select::make('type')
-                        ->label('النوع')
+                        ->label(__('site-builder/builder-template-layout.columns.type'))
                         ->preload()
                         ->searchable()
                         ->options([
@@ -94,7 +112,7 @@ class BuilderTemplateLayoutResource extends Resource implements HasShieldPermiss
                         ->required(),
 
                     Toggle::make('is_default')
-                        ->label(__('default/lang.columns.is_default'))
+                        ->label(__('site-builder/builder-template-layout.columns.is_default'))
                         ->default(false)
                         ->required(),
 

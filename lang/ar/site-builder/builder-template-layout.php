@@ -7,9 +7,8 @@ return [
     'add_but_label' => 'اضافة',
 
     'columns' => [
-        'template_id' => 'Template Id',
-        'type' => 'Type',
-        'name' => 'Name',
-        'is_default' => 'Is Default',
+        'template_id' => 'القالب',
+        'type' => 'النوع',
+        'is_default' => 'تعيين كافتراضى',
     ],
 ];
