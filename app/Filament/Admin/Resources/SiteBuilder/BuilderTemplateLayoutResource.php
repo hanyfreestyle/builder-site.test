@@ -31,7 +31,6 @@ class BuilderTemplateLayoutResource extends Resource implements HasShieldPermiss
     protected static ?string $navigationIcon = 'heroicon-s-rectangle-group';
     protected static ?string $uploadDirectory = 'site-builder';
 
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function getPages(): array {
@@ -61,7 +60,7 @@ class BuilderTemplateLayoutResource extends Resource implements HasShieldPermiss
                         ->required()
                         ->rule(function (callable $get) use ($form) {
                             return Rule::unique('builder_template_layout', 'slug')
-                                ->where(fn ($query) => $query->where('template_id', $get('template_id')))
+                                ->where(fn($query) => $query->where('template_id', $get('template_id')))
                                 ->ignore(optional($form->getRecord())->id); // ✅ استخدم form->getRecord()
                         })
                 ]),
@@ -70,7 +69,7 @@ class BuilderTemplateLayoutResource extends Resource implements HasShieldPermiss
                     Select::make('template_id')
                         ->label(__('site-builder/builder-template-layout.columns.template_id'))
                         ->options(function () {
-                            return  BuilderTemplate::all()
+                            return BuilderTemplate::all()
                                 ->pluck('name.ar', 'id'); // استخراج التسمية من JSON مباشرة
                         })
                         ->preload()

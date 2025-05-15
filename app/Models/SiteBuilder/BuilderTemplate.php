@@ -29,8 +29,17 @@ class BuilderTemplate extends Model {
         static::bootWithModelUploadPhoto();
     }
 
-    public function template(): BelongsTo {
-        return $this->belongsTo(BuilderTemplate::class, 'template_id');
+    public function layouts():HasMany {
+        return $this->hasMany(BuilderTemplateLayout::class, 'template_id');
+    }
+
+// تقدر تضيف علاقات filtered:
+    public function headers() {
+        return $this->layouts()->where('type', 'header');
+    }
+
+    public function footers() {
+        return $this->layouts()->where('type', 'footer');
     }
 
 

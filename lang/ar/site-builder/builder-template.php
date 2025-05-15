@@ -10,4 +10,10 @@ return [
         'name' => 'Name',
         'des' => 'Des',
     ],
+
+    'enum_TemplateLayouts' => [
+        'Header' => 'هيدير',
+        'Footer' => 'فوتر',
+    ],
+
 ];

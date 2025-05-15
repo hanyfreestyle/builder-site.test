@@ -1,9 +1,15 @@
 <?php
+
 namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource;
+
+use App\Enums\SiteBuilder\EnumsTemplateLayouts;
+use App\Enums\Status\EnumsActive;
 
 use App\FilamentCustom\Table\CreatedDates;
 use App\FilamentCustom\Table\ImageColumnDef;
 use App\FilamentCustom\Table\TranslationTextColumn;
+use App\Models\SiteBuilder\BuilderTemplate;
+use App\Models\SiteBuilder\BuilderTemplateLayout;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -14,48 +20,68 @@ use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextColumn\TextColumnSize;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
-trait TableBuilderTemplateLayout{
+trait TableBuilderTemplateLayout {
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {
+
+        $thisLang = app()->getLocale();
         return $table
-//            ->modifyQueryUsing(fn($query) => $query->withCount('posts'))
             ->columns([
                 ImageColumnDef::make('photo')->width(60)->height(40),
+                TextColumn::make('name.' . $thisLang)
+                    ->label(__('default/lang.columns.name'))
+                    ->searchable(),
+
+                TextColumn::make('template_id')
+                    ->label('اسم القالب')
+                    ->formatStateUsing(fn($state, $record) => $record->template?->name[$thisLang] ?? '---'),
+
+                TextColumn::make('slug')->label('Slug'),
+
+                TextColumn::make('type')
+                    ->label(__('site-builder/builder-template-layout.columns.type'))
+                    ->formatStateUsing(fn(string $state) => EnumsTemplateLayouts::tryFrom($state)?->label()),
 
                 IconColumn::make('is_active')->label(__('default/lang.columns.is_active'))->boolean(),
-//                TextColumn::make('posts_count')
-//                    ->label(__('posts_count'))
-//                    ->size(TextColumnSize::Large)
-//                    ->badge()
-//                    ->sortable(),
+                IconColumn::make('is_default')->boolean()->label('افتراضي'),
 
             ])->filters([
+                SelectFilter::make('is_active')
+                    ->label(__('default/lang.enum.active.label'))
+                    ->options(EnumsActive::options())
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('type')
+                    ->label(__('site-builder/builder-template-layout.columns.type'))
+                    ->options(EnumsTemplateLayouts::options())
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('template_id')
+                    ->label(__('site-builder/builder-template-layout.columns.template_id'))
+                    ->options(function () {
+                        return BuilderTemplate::all()
+                            ->pluck('name.ar', 'id'); // استخراج التسمية من JSON مباشرة
+                    })
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
 
             ])
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()
             ->actions([
-
                 EditAction::make(),
                 DeleteAction::make(),
-//                DeleteAction::make()
-//                    ->before(function ($record) {
-//                        if ($record->posts()->withoutTrashed()->count() > 0) {
-//                            Notification::make()
-//                                ->title(__('filament/Menu/product.category.err_delete.title'))
-//                                ->danger()
-//                                ->body(__('filament/Menu/product.category.err_delete.body'))
-//                                ->send();
-//                            return false;
-//                        }
-//                    }),
-                ForceDeleteAction::make(),
-                RestoreAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

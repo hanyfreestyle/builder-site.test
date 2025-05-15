@@ -26,18 +26,20 @@ class BuilderTemplateLayout extends Model {
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     protected static function booted() {
         static::bootWithModelUploadPhoto();
+        static::saving(function ($layout) {
+            if ($layout->is_default) {
+                // نلغي الافتراضية عن البقية لنفس القالب ولنفس النوع
+                static::where('template_id', $layout->template_id)
+                    ->where('type', $layout->type)
+                    ->where('id', '!=', $layout->id)
+                    ->update(['is_default' => false]);
+            }
+        });
     }
 
-    public function layouts():HasMany {
-        return $this->hasMany(BuilderTemplateLayout::class, 'template_id');
+    public function template(): BelongsTo {
+        return $this->belongsTo(BuilderTemplate::class, 'template_id');
     }
 
-// تقدر تضيف علاقات filtered:
-    public function headers() {
-        return $this->layouts()->where('type', 'header');
-    }
 
-    public function footers() {
-        return $this->layouts()->where('type', 'footer');
-    }
 }
