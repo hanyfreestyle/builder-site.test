@@ -29,6 +29,10 @@ class BuilderTemplate extends Model {
         static::bootWithModelUploadPhoto();
     }
 
+    public function blocks() : HasMany{
+        return $this->hasMany(BuilderTemplateBlock::class, 'template_id');
+    }
+
     public function layouts(): HasMany {
         return $this->hasMany(BuilderTemplateLayout::class, 'template_id');
     }
