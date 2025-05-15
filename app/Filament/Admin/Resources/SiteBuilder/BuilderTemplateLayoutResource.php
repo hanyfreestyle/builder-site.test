@@ -2,8 +2,8 @@
 
 namespace App\Filament\Admin\Resources\SiteBuilder;
 
+use App\Enums\SiteBuilder\EnumsTemplateLayouts;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
-use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
 use App\FilamentCustom\UploadFile\WebpUploadFixedSize;
 use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource\TableBuilderTemplateLayout;
 use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource\Pages;
@@ -12,7 +12,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
-use App\FilamentCustom\Form\Inputs\SlugInput;
 use App\Traits\Admin\Helper\SmartResourceTrait;
 use App\Models\SiteBuilder\BuilderTemplateLayout;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
@@ -46,51 +45,50 @@ class BuilderTemplateLayoutResource extends Resource implements HasShieldPermiss
     public static function form(Form $form): Form {
         return $form->schema([
             Group::make()->schema([
-                Group::make()->schema([
+                Section::make()->schema([
+                    Group::make()->schema([
+                        TextInput::make('slug')
+                            ->extraAttributes(fn() => rtlIfArabic("en"))
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $slug = Url_Slug($state);
+                                $set('slug', $slug); // ✅ نستخدم الاسم مباشرة
+                            })
+                            ->beforeStateDehydrated(function ($state) {
+                                return Url_Slug($state);
+                            })
+                            ->required()
+                            ->rule(function (callable $get) use ($form) {
+                                return Rule::unique('builder_template_layout', 'slug')
+                                    ->where(fn($query) => $query->where('template_id', $get('template_id')))
+                                    ->ignore(optional($form->getRecord())->id); // ✅ استخدم form->getRecord()
+                            })
+                    ]),
 
-                    TextInput::make('slug')
-                        ->extraAttributes(fn() => rtlIfArabic("en"))
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            $slug = Url_Slug($state);
-                            $set('slug', $slug); // ✅ نستخدم الاسم مباشرة
-                        })
-                        ->beforeStateDehydrated(function ($state) {
-                            return Url_Slug($state);
-                        })
-                        ->required()
-                        ->rule(function (callable $get) use ($form) {
-                            return Rule::unique('builder_template_layout', 'slug')
-                                ->where(fn($query) => $query->where('template_id', $get('template_id')))
-                                ->ignore(optional($form->getRecord())->id); // ✅ استخدم form->getRecord()
-                        })
+                    Group::make()->schema([
+                        Select::make('template_id')
+                            ->label(__('site-builder/builder-template-layout.columns.template_id'))
+                            ->options(function () {
+                                return BuilderTemplate::all()
+                                    ->pluck('name.ar', 'id'); // استخراج التسمية من JSON مباشرة
+                            })
+                            ->preload()
+                            ->searchable()
+                            ->required(),
+
+                        Select::make('type')
+                            ->label(__('site-builder/builder-template-layout.columns.type'))
+                            ->preload()
+                            ->searchable()
+                            ->options(EnumsTemplateLayouts::options())
+                            ->required(),
+
+                    ])->columns(2),
+                    Group::make()->schema([
+                        ...SoftTranslatableInput::make()->getColumns(),
+
+                    ])->columns(2),
+
                 ]),
-
-                Group::make()->schema([
-                    Select::make('template_id')
-                        ->label(__('site-builder/builder-template-layout.columns.template_id'))
-                        ->options(function () {
-                            return BuilderTemplate::all()
-                                ->pluck('name.ar', 'id'); // استخراج التسمية من JSON مباشرة
-                        })
-                        ->preload()
-                        ->searchable()
-                        ->required(),
-
-                    Select::make('type')
-                        ->label(__('site-builder/builder-template-layout.columns.type'))
-                        ->preload()
-                        ->searchable()
-                        ->options([
-                            'header' => 'Header',
-                            'footer' => 'Footer',
-                        ])
-                        ->required(),
-
-                ])->columns(2),
-                Group::make()->schema([
-                    ...SoftTranslatableInput::make()->getColumns(),
-
-                ])->columns(2),
 
             ])->columnSpan(2),
 

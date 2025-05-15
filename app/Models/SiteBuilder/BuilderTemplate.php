@@ -29,7 +29,7 @@ class BuilderTemplate extends Model {
         static::bootWithModelUploadPhoto();
     }
 
-    public function layouts():HasMany {
+    public function layouts(): HasMany {
         return $this->hasMany(BuilderTemplateLayout::class, 'template_id');
     }
 
@@ -42,5 +42,15 @@ class BuilderTemplate extends Model {
         return $this->layouts()->where('type', 'footer');
     }
 
+    public function defaultHeader() {
+        return $this->hasOne(BuilderTemplateLayout::class, 'template_id')
+            ->where('type', 'header')
+            ->where('is_default', true);
+    }
 
+    public function defaultFooter() {
+        return $this->hasOne(BuilderTemplateLayout::class, 'template_id')
+            ->where('type', 'footer')
+            ->where('is_default', true);
+    }
 }

@@ -1,39 +1,29 @@
 <?php
+
 namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource;
 
-use App\FilamentCustom\Table\CreatedDates;
 use App\FilamentCustom\Table\ImageColumnDef;
-use App\FilamentCustom\Table\TranslationTextColumn;
-use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextColumn\TextColumnSize;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
-trait TableBuilderTemplate{
+trait TableBuilderTemplate {
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {
+        $thisLang = app()->getLocale();
+
         return $table
-//            ->modifyQueryUsing(fn($query) => $query->withCount('posts'))
             ->columns([
                 ImageColumnDef::make('photo')->width(60)->height(40),
-//                TranslationTextColumn::make('name'),
-                TextColumn::make('name.'.app()->getLocale())->searchable(),
+                TextColumn::make('name.' . $thisLang)->label(__('default/lang.columns.name'))->searchable(),
+                TextColumn::make('defaultHeader.slug')->label(__('site-builder/builder-template.columns.defaultHeader')),
+                TextColumn::make('defaultFooter.slug')->label(__('site-builder/builder-template.columns.defaultFooter')),
                 IconColumn::make('is_active')->label(__('default/lang.columns.is_active'))->boolean(),
-//                TextColumn::make('posts_count')
-//                    ->label(__('posts_count'))
-//                    ->size(TextColumnSize::Large)
-//                    ->badge()
-//                    ->sortable(),
-
             ])->filters([
 
             ])
@@ -41,22 +31,8 @@ trait TableBuilderTemplate{
             ->persistSearchInSession()
             ->persistSortInSession()
             ->actions([
-
                 EditAction::make(),
                 DeleteAction::make(),
-//                DeleteAction::make()
-//                    ->before(function ($record) {
-//                        if ($record->posts()->withoutTrashed()->count() > 0) {
-//                            Notification::make()
-//                                ->title(__('filament/Menu/product.category.err_delete.title'))
-//                                ->danger()
-//                                ->body(__('filament/Menu/product.category.err_delete.body'))
-//                                ->send();
-//                            return false;
-//                        }
-//                    }),
-                ForceDeleteAction::make(),
-                RestoreAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

@@ -9,6 +9,8 @@ return [
     'columns' => [
         'name' => 'Name',
         'des' => 'Des',
+        'defaultHeader' => 'الهيدر الافتراضي',
+        'defaultFooter' => 'الفوتر الافتراضي',
     ],
 
     'enum_TemplateLayouts' => [

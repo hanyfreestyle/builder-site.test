@@ -4,31 +4,21 @@ namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource
 
 use App\Enums\SiteBuilder\EnumsTemplateLayouts;
 use App\Enums\Status\EnumsActive;
-
-use App\FilamentCustom\Table\CreatedDates;
 use App\FilamentCustom\Table\ImageColumnDef;
-use App\FilamentCustom\Table\TranslationTextColumn;
 use App\Models\SiteBuilder\BuilderTemplate;
-use App\Models\SiteBuilder\BuilderTemplateLayout;
-use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\RestoreAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 trait TableBuilderTemplateLayout {
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {
-
         $thisLang = app()->getLocale();
         return $table
             ->columns([
@@ -38,7 +28,7 @@ trait TableBuilderTemplateLayout {
                     ->searchable(),
 
                 TextColumn::make('template_id')
-                    ->label('اسم القالب')
+                    ->label(__('site-builder/builder-template-layout.columns.template_id'))
                     ->formatStateUsing(fn($state, $record) => $record->template?->name[$thisLang] ?? '---'),
 
                 TextColumn::make('slug')->label('Slug'),
@@ -48,7 +38,8 @@ trait TableBuilderTemplateLayout {
                     ->formatStateUsing(fn(string $state) => EnumsTemplateLayouts::tryFrom($state)?->label()),
 
                 IconColumn::make('is_active')->label(__('default/lang.columns.is_active'))->boolean(),
-                IconColumn::make('is_default')->boolean()->label('افتراضي'),
+                IconColumn::make('is_default')->boolean()
+                    ->label(__('site-builder/builder-template-layout.columns.is_default')),
 
             ])->filters([
                 SelectFilter::make('is_active')

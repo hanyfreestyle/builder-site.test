@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Filament\Admin\Resources\SiteBuilder;
 
 use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource\TableBuilderTemplate;
-use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\TableTemplate;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
 use App\FilamentCustom\UploadFile\WebpUploadFixedSize;
@@ -41,14 +41,15 @@ class BuilderTemplateResource extends Resource implements HasShieldPermissions {
     public static function form(Form $form): Form {
         return $form->schema([
             Group::make()->schema([
-                Group::make()->schema([
-                    SlugInput::make('slug'),
+                Section::make()->schema([
+                    Group::make()->schema([
+                        SlugInput::make('slug'),
+                    ]),
+                    Group::make()->schema([
+                        ...SoftTranslatableInput::make()->getColumns(),
+                        ...SoftTranslatableTextArea::make()->setDataRequired(false)->getColumns(),
+                    ])->columns(2),
                 ]),
-                Group::make()->schema([
-                    ...SoftTranslatableInput::make()->getColumns(),
-                    ...SoftTranslatableTextArea::make()->setDataRequired(false)->getColumns(),
-                ])->columns(2),
-
             ])->columnSpan(2),
 
             Group::make()->schema([
