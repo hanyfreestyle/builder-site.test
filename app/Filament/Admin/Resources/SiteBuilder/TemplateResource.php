@@ -6,23 +6,18 @@ use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
 use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\TableTemplate;
 use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
-use Filament\Forms\Components\TextInput;
+use App\FilamentCustom\UploadFile\WebpUploadFixedSize;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use App\FilamentCustom\Form\Inputs\SlugInput;
-use App\FilamentCustom\Form\Translation\MainInput;
-use App\FilamentCustom\UploadFile\WebpUploadWithFilter;
 use App\Traits\Admin\Helper\SmartResourceTrait;
 use App\Models\SiteBuilder\Template;
-use App\Helpers\FilamentAstrotomic\Forms\Components\TranslatableTabs;
-use App\Helpers\FilamentAstrotomic\TranslatableTab;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Group;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Toggle;
-use Illuminate\Support\Facades\Gate;
 
 class TemplateResource extends Resource implements HasShieldPermissions {
     use SmartResourceTrait;
@@ -31,18 +26,6 @@ class TemplateResource extends Resource implements HasShieldPermissions {
     protected static ?string $model = Template::class;
     protected static ?string $navigationIcon = 'heroicon-s-paint-brush';
     protected static ?string $uploadDirectory = 'site-builder';
-
-//    public static bool $showCategoryActions = true;
-//    public static string $relatedResourceClass = BlogCategoryResource::class;
-//    public static string $modelPolicy = Template::class;
-
-//    public static function canViewAny(): bool {
-//        return Gate::forUser(auth()->user())->allows('viewAnyCategory', Template::class) ;
-//    }
-//
-//    public static function shouldRegisterNavigation(): bool {
-//        return false;
-//    }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -56,7 +39,6 @@ class TemplateResource extends Resource implements HasShieldPermissions {
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function form(Form $form): Form {
-//        $filterId = getModuleConfigKey("template_filter_photo", 0);
 
         return $form->schema([
             Group::make()->schema([
@@ -72,12 +54,14 @@ class TemplateResource extends Resource implements HasShieldPermissions {
 
             Group::make()->schema([
                 Section::make()->schema([
-//                    ...WebpUploadWithFilter::make()
-//                        ->setFilterId($filterId)
-//                        ->setUploadDirectory(static::$uploadDirectory)
-//                        ->setRequiredUpload(false)
-//                        ->setCanChangeFilter(true)
-//                        ->getColumns(),
+                    ...WebpUploadFixedSize::make()
+                        ->setThumbnail(true)
+                        ->setResize(500, 500, 90)
+                        ->setThumbnailSize(100, 100)
+                        ->setUploadDirectory(static::$uploadDirectory)
+                        ->setRequiredUpload(false)
+                        ->setCanChangeFilter(true)
+                        ->getColumns(),
 
                     Toggle::make('is_active')
                         ->label(__('default/lang.columns.is_active'))
