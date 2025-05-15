@@ -1,0 +1,17 @@
+{
+    "modules": {
+        "MetaTag_filter_photo": "2",
+        "DefPhoto_filter_photo": "2",
+        "Developer_filter_photo": "4",
+        "Location_filter_photo": "6",
+        "Projects_filter_photo": "9",
+        "Projects_filter_gallery": "10",
+        "Units_filter_photo": "11",
+        "Units_filter_gallery": "11",
+        "ForSale_filter_photo": "11",
+        "ForSale_filter_gallery": "11",
+        "BlogCategory_filter_photo": "15",
+        "BlogPost_filter_photo": "7",
+        "BlogPost_filter_gallery": "8"
+    }
+}
