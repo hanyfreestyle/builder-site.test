@@ -3,23 +3,8 @@
 
 return [
 
-    "ProjectResource" => [
-        \App\Filament\Admin\Resources\RealEstate\ProjectResource::class,
-    ],
-
-    "ProjectUnitsResource" => [
-        \App\Filament\Admin\Resources\RealEstate\ProjectUnitsResource::class,
-    ],
-    "ForSaleResource" => [
-        \App\Filament\Admin\Resources\RealEstate\ForSaleResource::class,
-    ],
-    "developer" => [
-        \App\Filament\Admin\Resources\RealEstate\DeveloperResource::class,
-    ],
-
-    "blogPost" => [
-//        \App\Filament\Admin\Resources\RealEstate\BlogCategoryResource::class,
-        \App\Filament\Admin\Resources\RealEstate\BlogPostResource::class,
+    "TemplateResource" => [
+        \App\Filament\Admin\Resources\SiteBuilder\TemplateResource::class,
     ],
 
     "manageData" => [
