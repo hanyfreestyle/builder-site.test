@@ -2,6 +2,8 @@
 
 namespace App\Filament\Admin\Resources\SiteBuilder;
 
+use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
+use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
 use Astrotomic\Translatable\Translatable;
 use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\TableTemplate;
 use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
@@ -56,27 +58,17 @@ class TemplateResource extends Resource implements HasShieldPermissions {
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function form(Form $form): Form {
 //        $filterId = getModuleConfigKey("template_filter_photo", 0);
-        $nameInputs = [];
-        foreach (config('app.web_add_lang') as $lang) {
-            $printLang = "(" . ucfirst($lang) . ")";
-            $nameInputs[] = TextInput::make('name.' . $lang)
-                ->label(__('default/lang.columns.name') . " " . $printLang)
-                ->extraAttributes(fn() => rtlIfArabic($lang))
-                ->required();
-        }
 
         return $form->schema([
             Group::make()->schema([
-                SlugInput::make('slug'),
-                ...$nameInputs,
-//                TranslatableTabs::make('translations')
-//                    ->availableLocales(config('app.web_add_lang'))
-//                    ->localeTabSchema(fn(TranslatableTab $tab) => [
-//                        ...MainInput::make()
-//                            ->setDes(false)
-//                            ->setSeoRequired(false)
-//                            ->getColumns($tab),
-//                    ]),
+                Group::make()->schema([
+                    SlugInput::make('slug'),
+                ]),
+                Group::make()->schema([
+                    ...SoftTranslatableInput::make()->getColumns(),
+                    ...SoftTranslatableTextArea::make()->setDataRequired(false)->getColumns(),
+                ])->columns(2),
+
             ])->columnSpan(2),
 
             Group::make()->schema([
@@ -108,12 +100,15 @@ class TemplateResource extends Resource implements HasShieldPermissions {
     public static function getNavigationGroup(): ?string {
         return __('site-builder/template.navigation_group');
     }
+
     public static function getNavigationLabel(): string {
         return __('site-builder/template.navigation_label');
     }
+
     public static function getModelLabel(): string {
         return __('site-builder/template.model_label');
     }
+
     public static function getPluralModelLabel(): string {
         return __('site-builder/template.plural_model_label');
     }

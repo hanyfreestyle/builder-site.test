@@ -1,5 +1,17 @@
 <?php
 return [
+    'construct' => [
+        'locale_ar' => 'المحتوى العربى',
+        'locale_en' => 'المحتوى الانجليزى',
+        'gallery_tab' => 'معرض الصور',
+        'gallery_file' => 'اضافة الى معرض الصور',
+        'post_name' => 'عنوان المقال',
+        'post_description' => 'المحتوى',
+        'name' => 'الاسم ',
+        'description' => 'الوصف',
+    ],
+
+
     'columns' => [
         'name' => 'الاسم',
         'description' => 'الوصف',

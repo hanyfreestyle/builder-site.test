@@ -12,6 +12,7 @@ trait SmartSetFunctionTrait {
     protected string $setDesLabel= '';
     protected bool $setMarkdown  = false;
     protected bool $setRichEditor  = false;
+    protected int $setTextAreaRow  = 6;
 
 
     public function __construct() {
@@ -61,6 +62,11 @@ trait SmartSetFunctionTrait {
 
     public function setDesLabel(?string $label = null): static {
         $this->setDesLabel = $label ?? __('default/lang.columns.description');
+        return $this;
+    }
+
+    public function setTextAreaRow(?string $setTextAreaRow = null): static {
+        $this->setTextAreaRow = $setTextAreaRow ?? 6;
         return $this;
     }
 

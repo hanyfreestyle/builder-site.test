@@ -8,7 +8,7 @@ return [
         'post_name' => 'عنوان المقال',
         'post_description' => 'المحتوى',
         'name' => 'الاسم ',
-        'description' => 'المحتوى',
+        'description' => 'Description',
     ],
 
 
