@@ -4,7 +4,6 @@ namespace App\Filament\Admin\Resources\SiteBuilder;
 
 use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
-use Astrotomic\Translatable\Translatable;
 use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\TableTemplate;
 use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
 use Filament\Forms\Components\TextInput;
