@@ -1,18 +1,18 @@
 <?php
-namespace App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
+namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource\Pages;
 
-use App\Filament\Admin\Resources\SiteBuilder\TemplateResource;
+use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource;
 use App\Helpers\FilamentAstrotomic\Resources\Pages\Record\CreateTranslatable;
 use App\Traits\Admin\FormAction\WithSaveAndCreateAnother;
 use App\Traits\Admin\UploadPhoto\WithGallerySaving;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateTemplate extends CreateRecord{
+class CreateBuilderTemplate extends CreateRecord{
     use CreateTranslatable;
     use WithSaveAndCreateAnother;
 //    use WithGallerySaving;
 
-    protected static string $resource = TemplateResource::class;
+    protected static string $resource = BuilderTemplateResource::class;
     protected static bool $canCreateAnother = false;
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

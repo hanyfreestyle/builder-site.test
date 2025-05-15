@@ -1,17 +1,17 @@
 <?php
-
 namespace App\Filament\Admin\Resources\SiteBuilder;
 
+use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource\TableBuilderTemplate;
+use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\TableTemplate;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
-use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\TableTemplate;
-use App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
 use App\FilamentCustom\UploadFile\WebpUploadFixedSize;
+use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource\Pages;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use App\FilamentCustom\Form\Inputs\SlugInput;
 use App\Traits\Admin\Helper\SmartResourceTrait;
-use App\Models\SiteBuilder\Template;
+use App\Models\SiteBuilder\BuilderTemplate;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms\Components\Group;
 use Filament\Resources\Resource;
@@ -19,11 +19,11 @@ use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Toggle;
 
-class TemplateResource extends Resource implements HasShieldPermissions {
+class BuilderTemplateResource extends Resource implements HasShieldPermissions {
     use SmartResourceTrait;
-    use TableTemplate;
+    use TableBuilderTemplate;
 
-    protected static ?string $model = Template::class;
+    protected static ?string $model = BuilderTemplate::class;
     protected static ?string $navigationIcon = 'heroicon-s-paint-brush';
     protected static ?string $uploadDirectory = 'site-builder';
 
@@ -31,15 +31,14 @@ class TemplateResource extends Resource implements HasShieldPermissions {
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function getPages(): array {
         return [
-            'index' => Pages\ListTemplates::route('/'),
-            'create' => Pages\CreateTemplate::route('/create'),
-            'edit' => Pages\EditTemplate::route('/{record}/edit'),
+            'index' => Pages\ListBuilderTemplates::route('/'),
+            'create' => Pages\CreateBuilderTemplate::route('/create'),
+            'edit' => Pages\EditBuilderTemplate::route('/{record}/edit'),
         ];
     }
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function form(Form $form): Form {
-
         return $form->schema([
             Group::make()->schema([
                 Group::make()->schema([
@@ -81,19 +80,19 @@ class TemplateResource extends Resource implements HasShieldPermissions {
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function getNavigationGroup(): ?string {
-        return __('site-builder/template.navigation_group');
+        return __('site-builder/builder-template.navigation_group');
     }
 
     public static function getNavigationLabel(): string {
-        return __('site-builder/template.navigation_label');
+        return __('site-builder/builder-template.navigation_label');
     }
 
     public static function getModelLabel(): string {
-        return __('site-builder/template.model_label');
+        return __('site-builder/builder-template.model_label');
     }
 
     public static function getPluralModelLabel(): string {
-        return __('site-builder/template.plural_model_label');
+        return __('site-builder/builder-template.plural_model_label');
     }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

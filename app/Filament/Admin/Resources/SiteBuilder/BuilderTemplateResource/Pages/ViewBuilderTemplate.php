@@ -1,14 +1,14 @@
 <?php
-namespace App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
+namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource\Pages;
 
-use App\Filament\Admin\Resources\SiteBuilder\TemplateResource;
+use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource;
 use App\Helpers\FilamentAstrotomic\Resources\Pages\Record\ViewTranslatable;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions;
 
-class ViewTemplate extends ViewRecord {
+class ViewBuilderTemplate extends ViewRecord {
     use ViewTranslatable;
-    protected static string $resource = TemplateResource::class;
+    protected static string $resource = BuilderTemplateResource::class;
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

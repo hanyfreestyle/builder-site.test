@@ -1,5 +1,5 @@
 <?php
-namespace App\Filament\Admin\Resources\SiteBuilder\TemplateResource;
+namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource;
 
 use App\FilamentCustom\Table\CreatedDates;
 use App\FilamentCustom\Table\ImageColumnDef;
@@ -17,7 +17,7 @@ use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
-trait TableTemplate{
+trait TableBuilderTemplate{
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {

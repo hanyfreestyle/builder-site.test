@@ -1,21 +1,21 @@
 <?php
-namespace App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
+namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource\Pages;
 
-use App\Filament\Admin\Resources\SiteBuilder\TemplateResource;
+use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
-class ListTemplates extends ListRecords {
-    protected static string $resource = TemplateResource::class;
+class ListBuilderTemplates extends ListRecords {
+    protected static string $resource = BuilderTemplateResource::class;
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     protected function getHeaderActions(): array {
         return [
             Actions\CreateAction::make()
-                ->label(__('site-builder/template.add_but_label')),
+                ->label(__('site-builder/builder-template.add_but_label')),
         ];
     }
 

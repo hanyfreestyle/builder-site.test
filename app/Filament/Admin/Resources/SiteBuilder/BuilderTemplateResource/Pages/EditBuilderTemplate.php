@@ -1,33 +1,24 @@
 <?php
-namespace App\Filament\Admin\Resources\SiteBuilder\TemplateResource\Pages;
+namespace App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource\Pages;
 
-use App\Filament\Admin\Resources\SiteBuilder\TemplateResource;
+use App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource;
 use Filament\Resources\Pages\EditRecord;
 use App\Traits\Admin\FormAction\WithNextAndPreviousActions;
 use App\Traits\Admin\FormAction\WithSaveAndClose;
 use Filament\Actions;
-use App\Traits\Admin\UploadPhoto\WithGallerySaving;
-use App\Helpers\FilamentAstrotomic\Resources\Pages\Record\EditTranslatable;
 
-class EditTemplate extends EditRecord {
-    use EditTranslatable;
+class EditBuilderTemplate extends EditRecord {
     use WithSaveAndClose;
     use WithNextAndPreviousActions;
-    // use WithGallerySaving;
 
-    protected static string $resource = TemplateResource::class;
+
+    protected static string $resource = BuilderTemplateResource::class;
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public function getRecordTitle(): string {
         return $this->record->name[app()->getLocale()] ?? '';
     }
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-//    public function afterSave(): void {
-//        $this->setRelation('photos')->afterSaveGallery();
-//    }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
