@@ -4,7 +4,8 @@
 return [
 
     "TemplateResource" => [
-        \App\Filament\Admin\Resources\SiteBuilder\TemplateResource::class,
+        \App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource::class,
+        \App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource::class,
     ],
 
     "manageData" => [

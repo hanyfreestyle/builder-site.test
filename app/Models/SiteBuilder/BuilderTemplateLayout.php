@@ -8,20 +8,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
-class BuilderTemplate extends Model {
+class BuilderTemplateLayout extends Model {
     use WithModelUploadPhoto;
 
-    protected $table = "builder_template";
+    protected $table = "builder_template_layout";
     protected $primaryKey = 'id';
     public $timestamps = false;
 
-    protected $fillable = ['slug', 'name', 'des', 'photo', 'photo_thumbnail', 'is_active'];
+    protected $fillable = ['template_id', 'type', 'slug', 'name', 'photo', 'photo_thumbnail', 'is_default', 'is_active', 'position'];
 
     protected $casts = [
         'name' => 'array',
-        'des' => 'array',
-        'is_active' => 'boolean',
     ];
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -29,9 +28,16 @@ class BuilderTemplate extends Model {
         static::bootWithModelUploadPhoto();
     }
 
-    public function template(): BelongsTo {
-        return $this->belongsTo(BuilderTemplate::class, 'template_id');
+    public function layouts():HasMany {
+        return $this->hasMany(BuilderTemplateLayout::class, 'template_id');
     }
 
+// تقدر تضيف علاقات filtered:
+    public function headers() {
+        return $this->layouts()->where('type', 'header');
+    }
 
+    public function footers() {
+        return $this->layouts()->where('type', 'footer');
+    }
 }
