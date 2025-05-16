@@ -2,6 +2,7 @@
 
 namespace App\Models\Builder;
 
+use App\Enums\SiteBuilder\BlockCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,6 +47,7 @@ class BlockType extends Model
         'default_data' => 'array',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'category' => BlockCategory::class,
     ];
 
     /**

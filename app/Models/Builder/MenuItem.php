@@ -2,6 +2,7 @@
 
 namespace App\Models\Builder;
 
+use App\Enums\SiteBuilder\MenuItemType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -49,6 +50,7 @@ class MenuItem extends Model
         'target_blank' => 'boolean',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'type' => MenuItemType::class,
     ];
 
     /**
@@ -89,13 +91,13 @@ class MenuItem extends Model
     public function getUrl(): string
     {
         switch ($this->type) {
-            case 'page':
+            case MenuItemType::PAGE:
                 if ($this->page) {
                     return url($this->page->slug);
                 }
                 break;
             
-            case 'route':
+            case MenuItemType::ROUTE:
                 if ($this->route) {
                     try {
                         return route($this->route);
@@ -105,7 +107,7 @@ class MenuItem extends Model
                 }
                 break;
             
-            case 'url':
+            case MenuItemType::URL:
             default:
                 if ($this->url) {
                     return $this->url;

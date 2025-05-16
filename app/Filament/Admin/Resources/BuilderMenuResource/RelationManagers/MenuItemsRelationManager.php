@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\BuilderMenuResource\RelationManagers;
 
+use App\Enums\SiteBuilder\MenuItemType;
 use App\Models\Builder\Page;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -33,37 +34,32 @@ class MenuItemsRelationManager extends RelationManager
                     ->placeholder('No parent (top level)'),
                 
                 Forms\Components\Select::make('type')
-                    ->label('Type')
-                    ->options([
-                        'url' => 'URL',
-                        'page' => 'Page',
-                        'route' => 'Route',
-                        'section' => 'Section (no link)',
-                    ])
-                    ->default('url')
+                    ->label(__('site-builder/menu-item.labels.type'))
+                    ->options(MenuItemType::options())
+                    ->default(MenuItemType::URL)
                     ->reactive()
                     ->required(),
                 
                 Forms\Components\TextInput::make('url')
-                    ->label('URL')
+                    ->label(__('site-builder/menu-item.labels.url'))
                     ->maxLength(255)
-                    ->visible(fn (Forms\Get $get) => $get('type') === 'url'),
+                    ->visible(fn (Forms\Get $get) => $get('type') === MenuItemType::URL),
                 
                 Forms\Components\Select::make('page_id')
-                    ->label('Page')
+                    ->label(__('site-builder/menu-item.labels.page'))
                     ->options(Page::where('is_active', true)->pluck('title', 'id'))
                     ->searchable()
-                    ->visible(fn (Forms\Get $get) => $get('type') === 'page'),
+                    ->visible(fn (Forms\Get $get) => $get('type') === MenuItemType::PAGE),
                 
                 Forms\Components\TextInput::make('route')
-                    ->label('Route Name')
+                    ->label(__('site-builder/menu-item.labels.route'))
                     ->maxLength(255)
-                    ->visible(fn (Forms\Get $get) => $get('type') === 'route'),
+                    ->visible(fn (Forms\Get $get) => $get('type') === MenuItemType::ROUTE),
                 
                 Forms\Components\TextInput::make('icon')
-                    ->label('Icon')
+                    ->label(__('site-builder/menu-item.labels.icon'))
                     ->maxLength(255)
-                    ->helperText('FontAwesome or other icon class, e.g., "fas fa-home"'),
+                    ->helperText(__('site-builder/menu-item.help_text.icon')),
                 
                 Forms\Components\KeyValue::make('translations')
                     ->label('Translations')
@@ -119,12 +115,7 @@ class MenuItemsRelationManager extends RelationManager
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
-                    ->options([
-                        'url' => 'URL',
-                        'page' => 'Page',
-                        'route' => 'Route',
-                        'section' => 'Section',
-                    ]),
+                    ->options(MenuItemType::options()),
                 Tables\Filters\SelectFilter::make('parent_id')
                     ->label('Parent')
                     ->options(function () {

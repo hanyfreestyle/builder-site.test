@@ -2,6 +2,9 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Enums\SiteBuilder\BlockCategory;
+use App\Enums\SiteBuilder\BlockTypeField;
+use App\Enums\SiteBuilder\FieldWidth;
 use App\Models\Builder\BlockType;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -22,11 +25,26 @@ class BuilderBlockTypeResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
-    protected static ?string $navigationLabel = 'أنواع البلوكات';
+    protected static ?string $navigationLabel = 'block_types';
 
-    protected static ?string $modelLabel = 'نوع البلوك';
+    protected static ?string $modelLabel = 'block_type';
 
-    protected static ?string $pluralModelLabel = 'أنواع البلوكات';
+    protected static ?string $pluralModelLabel = 'block_types';
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('site-builder/general.block_types');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('site-builder/block-type.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('site-builder/general.block_types');
+    }
 
     public static function form(Form $form): Form
     {
@@ -34,121 +52,102 @@ class BuilderBlockTypeResource extends Resource
             ->schema([
                 Forms\Components\Tabs::make('Tabs')
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make('المعلومات الأساسية')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/block-type.tabs.basic_info'))
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('الاسم')
+                                    ->label(__('site-builder/general.name'))
                                     ->required()
                                     ->maxLength(255),
                                 
                                 Forms\Components\TextInput::make('slug')
-                                    ->label('الرابط')
+                                    ->label(__('site-builder/general.slug'))
                                     ->required()
                                     ->maxLength(255)
                                     ->unique(BlockType::class, 'slug', fn ($record) => $record)
                                     ->alphaDash(),
                                 
                                 Forms\Components\Textarea::make('description')
-                                    ->label('الوصف')
+                                    ->label(__('site-builder/general.description'))
                                     ->maxLength(65535)
                                     ->columnSpanFull(),
                                 
                                 Forms\Components\TextInput::make('icon')
-                                    ->label('الأيقونة')
+                                    ->label(__('site-builder/general.icon'))
                                     ->maxLength(255)
                                     ->helperText('رمز FontAwesome أو رمز آخر، مثال: "fas fa-home"'),
                                 
-                                Forms\Components\TextInput::make('category')
-                                    ->label('التصنيف')
-                                    ->maxLength(255)
-                                    ->helperText('فئة لتجميع البلوكات، مثل: "أساسي"، "وسائط"، "متقدم"'),
+                                Forms\Components\Select::make('category')
+                                ->label(__('site-builder/block-type.labels.category'))
+                                ->options(BlockCategory::options())
+                                ->default(BlockCategory::BASIC)
+                                            ->helperText(__('site-builder/block-type.help_text.category')),
                                 
                                 Forms\Components\Toggle::make('is_active')
-                                    ->label('نشط')
+                                    ->label(__('site-builder/general.is_active'))
                                     ->default(true),
                                 
                                 Forms\Components\TextInput::make('sort_order')
-                                    ->label('ترتيب العرض')
+                                    ->label(__('site-builder/general.sort_order'))
                                     ->numeric()
                                     ->default(0),
                             ])
                             ->columns(2),
                         
-                        Forms\Components\Tabs\Tab::make('بنية البيانات')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/block-type.tabs.schema'))
                             ->schema([
                                 Forms\Components\Repeater::make('schema')
-                                    ->label('بنية البلوك')
+                                    ->label(__('site-builder/block-type.labels.schema'))
                                     ->schema([
                                         Forms\Components\TextInput::make('name')
-                                            ->label('اسم الحقل')
+                                            ->label(__('site-builder/block-type.labels.field_name'))
                                             ->required()
                                             ->maxLength(255)
-                                            ->helperText('اسم الحقل، يستخدم كمفتاح في تخزين البيانات'),
+                                            ->helperText(__('site-builder/block-type.help_text.field_name')),
                                         
                                         Forms\Components\TextInput::make('label')
-                                            ->label('عنوان الحقل')
+                                            ->label(__('site-builder/block-type.labels.field_label'))
                                             ->required()
                                             ->maxLength(255)
-                                            ->helperText('عنوان الحقل المرئي للمستخدم'),
+                                            ->helperText(__('site-builder/block-type.help_text.field_label')),
                                         
                                         Forms\Components\Select::make('type')
-                                            ->label('نوع الحقل')
-                                            ->options([
-                                                'text' => 'نص',
-                                                'textarea' => 'نص طويل',
-                                                'rich_text' => 'محرر نصوص متقدم',
-                                                'select' => 'قائمة منسدلة',
-                                                'checkbox' => 'صندوق اختيار',
-                                                'radio' => 'أزرار راديو',
-                                                'image' => 'رفع صورة',
-                                                'file' => 'رفع ملف',
-                                                'date' => 'منتقي التاريخ',
-                                                'time' => 'منتقي الوقت',
-                                                'color' => 'منتقي اللون',
-                                                'icon' => 'منتقي الأيقونة',
-                                                'link' => 'رابط (عنوان + نص)',
-                                                'number' => 'رقم',
-                                                'repeater' => 'قائمة عناصر متكررة',
-                                            ])
+                                            ->label(__('site-builder/block-type.labels.field_type'))
+                                            ->options(BlockTypeField::options())
+                                            ->default(BlockTypeField::TEXT)
                                             ->required(),
                                         
                                         Forms\Components\Toggle::make('required')
-                                            ->label('مطلوب')
+                                            ->label(__('site-builder/block-type.labels.field_required'))
                                             ->default(false),
                                         
                                         Forms\Components\TextInput::make('placeholder')
-                                            ->label('نص توضيحي')
+                                            ->label(__('site-builder/block-type.labels.field_placeholder'))
                                             ->maxLength(255),
                                         
                                         Forms\Components\TextInput::make('default')
-                                            ->label('القيمة الافتراضية')
+                                            ->label(__('site-builder/block-type.labels.field_default'))
                                             ->maxLength(255)
-                                            ->helperText('القيمة الافتراضية للحقل (إن وجدت)'),
+                                            ->helperText(__('site-builder/block-type.help_text.field_default')),
                                         
                                         Forms\Components\KeyValue::make('options')
-                                            ->label('الخيارات')
-                                            ->helperText('أزواج المفتاح-القيمة للقوائم المنسدلة وأزرار الراديو وصناديق الاختيار')
+                                            ->label(__('site-builder/block-type.labels.field_options'))
+                                            ->helperText(__('site-builder/block-type.help_text.field_options'))
                                             ->visible(fn (Forms\Get $get) => in_array($get('type'), ['select', 'radio', 'checkbox'])),
                                         
                                         Forms\Components\Toggle::make('translatable')
-                                            ->label('قابل للترجمة')
+                                            ->label(__('site-builder/block-type.labels.field_translatable'))
                                             ->default(true)
-                                            ->helperText('هل يمكن ترجمة هذا الحقل'),
+                                            ->helperText(__('site-builder/block-type.help_text.field_translatable')),
                                         
                                         Forms\Components\TextInput::make('help')
-                                            ->label('نص المساعدة')
+                                            ->label(__('site-builder/block-type.labels.field_help'))
                                             ->maxLength(255)
-                                            ->helperText('نص المساعدة الذي سيتم عرضه مع الحقل'),
+                                            ->helperText(__('site-builder/block-type.help_text.field_help')),
                                         
                                         Forms\Components\Select::make('width')
-                                            ->label('عرض الحقل')
-                                            ->options([
-                                                '1/2' => 'نصف عرض',
-                                                '1/3' => 'ثلث عرض',
-                                                '2/3' => 'ثلثي عرض',
-                                                'full' => 'عرض كامل',
-                                            ])
-                                            ->default('full')
+                                            ->label(__('site-builder/block-type.labels.field_width'))
+                                            ->options(FieldWidth::options())
+                                            ->default(FieldWidth::FULL)
                                             ->required(),
                                     ])
                                     ->columns(2)
@@ -157,11 +156,11 @@ class BuilderBlockTypeResource extends Resource
                                     ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
                             ]),
                         
-                        Forms\Components\Tabs\Tab::make('البيانات الافتراضية')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/block-type.tabs.default_data'))
                             ->schema([
                                 Forms\Components\KeyValue::make('default_data')
-                                    ->label('القيم الافتراضية للحقول')
-                                    ->helperText('تعيين القيم الافتراضية لحقول البلوك'),
+                                    ->label(__('site-builder/block-type.default_values'))
+                                    ->helperText(__('site-builder/block-type.help_text.default_values')),
                             ]),
                     ])
                     ->columnSpanFull(),

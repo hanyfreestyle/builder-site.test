@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Enums\SiteBuilder\MenuLocation;
 use App\Models\Builder\Menu;
 use App\Models\Builder\Template;
 use Filament\Forms;
@@ -24,53 +25,64 @@ class BuilderMenuResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
-    protected static ?string $navigationLabel = 'Menus';
+    protected static ?string $navigationLabel = 'menus';
 
-    protected static ?string $modelLabel = 'Menu';
+    protected static ?string $modelLabel = 'menu';
 
-    protected static ?string $pluralModelLabel = 'Menus';
+    protected static ?string $pluralModelLabel = 'menus';
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('site-builder/general.menus');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('site-builder/menu.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('site-builder/general.menus');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Select::make('template_id')
-                    ->label('Template')
+                    ->label(__('site-builder/menu.labels.template'))
                     ->options(Template::where('is_active', true)->pluck('name', 'id'))
                     ->required()
                     ->searchable(),
                 
                 Forms\Components\TextInput::make('name')
+                    ->label(__('site-builder/general.name'))
                     ->required()
                     ->maxLength(255),
                 
                 Forms\Components\TextInput::make('slug')
+                    ->label(__('site-builder/general.slug'))
                     ->required()
                     ->maxLength(255)
                     ->unique(Menu::class, 'slug', fn ($record) => $record)
                     ->alphaDash(),
                 
                 Forms\Components\Select::make('location')
-                    ->label('Location')
-                    ->options([
-                        'header' => 'Header',
-                        'footer' => 'Footer',
-                        'sidebar' => 'Sidebar',
-                        'mobile' => 'Mobile',
-                        'social' => 'Social Media',
-                        'other' => 'Other',
-                    ])
-                    ->default('header')
+                    ->label(__('site-builder/menu.labels.location'))
+                    ->options(MenuLocation::options())
+                    ->default(MenuLocation::HEADER)
                     ->required(),
                 
                 Forms\Components\KeyValue::make('translations')
-                    ->label('Translations')
-                    ->keyLabel('Locale')
-                    ->valueLabel('Name')
-                    ->keyPlaceholder('Enter language code (e.g., "ar", "fr")')
-                    ->valuePlaceholder('Translated name'),
+                    ->label(__('site-builder/general.translations'))
+                    ->keyLabel(__('site-builder/translation.locale'))
+                    ->valueLabel(__('site-builder/general.name'))
+                    ->keyPlaceholder(__('site-builder/translation.key_placeholder'))
+                    ->valuePlaceholder(__('site-builder/translation.value_placeholder')),
                 
                 Forms\Components\Toggle::make('is_active')
+                    ->label(__('site-builder/general.is_active'))
                     ->default(true),
             ]);
     }
@@ -80,29 +92,34 @@ class BuilderMenuResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('site-builder/general.name'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('slug')
+                    ->label(__('site-builder/general.slug'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('template.name')
-                    ->label('Template')
+                    ->label(__('site-builder/menu.labels.template'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('location')
+                    ->label(__('site-builder/menu.labels.location'))
                     ->searchable(),
                 
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('site-builder/general.is_active'))
                     ->boolean()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('site-builder/general.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('site-builder/general.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -110,19 +127,12 @@ class BuilderMenuResource extends Resource
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\SelectFilter::make('template_id')
-                    ->label('Template')
+                    ->label(__('site-builder/menu.labels.template'))
                     ->options(Template::pluck('name', 'id')),
                 Tables\Filters\SelectFilter::make('location')
-                    ->options([
-                        'header' => 'Header',
-                        'footer' => 'Footer',
-                        'sidebar' => 'Sidebar',
-                        'mobile' => 'Mobile',
-                        'social' => 'Social Media',
-                        'other' => 'Other',
-                    ]),
+                    ->options(MenuLocation::options()),
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active'),
+                    ->label(__('site-builder/general.is_active')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -133,11 +143,11 @@ class BuilderMenuResource extends Resource
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\BulkAction::make('activate')
-                        ->label('Activate')
+                        ->label(__('site-builder/general.activate'))
                         ->icon('heroicon-o-check-circle')
                         ->action(fn (Builder $query) => $query->update(['is_active' => true])),
                     Tables\Actions\BulkAction::make('deactivate')
-                        ->label('Deactivate')
+                        ->label(__('site-builder/general.deactivate'))
                         ->icon('heroicon-o-x-circle')
                         ->action(fn (Builder $query) => $query->update(['is_active' => false])),
                 ]),
