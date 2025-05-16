@@ -22,11 +22,11 @@ class BuilderBlockTypeResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
-    protected static ?string $navigationLabel = 'Block Types';
+    protected static ?string $navigationLabel = 'أنواع البلوكات';
 
-    protected static ?string $modelLabel = 'Block Type';
+    protected static ?string $modelLabel = 'نوع البلوك';
 
-    protected static ?string $pluralModelLabel = 'Block Types';
+    protected static ?string $pluralModelLabel = 'أنواع البلوكات';
 
     public static function form(Form $form): Form
     {
@@ -34,102 +34,119 @@ class BuilderBlockTypeResource extends Resource
             ->schema([
                 Forms\Components\Tabs::make('Tabs')
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make('Basic Information')
+                        Forms\Components\Tabs\Tab::make('المعلومات الأساسية')
                             ->schema([
                                 Forms\Components\TextInput::make('name')
+                                    ->label('الاسم')
                                     ->required()
                                     ->maxLength(255),
                                 
                                 Forms\Components\TextInput::make('slug')
+                                    ->label('الرابط')
                                     ->required()
                                     ->maxLength(255)
                                     ->unique(BlockType::class, 'slug', fn ($record) => $record)
                                     ->alphaDash(),
                                 
                                 Forms\Components\Textarea::make('description')
+                                    ->label('الوصف')
                                     ->maxLength(65535)
                                     ->columnSpanFull(),
                                 
                                 Forms\Components\TextInput::make('icon')
+                                    ->label('الأيقونة')
                                     ->maxLength(255)
-                                    ->helperText('FontAwesome or other icon class, e.g., "fas fa-home"'),
+                                    ->helperText('رمز FontAwesome أو رمز آخر، مثال: "fas fa-home"'),
                                 
                                 Forms\Components\TextInput::make('category')
+                                    ->label('التصنيف')
                                     ->maxLength(255)
-                                    ->helperText('Category for grouping blocks, e.g., "Basic", "Media", "Advanced"'),
+                                    ->helperText('فئة لتجميع البلوكات، مثل: "أساسي"، "وسائط"، "متقدم"'),
                                 
                                 Forms\Components\Toggle::make('is_active')
+                                    ->label('نشط')
                                     ->default(true),
                                 
                                 Forms\Components\TextInput::make('sort_order')
+                                    ->label('ترتيب العرض')
                                     ->numeric()
                                     ->default(0),
                             ])
                             ->columns(2),
                         
-                        Forms\Components\Tabs\Tab::make('Schema')
+                        Forms\Components\Tabs\Tab::make('بنية البيانات')
                             ->schema([
                                 Forms\Components\Repeater::make('schema')
-                                    ->label('Block Schema')
+                                    ->label('بنية البلوك')
                                     ->schema([
                                         Forms\Components\TextInput::make('name')
+                                            ->label('اسم الحقل')
                                             ->required()
                                             ->maxLength(255)
-                                            ->helperText('Field name, used as the key in data storage'),
+                                            ->helperText('اسم الحقل، يستخدم كمفتاح في تخزين البيانات'),
                                         
                                         Forms\Components\TextInput::make('label')
+                                            ->label('عنوان الحقل')
                                             ->required()
                                             ->maxLength(255)
-                                            ->helperText('User-friendly label for the field'),
+                                            ->helperText('عنوان الحقل المرئي للمستخدم'),
                                         
                                         Forms\Components\Select::make('type')
+                                            ->label('نوع الحقل')
                                             ->options([
-                                                'text' => 'Text',
-                                                'textarea' => 'Text Area',
-                                                'rich_text' => 'Rich Text Editor',
-                                                'select' => 'Select Dropdown',
-                                                'checkbox' => 'Checkbox',
-                                                'radio' => 'Radio Buttons',
-                                                'image' => 'Image Upload',
-                                                'file' => 'File Upload',
-                                                'date' => 'Date Picker',
-                                                'time' => 'Time Picker',
-                                                'color' => 'Color Picker',
-                                                'icon' => 'Icon Picker',
-                                                'link' => 'Link (URL + Text)',
-                                                'number' => 'Number',
-                                                'repeater' => 'Repeatable Item List',
+                                                'text' => 'نص',
+                                                'textarea' => 'نص طويل',
+                                                'rich_text' => 'محرر نصوص متقدم',
+                                                'select' => 'قائمة منسدلة',
+                                                'checkbox' => 'صندوق اختيار',
+                                                'radio' => 'أزرار راديو',
+                                                'image' => 'رفع صورة',
+                                                'file' => 'رفع ملف',
+                                                'date' => 'منتقي التاريخ',
+                                                'time' => 'منتقي الوقت',
+                                                'color' => 'منتقي اللون',
+                                                'icon' => 'منتقي الأيقونة',
+                                                'link' => 'رابط (عنوان + نص)',
+                                                'number' => 'رقم',
+                                                'repeater' => 'قائمة عناصر متكررة',
                                             ])
                                             ->required(),
                                         
                                         Forms\Components\Toggle::make('required')
+                                            ->label('مطلوب')
                                             ->default(false),
                                         
                                         Forms\Components\TextInput::make('placeholder')
+                                            ->label('نص توضيحي')
                                             ->maxLength(255),
                                         
                                         Forms\Components\TextInput::make('default')
+                                            ->label('القيمة الافتراضية')
                                             ->maxLength(255)
-                                            ->helperText('Default value for the field (if applicable)'),
+                                            ->helperText('القيمة الافتراضية للحقل (إن وجدت)'),
                                         
                                         Forms\Components\KeyValue::make('options')
-                                            ->helperText('Key-value pairs for select, radio, and checkbox options')
+                                            ->label('الخيارات')
+                                            ->helperText('أزواج المفتاح-القيمة للقوائم المنسدلة وأزرار الراديو وصناديق الاختيار')
                                             ->visible(fn (Forms\Get $get) => in_array($get('type'), ['select', 'radio', 'checkbox'])),
                                         
                                         Forms\Components\Toggle::make('translatable')
+                                            ->label('قابل للترجمة')
                                             ->default(true)
-                                            ->helperText('Whether this field should be translatable'),
+                                            ->helperText('هل يمكن ترجمة هذا الحقل'),
                                         
                                         Forms\Components\TextInput::make('help')
+                                            ->label('نص المساعدة')
                                             ->maxLength(255)
-                                            ->helperText('Help text to display with the field'),
+                                            ->helperText('نص المساعدة الذي سيتم عرضه مع الحقل'),
                                         
                                         Forms\Components\Select::make('width')
+                                            ->label('عرض الحقل')
                                             ->options([
-                                                '1/2' => 'Half Width',
-                                                '1/3' => 'One Third',
-                                                '2/3' => 'Two Thirds',
-                                                'full' => 'Full Width',
+                                                '1/2' => 'نصف عرض',
+                                                '1/3' => 'ثلث عرض',
+                                                '2/3' => 'ثلثي عرض',
+                                                'full' => 'عرض كامل',
                                             ])
                                             ->default('full')
                                             ->required(),
@@ -140,11 +157,11 @@ class BuilderBlockTypeResource extends Resource
                                     ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
                             ]),
                         
-                        Forms\Components\Tabs\Tab::make('Default Data')
+                        Forms\Components\Tabs\Tab::make('البيانات الافتراضية')
                             ->schema([
                                 Forms\Components\KeyValue::make('default_data')
-                                    ->label('Default Field Values')
-                                    ->helperText('Set default values for the block fields'),
+                                    ->label('القيم الافتراضية للحقول')
+                                    ->helperText('تعيين القيم الافتراضية لحقول البلوك'),
                             ]),
                     ])
                     ->columnSpanFull(),
@@ -156,19 +173,24 @@ class BuilderBlockTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('الاسم')
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('slug')
+                    ->label('الرابط')
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('category')
+                    ->label('التصنيف')
                     ->searchable(),
                 
                 Tables\Columns\IconColumn::make('is_active')
+                    ->label('نشط')
                     ->boolean()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('sort_order')
+                    ->label('الترتيب')
                     ->numeric()
                     ->sortable(),
                 
