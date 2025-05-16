@@ -370,16 +370,16 @@ class BlocksRelationManager extends RelationManager
                                         $fields[] = Forms\Components\TextInput::make("{$name}.text")
                                         ->label("{$label} (نص الرابط)");
                                         } elseif ($type === 'repeater') {
-                                        // For repeater type, we create a KeyValue field to translate the titles/descriptions
+                                        // Create a repeater translator using KeyValue for simplicity
                                         $fields[] = Forms\Components\KeyValue::make("{$name}")
-                                                ->label($label)
-                                                    ->keyLabel('عنصر')
-                                                    ->valueLabel('الترجمة')
-                                                    ->helperText('استخدم المفتاح للإشارة إلى العنصر والحقل مثل "0.title" أو "1.description"');
-                                            } else {
-                                                $fields[] = Forms\Components\TextInput::make($name)
-                                                    ->label($label);
-                                            }
+                                        ->label($label)
+                                        ->keyLabel('العنصر والحقل')
+                                        ->valueLabel('الترجمة')
+                                        ->helperText('استخدم "0.title" للعنصر الأول, "1.title" للعنصر الثاني, وهكذا');
+                                        } else {
+                                        $fields[] = Forms\Components\TextInput::make($name)
+                                        ->label($label);
+                                        }
                                         }
 
                                         return $fields;
