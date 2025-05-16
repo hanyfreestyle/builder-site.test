@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,15 +55,6 @@
             border-color: var(--accent-color);
             color: white;
         }
-        
-        .language-switcher {
-            margin-right: 15px;
-        }
-        
-        .language-switcher .dropdown-item.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
     </style>
     
     @yield('styles')
@@ -74,47 +65,15 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-4">
-                    <a href="{{ url('/') }}" class="text-decoration-none text-white">
+                    <a href="{{ route('builder.home') }}" class="text-decoration-none text-white">
                         <h1 class="mb-0 h4">{{ $template->name }}</h1>
                     </a>
                 </div>
                 <div class="col-md-8">
                     <div class="d-flex justify-content-end align-items-center">
                         <!-- Language Switcher -->
-                        @if(isset($template->supported_languages) && count($template->supported_languages) > 1)
-                        <div class="language-switcher dropdown">
-                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="languageSwitcher" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ strtoupper(app()->getLocale()) }}
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="languageSwitcher">
-                                @foreach($template->supported_languages as $lang)
-                                <li>
-                                    <a class="dropdown-item {{ app()->getLocale() == $lang ? 'active' : '' }}" 
-                                       href="{{ route('builder.switch-language', ['locale' => $lang, 'redirect' => request()->path()]) }}">
-                                        @switch($lang)
-                                            @case('ar')
-                                                العربية
-                                                @break
-                                            @case('en')
-                                                English
-                                                @break
-                                            @case('fr')
-                                                Français
-                                                @break
-                                            @case('es')
-                                                Español
-                                                @break
-                                            @case('de')
-                                                Deutsch
-                                                @break
-                                            @default
-                                                {{ strtoupper($lang) }}
-                                        @endswitch
-                                    </a>
-                                </li>
-                                @endforeach
-                            </ul>
-                        </div>
+                        @if(isset($languages) && count($languages) > 1)
+                            @include('components.language-switcher', ['languages' => $languages])
                         @endif
                         
                         <!-- Navigation -->

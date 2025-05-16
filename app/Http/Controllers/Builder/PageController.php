@@ -7,8 +7,8 @@ use App\Models\Builder\Page;
 use App\Models\Builder\Template;
 use App\Models\Builder\Menu;
 use App\Services\Builder\BlockRenderer;
+use App\Services\Builder\LanguageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\View\View;
 
 class PageController extends Controller
@@ -28,11 +28,6 @@ class PageController extends Controller
     public function __construct(BlockRenderer $blockRenderer)
     {
         $this->blockRenderer = $blockRenderer;
-        
-        // Set locale from session
-        if (session()->has('locale')) {
-            App::setLocale(session('locale'));
-        }
     }
 
     /**
@@ -113,6 +108,9 @@ class PageController extends Controller
             $menus[$locationKey] = $menu;
         }
 
+        // Get supported languages based on template configuration
+        $languages = LanguageService::getSupportedLanguages($template);
+
         // Prepare SEO meta tags
         $metaTags = $page->meta_tags ?: [];
 
@@ -122,6 +120,7 @@ class PageController extends Controller
             'template' => $template,
             'renderedBlocks' => $renderedBlocks,
             'menus' => $menus,
+            'languages' => $languages,
             'metaTags' => $metaTags,
         ]);
     }

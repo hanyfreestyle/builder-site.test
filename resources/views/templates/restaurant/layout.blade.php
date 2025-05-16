@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,11 @@
     
     <!-- Meta Tags -->
     @foreach($metaTags as $name => $content)
-        <meta name="{{ $name }}" content="{{ $content }}">
+        @if(str_starts_with($name, 'og:'))
+            <meta property="{{ $name }}" content="{{ $content }}">
+        @else
+            <meta name="{{ $name }}" content="{{ $content }}">
+        @endif
     @endforeach
     
     <!-- CSS -->
@@ -95,6 +99,13 @@
                                     @endif
                                 </li>
                             @endforeach
+                            
+                            <!-- Language Switcher -->
+                            @if(isset($languages) && count($languages) > 1)
+                                <li class="nav-item">
+                                    @include('components.language-switcher', ['languages' => $languages])
+                                </li>
+                            @endif
                         </ul>
                     </div>
                 </div>

@@ -12,5 +12,3 @@ LoadRoutesFolder('routes/Web');
 
 // Include Site Builder routes
 require __DIR__.'/builder.php';
-
-

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Builder\PageController;
 use Illuminate\Support\Facades\Route;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,26 +13,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Language switcher route
-Route::get('/switch-language/{locale}', function ($locale) {
-    $redirect = request()->input('redirect', '/');
-    
-    // Check if the locale is supported
-    $supportedLocales = ['en', 'ar', 'fr', 'es', 'de']; // Update this with your supported locales
-    if (!in_array($locale, $supportedLocales)) {
-        $locale = 'en'; // Default to English if locale is not supported
-    }
-    
-    // Set the locale
-    app()->setLocale($locale);
-    session()->put('locale', $locale);
-    
-    // Redirect back to the previous page
-    return redirect($redirect);
-})->name('builder.switch-language');
+// Wrap all routes in LaravelLocalization prefix and middleware
+Route::group([
+    'prefix' => LaravelLocalization::setLocale(),
+    'middleware' => ['web', 'localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
+], function() {
+    // Homepage route
+    Route::get('/', [PageController::class, 'home'])->name('builder.home');
 
-// Homepage route
-Route::get('/', [PageController::class, 'home'])->name('builder.home');
-
-// Regular page route
-Route::get('/{slug}', [PageController::class, 'page'])->where('slug', '(?!switch-language).*')->name('builder.page');
+    // Regular page route
+    Route::get('/{slug}', [PageController::class, 'page'])->name('builder.page');
+});
