@@ -10,4 +10,7 @@ Route::get('/login', function () {
 LoadRoutesFolder('routes/Admin');
 LoadRoutesFolder('routes/Web');
 
+// Include Site Builder routes
+require __DIR__.'/builder.php';
+
 
