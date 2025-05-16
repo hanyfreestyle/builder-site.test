@@ -34,6 +34,7 @@ class Page extends Model
         'is_homepage',
         'is_active',
         'sort_order',
+        'use_default_template',
     ];
 
     /**
@@ -47,6 +48,16 @@ class Page extends Model
         'is_homepage' => 'boolean',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'use_default_template' => 'boolean',
+    ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'use_default_template' => false,
     ];
 
     /**
@@ -71,6 +82,52 @@ class Page extends Model
     public function menuItems(): HasMany
     {
         return $this->hasMany(MenuItem::class, 'page_id');
+    }
+
+    /**
+     * Get the template for this page, considering the use_default_template flag.
+     * 
+     * @return Template|null
+     */
+    public function getEffectiveTemplate(): ?Template
+    {
+        // If page is set to use default template or has no template assigned
+        if ($this->use_default_template || $this->template_id === null) {
+            return Template::getDefault();
+        }
+        
+        // If the associated template is inactive, use the default
+        if (!$this->template || !$this->template->is_active) {
+            return Template::getDefault();
+        }
+        
+        // Otherwise use the assigned template
+        return $this->template;
+    }
+
+    /**
+     * Update the template of this page to use the default template.
+     * 
+     * @return $this
+     */
+    public function useDefaultTemplate(): self
+    {
+        $this->use_default_template = true;
+        return $this;
+    }
+
+    /**
+     * Set a specific template for this page.
+     * 
+     * @param Template|int $template
+     * @return $this
+     */
+    public function setSpecificTemplate($template): self
+    {
+        $templateId = $template instanceof Template ? $template->id : $template;
+        $this->template_id = $templateId;
+        $this->use_default_template = false;
+        return $this;
     }
 
     /**

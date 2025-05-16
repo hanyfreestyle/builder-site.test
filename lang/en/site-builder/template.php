@@ -36,8 +36,16 @@ return [
     ],
     'actions' => [
         'set_default' => 'Set as Default',
+        'migrate_pages' => 'Convert Pages to Default Template',
     ],
     'notifications' => [
         'set_default_success' => 'Template has been set as default successfully',
+        'pages_migrated' => ':count pages have been converted to use the default template',
+        'migration_failed' => 'Failed to convert pages to default template',
+    ],
+    'modal' => [
+        'migrate_pages_title' => 'Convert Pages to Default Template',
+        'migrate_pages_description' => 'This will convert all pages that use this template to use the default template instead. Pages will keep the same URLs and content, only the template will change. This operation cannot be undone.',
+        'migrate_pages_submit' => 'Convert Pages',
     ],
 ];

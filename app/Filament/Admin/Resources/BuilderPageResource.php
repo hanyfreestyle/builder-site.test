@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderPageResource\Pages;
 use App\Filament\Admin\Resources\BuilderPageResource\RelationManagers;
+use App\Services\Builder\TemplateService;
+use Filament\Notifications\Notification;
 
 class BuilderPageResource extends Resource
 {
@@ -47,17 +49,39 @@ class BuilderPageResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $templates = Template::where('is_active', true)->pluck('name', 'id')->toArray();
+        $defaultTemplate = Template::getDefault();
+        
+        if ($defaultTemplate) {
+            $templates = ['' => __('site-builder/page.template_options.use_default_template', [
+                'template' => $defaultTemplate->name
+            ])] + $templates;
+        }
+        
         return $form
             ->schema([
                 Forms\Components\Tabs::make('Tabs')
                     ->tabs([
                         Forms\Components\Tabs\Tab::make(__('site-builder/page.tabs.basic_info'))
                             ->schema([
-                                Forms\Components\Select::make('template_id')
-                                    ->label(__('site-builder/page.labels.template'))
-                                    ->options(Template::where('is_active', true)->pluck('name', 'id'))
-                                    ->required()
-                                    ->searchable(),
+                                Forms\Components\Group::make([
+                                    Forms\Components\Select::make('template_id')
+                                        ->label(__('site-builder/page.labels.template'))
+                                        ->options($templates)
+                                        ->searchable()
+                                        ->reactive()
+                                        ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                            $set('use_default_template', $state === '');
+                                        })
+                                        ->afterStateHydrated(function (Forms\Get $get, Forms\Set $set, $state) {
+                                            if ($get('use_default_template')) {
+                                                $set('template_id', '');
+                                            }
+                                        }),
+                                    
+                                    Forms\Components\Hidden::make('use_default_template')
+                                        ->default(false),
+                                ]),
                                 
                                 Forms\Components\TextInput::make('title')
                                     ->label(__('site-builder/general.title'))
@@ -196,6 +220,11 @@ class BuilderPageResource extends Resource
                 
                 Tables\Columns\TextColumn::make('template.name')
                     ->label(__('site-builder/page.labels.template'))
+                    ->description(fn (Page $record): ?string => 
+                        $record->use_default_template 
+                            ? __('site-builder/page.using_default_template') 
+                            : null
+                    )
                     ->searchable(),
                 
                 Tables\Columns\IconColumn::make('is_homepage')
@@ -229,13 +258,32 @@ class BuilderPageResource extends Resource
                 Tables\Filters\SelectFilter::make('template_id')
                     ->label(__('site-builder/page.labels.template'))
                     ->options(Template::pluck('name', 'id')),
+                Tables\Filters\TernaryFilter::make('use_default_template')
+                    ->label(__('site-builder/page.labels.use_default_template')),
                 Tables\Filters\TernaryFilter::make('is_homepage')
                     ->label(__('site-builder/page.labels.is_homepage')),
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label(__('site-builder/general.is_active')),
             ])
             ->actions([
+                Tables\Actions\Action::make('use_default_template')
+                    ->label(__('site-builder/page.actions.use_default_template'))
+                    ->icon('heroicon-o-link')
+                    ->color('success')
+                    ->visible(fn (Page $record) => !$record->use_default_template)
+                    ->requiresConfirmation()
+                    ->action(function (Page $record) {
+                        $record->useDefaultTemplate();
+                        $record->save();
+                        
+                        Notification::make()
+                            ->title(__('site-builder/page.notifications.now_using_default_template'))
+                            ->success()
+                            ->send();
+                    }),
+                
                 Tables\Actions\EditAction::make(),
+                
                 Tables\Actions\Action::make('view')
                     ->label(__('site-builder/general.view'))
                     ->icon('heroicon-o-eye')
@@ -257,6 +305,26 @@ class BuilderPageResource extends Resource
                         ->action(function (Builder $query) {
                             // Don't deactivate the homepage
                             $query->where('is_homepage', false)->update(['is_active' => false]);
+                        }),
+                    Tables\Actions\BulkAction::make('use_default_template')
+                        ->label(__('site-builder/page.actions.use_default_template_bulk'))
+                        ->icon('heroicon-o-link')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Builder $query) {
+                            $count = 0;
+                            $pages = $query->get();
+                            
+                            foreach ($pages as $page) {
+                                $page->useDefaultTemplate();
+                                $page->save();
+                                $count++;
+                            }
+                            
+                            Notification::make()
+                                ->title(__('site-builder/page.notifications.pages_using_default_template', ['count' => $count]))
+                                ->success()
+                                ->send();
                         }),
                 ]),
             ]);
