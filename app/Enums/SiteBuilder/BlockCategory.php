@@ -7,9 +7,9 @@ use App\Traits\Admin\Helper\EnumHasLabelOptionsTrait;
 enum BlockCategory: string {
     use EnumHasLabelOptionsTrait;
 
-    case BASIC = 'basic';
-    case MEDIA = 'media';
-    case ADVANCED = 'advanced';
+    case BASIC = 'Basic';
+    case MEDIA = 'Media';
+    case ADVANCED = 'Advanced';
 
     public function label(): string {
         return match ($this) {

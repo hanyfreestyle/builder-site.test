@@ -19,7 +19,7 @@ class BlocksRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Select::make('block_type_id')
-                    ->label('نوع البلوك')
+                    ->label(__('site-builder/page.blocks.block_type'))
                     ->options(function () {
                         // Get the page's template
                         $page = $this->getOwnerRecord();
@@ -41,7 +41,7 @@ class BlocksRelationManager extends RelationManager
                     }),
 
                 Forms\Components\Select::make('view_version')
-                    ->label('إصدار العرض')
+                    ->label(__('site-builder/page.blocks.view_version'))
                     ->options(function (Forms\Get $get) {
                         // Get the page's template
                         $page = $this->getOwnerRecord();
@@ -66,8 +66,9 @@ class BlocksRelationManager extends RelationManager
                     ->default('default')
                     ->required(),
 
-                // Dynamic Block Fields based on Schema
-                Forms\Components\Section::make('بيانات البلوك')
+                // Dynamic Block Fields based on Schema for Default Language
+                Forms\Components\Section::make(__('site-builder/page.blocks.default_language_content'))
+                    ->description(__('site-builder/page.blocks.default_language_description'))
                     ->schema(function (Forms\Get $get) {
                         $blockTypeId = $get('block_type_id');
 
@@ -211,26 +212,25 @@ class BlocksRelationManager extends RelationManager
                                         ->label($label)
                                         ->required($required)
                                         ->placeholder($placeholder)
-                                        ->helperText($help ?: 'أدخل اسم الأيقونة، مثال: fas fa-home')
+                                        ->helperText($help ?: __('site-builder/page.blocks.icon_help'))
                                         ->default($defaultValue);
                                     break;
 
                                 case 'link':
                                     $formField = Forms\Components\Group::make([
                                         Forms\Components\TextInput::make("data.{$name}.text")
-                                            ->label('نص الرابط')
+                                            ->label(__('site-builder/page.blocks.link_text'))
                                             ->required($required)
-                                            ->placeholder('أدخل نص الرابط')
+                                            ->placeholder(__('site-builder/page.blocks.link_text_placeholder'))
                                             ->default($defaultValue['text'] ?? null),
 
                                         Forms\Components\TextInput::make("data.{$name}.url")
-                                            ->label('عنوان الرابط')
+                                            ->label(__('site-builder/page.blocks.link_url'))
                                             ->required($required)
-                                            ->placeholder('أدخل عنوان الرابط URL')
+                                            ->placeholder(__('site-builder/page.blocks.link_url_placeholder'))
                                             ->default($defaultValue['url'] ?? null),
                                     ])
                                     ->label($label);
-                                    //->helperText($help);
                                     break;
 
                                 case 'number':
@@ -277,10 +277,10 @@ class BlocksRelationManager extends RelationManager
                                         // Default fields for a repeater
                                         $subSchema = [
                                             Forms\Components\TextInput::make('title')
-                                                ->label('العنوان')
+                                                ->label(__('site-builder/general.title'))
                                                 ->required(),
                                             Forms\Components\Textarea::make('description')
-                                                ->label('الوصف'),
+                                                ->label(__('site-builder/general.description')),
                                         ];
                                     }
 
@@ -315,94 +315,134 @@ class BlocksRelationManager extends RelationManager
                     })
                     ->columns(2),
 
-                // Translations section
-                Forms\Components\Section::make('الترجمات')
-                    ->schema([
-                        Forms\Components\Repeater::make('translations')
-                            ->label('الترجمات')
-                            ->schema([
-                                Forms\Components\Select::make('locale')
-                                    ->label('اللغة')
-                                    ->options([
-                                        'ar' => 'العربية',
-                                        'en' => 'الإنجليزية',
-                                        'fr' => 'الفرنسية',
-                                        'es' => 'الإسبانية',
-                                        'de' => 'الألمانية',
-                                    ])
-                                    ->required(),
-
-                                Forms\Components\Grid::make('translation_fields')
-                                    ->label('حقول الترجمة')
-                                    ->schema(function (Forms\Get $get) {
-                                        $blockTypeId = $get('../../block_type_id');
-
-                                        if (!$blockTypeId) {
-                                            return [];
-                                        }
-
-                                        $blockType = BlockType::find($blockTypeId);
-
-                                        if (!$blockType) {
-                                            return [];
-                                        }
-
-                                        $schema = $blockType->schema ?: [];
-                                        $fields = [];
-
-                                        foreach ($schema as $field) {
-                                        $name = $field['name'] ?? '';
-                                        $label = $field['label'] ?? $name;
-                                        $translatable = $field['translatable'] ?? true;
-                                        $type = $field['type'] ?? 'text';
-                                        
-                                        // Skip non-translatable fields
-                                        if (!$translatable) {
-                                        continue;
-                                        }
-                                        
-                                        // Handle different field types for translation
-                                        if ($type === 'textarea' || $type === 'rich_text') {
-                                        $fields[] = Forms\Components\Textarea::make($name)
-                                        ->label($label);
-                                        } elseif ($type === 'link') {
-                                        // For link type, we need to handle the text part
-                                        $fields[] = Forms\Components\TextInput::make("{$name}.text")
-                                        ->label("{$label} (نص الرابط)");
-                                        } elseif ($type === 'repeater') {
-                                        // Create a repeater translator using KeyValue for simplicity
-                                        $fields[] = Forms\Components\KeyValue::make("{$name}")
-                                        ->label($label)
-                                        ->keyLabel('العنصر والحقل')
-                                        ->valueLabel('الترجمة')
-                                        ->helperText('استخدم "0.title" للعنصر الأول, "1.title" للعنصر الثاني, وهكذا');
-                                        } else {
-                                        $fields[] = Forms\Components\TextInput::make($name)
-                                        ->label($label);
-                                        }
-                                        }
-
-                                        return $fields;
-                                    }),
-                            ])
-                            ->itemLabel(fn (array $state): ?string => $state['locale'] ?? null)
-                            ->collapsible(),
-                    ])
-                    ->collapsed(),
+                // Dynamic translations based on supported languages
+                Forms\Components\Section::make(function (Forms\Get $get) {
+                    // Get the page's template
+                    $page = $this->getOwnerRecord();
+                    $template = $page->template;
+                    
+                    return __('site-builder/page.blocks.translations_heading');
+                })
+                ->description(function (Forms\Get $get) {
+                    // Get the page's template
+                    $page = $this->getOwnerRecord();
+                    $template = $page->template;
+                    
+                    if (!$template || !$template->supported_languages || count($template->supported_languages) <= 1) {
+                        return __('site-builder/page.blocks.no_translations_needed');
+                    }
+                    
+                    return __('site-builder/page.blocks.translations_description');
+                })
+                ->schema(function (Forms\Get $get) {
+                    // Get the page's template and block type
+                    $page = $this->getOwnerRecord();
+                    $template = $page->template;
+                    $blockTypeId = $get('block_type_id');
+                    
+                    if (!$template || !$blockTypeId) {
+                        return [];
+                    }
+                    
+                    // Get supported languages
+                    $supportedLanguages = $template->supported_languages ?? ['en'];
+                    
+                    // Remove default language (first language is considered default)
+                    $defaultLanguage = $supportedLanguages[0] ?? 'en';
+                    $translationLanguages = array_filter($supportedLanguages, function ($lang) use ($defaultLanguage) {
+                        return $lang !== $defaultLanguage;
+                    });
+                    
+                    if (empty($translationLanguages)) {
+                        return [];
+                    }
+                    
+                    $blockType = BlockType::find($blockTypeId);
+                    if (!$blockType) {
+                        return [];
+                    }
+                    
+                    $schema = $blockType->schema ?: [];
+                    
+                    // Create a section for each language
+                    $languageSections = [];
+                    
+                    foreach ($translationLanguages as $locale) {
+                        $fields = [];
+                        
+                        foreach ($schema as $field) {
+                            $name = $field['name'] ?? '';
+                            $label = $field['label'] ?? $name;
+                            $translatable = $field['translatable'] ?? true;
+                            $type = $field['type'] ?? 'text';
+                            $required = $field['required'] ?? false;
+                            
+                            // Skip non-translatable fields
+                            if (!$translatable) {
+                                continue;
+                            }
+                            
+                            // Handle different field types for translation
+                            if ($type === 'textarea' || $type === 'rich_text') {
+                                $fields[] = Forms\Components\Textarea::make("translations.{$locale}.{$name}")
+                                    ->label($label)
+                                    ->required($required);
+                            } elseif ($type === 'link') {
+                                // For link type, we need to handle the text part
+                                $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}.text")
+                                    ->label("{$label} (" . __('site-builder/page.blocks.link_text') . ")")
+                                    ->required($required);
+                                    
+                                $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}.url")
+                                    ->label("{$label} (" . __('site-builder/page.blocks.link_url') . ")")
+                                    ->required($required);
+                            } elseif ($type === 'repeater') {
+                                // Create a repeater translator using KeyValue for simplicity
+                                $fields[] = Forms\Components\KeyValue::make("translations.{$locale}.{$name}")
+                                    ->label($label)
+                                    ->keyLabel(__('site-builder/page.blocks.repeater_item_field'))
+                                    ->valueLabel(__('site-builder/page.blocks.translation'))
+                                    ->helperText(__('site-builder/page.blocks.repeater_translation_help'));
+                            } else {
+                                $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}")
+                                    ->label($label)
+                                    ->required($required);
+                            }
+                        }
+                        
+                        // Create a section for this language
+                        $languageName = match($locale) {
+                            'ar' => __('site-builder/translation.locale_ar'),
+                            'en' => __('site-builder/translation.locale_en'),
+                            'fr' => __('site-builder/translation.locale_fr'),
+                            'es' => __('site-builder/translation.locale_es'),
+                            'de' => __('site-builder/translation.locale_de'),
+                            default => $locale,
+                        };
+                        
+                        if (!empty($fields)) {
+                            $languageSections[] = Forms\Components\Section::make(__('site-builder/page.blocks.language_content', ['language' => $languageName]))
+                                ->schema($fields)
+                                ->columns(2);
+                        }
+                    }
+                    
+                    return $languageSections;
+                }),
 
                 Forms\Components\Group::make([
                     Forms\Components\Toggle::make('is_active')
-                        ->label('نشط')
+                        ->label(__('site-builder/general.is_active'))
                         ->default(true),
 
                     Forms\Components\Toggle::make('is_visible')
-                        ->label('ظاهر')
+                        ->label(__('site-builder/page.blocks.is_visible'))
                         ->default(true),
                 ])
                 ->columns(2),
 
                 Forms\Components\TextInput::make('sort_order')
-                    ->label('ترتيب العرض')
+                    ->label(__('site-builder/general.sort_order'))
                     ->numeric()
                     ->default(0),
             ]);
@@ -413,56 +453,56 @@ class BlocksRelationManager extends RelationManager
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('blockType.name')
-                    ->label('نوع البلوك')
-                    ->description(fn ($record) => $record->blockType?->category ?? '')
+                    ->label(__('site-builder/page.blocks.block_type'))
+                    ->description(fn ($record) => $record->blockType?->category?->label() ?? '')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('data.title')
-                    ->label('العنوان')
+                    ->label(__('site-builder/general.title'))
                     ->searchable()
                     ->limit(30),
 
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('نشط')
+                    ->label(__('site-builder/general.is_active'))
                     ->boolean(),
                     
                 Tables\Columns\TextColumn::make('sort_order')
-                    ->label('الترتيب')
+                    ->label(__('site-builder/general.sort_order'))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('view_version')
-                    ->label('إصدار العرض')
+                    ->label(__('site-builder/page.blocks.view_version'))
                     ->badge(),
 
                 Tables\Columns\IconColumn::make('is_visible')
-                    ->label('ظاهر')
+                    ->label(__('site-builder/page.blocks.is_visible'))
                     ->boolean(),
                     
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('تاريخ الإنشاء')
+                    ->label(__('site-builder/general.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('تاريخ التحديث')
+                    ->label(__('site-builder/general.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('block_type_id')
-                    ->label('نوع البلوك')
+                    ->label(__('site-builder/page.blocks.block_type'))
                     ->options(function () {
                         return BlockType::pluck('name', 'id');
                     })
                     ->searchable(),
                     
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('نشط'),
+                    ->label(__('site-builder/general.is_active')),
                     
                 Tables\Filters\TernaryFilter::make('is_visible')
-                    ->label('ظاهر'),
+                    ->label(__('site-builder/page.blocks.is_visible')),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
@@ -471,7 +511,7 @@ class BlocksRelationManager extends RelationManager
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('moveUp')
-                    ->label('تحريك لأعلى')
+                    ->label(__('site-builder/general.move_up'))
                     ->icon('heroicon-o-arrow-up')
                     ->action(function ($record) {
                         $currentOrder = $record->sort_order;
@@ -487,7 +527,7 @@ class BlocksRelationManager extends RelationManager
                         }
                     }),
                 Tables\Actions\Action::make('moveDown')
-                    ->label('تحريك لأسفل')
+                    ->label(__('site-builder/general.move_down'))
                     ->icon('heroicon-o-arrow-down')
                     ->action(function ($record) {
                         $currentOrder = $record->sort_order;

@@ -8,4 +8,5 @@ return [
     'locale_en' => 'الإنجليزية',
     'locale_fr' => 'الفرنسية',
     'locale_es' => 'الإسبانية',
+    'locale_de' => 'الألمانية',
 ];

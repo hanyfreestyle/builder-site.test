@@ -8,4 +8,5 @@ return [
     'locale_en' => 'English',
     'locale_fr' => 'French',
     'locale_es' => 'Spanish',
+    'locale_de' => 'German',
 ];
