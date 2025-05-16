@@ -31,4 +31,13 @@ return [
     'labels' => [
         'supported_languages' => 'اللغات المدعومة',
     ],
+    'helpers' => [
+        'is_default' => 'عند تفعيل هذا الخيار، سيتم إلغاء تعيين أي قالب آخر كافتراضي.',
+    ],
+    'actions' => [
+        'set_default' => 'تعيين كافتراضي',
+    ],
+    'notifications' => [
+        'set_default_success' => 'تم تعيين القالب كافتراضي بنجاح',
+    ],
 ];

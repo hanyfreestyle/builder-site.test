@@ -31,4 +31,13 @@ return [
     'labels' => [
         'supported_languages' => 'Supported Languages',
     ],
+    'helpers' => [
+        'is_default' => 'When enabled, any other default template will be deactivated.',
+    ],
+    'actions' => [
+        'set_default' => 'Set as Default',
+    ],
+    'notifications' => [
+        'set_default_success' => 'Template has been set as default successfully',
+    ],
 ];

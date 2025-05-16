@@ -77,10 +77,18 @@ class PageController extends Controller
      */
     protected function showPage(Page $page): View
     {
+        // Get the page's template or use the default template if needed
         $template = $page->template;
-
+        
         if (!$template || !$template->is_active) {
-            abort(404, 'Template not found or inactive');
+            // If the template doesn't exist or is not active, find the default template
+            $template = Template::where('is_default', true)
+                ->where('is_active', true)
+                ->first();
+                
+            if (!$template) {
+                abort(404, 'No active template available');
+            }
         }
 
         // Get page blocks

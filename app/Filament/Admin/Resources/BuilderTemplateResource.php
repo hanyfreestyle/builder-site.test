@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderTemplateResource\Pages;
 use App\Filament\Admin\Resources\BuilderTemplateResource\RelationManagers;
+use Filament\Notifications\Notification;
 
 class BuilderTemplateResource extends Resource
 {
@@ -80,7 +81,8 @@ class BuilderTemplateResource extends Resource
                                 
                                 Forms\Components\Toggle::make('is_default')
                                     ->label(__('site-builder/general.is_default'))
-                                    ->default(false),
+                                    ->default(false)
+                                    ->helperText(__('site-builder/template.helpers.is_default')),
                             ])
                             ->columns(2),
                         
@@ -200,6 +202,21 @@ class BuilderTemplateResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
+                Tables\Actions\Action::make('set_default')
+                    ->label(__('site-builder/template.actions.set_default'))
+                    ->icon('heroicon-o-star')
+                    ->color('warning')
+                    ->visible(fn (Template $record) => !$record->is_default && $record->is_active)
+                    ->requiresConfirmation()
+                    ->action(function (Template $record) {
+                        $record->setAsDefault();
+                        
+                        Notification::make()
+                            ->title(__('site-builder/template.notifications.set_default_success'))
+                            ->success()
+                            ->send();
+                    }),
+                
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

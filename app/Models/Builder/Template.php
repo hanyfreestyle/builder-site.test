@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 
 class Template extends Model
 {
@@ -46,6 +47,26 @@ class Template extends Model
         'is_active' => 'boolean',
         'is_default' => 'boolean',
     ];
+
+    /**
+     * The booting method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // عند تعيين قالب جديد كافتراضي، إلغاء الافتراضي من القوالب الأخرى
+        static::saving(function($template) {
+            if ($template->is_default && $template->isDirty('is_default')) {
+                // إلغاء الافتراضي من القوالب الأخرى
+                static::where('id', '!=', $template->id)
+                    ->where('is_default', true)
+                    ->update(['is_default' => false]);
+            }
+        });
+    }
 
     /**
      * Get the pages associated with the template.
@@ -113,5 +134,35 @@ class Template extends Model
         }
         
         return (bool) $relation->pivot->is_enabled;
+    }
+
+    /**
+     * Set this template as the default template
+     */
+    public function setAsDefault(): bool
+    {
+        // استخدام معاملة قاعدة البيانات لضمان السلامة
+        DB::transaction(function() {
+            // إلغاء تعيين أي قالب آخر كافتراضي
+            self::where('id', '!=', $this->id)
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
+            
+            // تعيين هذا القالب كافتراضي
+            $this->is_default = true;
+            $this->save();
+        });
+
+        return true;
+    }
+
+    /**
+     * Get the default template
+     */
+    public static function getDefault()
+    {
+        return self::where('is_default', true)
+            ->where('is_active', true)
+            ->first();
     }
 }
