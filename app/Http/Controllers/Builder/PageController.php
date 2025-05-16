@@ -8,6 +8,7 @@ use App\Models\Builder\Template;
 use App\Models\Builder\Menu;
 use App\Services\Builder\BlockRenderer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\View\View;
 
 class PageController extends Controller
@@ -27,6 +28,11 @@ class PageController extends Controller
     public function __construct(BlockRenderer $blockRenderer)
     {
         $this->blockRenderer = $blockRenderer;
+        
+        // Set locale from session
+        if (session()->has('locale')) {
+            App::setLocale(session('locale'));
+        }
     }
 
     /**
@@ -102,7 +108,9 @@ class PageController extends Controller
             ->get();
 
         foreach ($templateMenus as $menu) {
-            $menus[$menu->location] = $menu;
+            // Convert Enum to string to use as array key
+            $locationKey = $menu->location->value;
+            $menus[$locationKey] = $menu;
         }
 
         // Prepare SEO meta tags

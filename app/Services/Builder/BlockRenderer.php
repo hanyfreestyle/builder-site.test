@@ -14,9 +14,10 @@ class BlockRenderer
      *
      * @param Block $block The block to render
      * @param array $additionalData Additional data to pass to the view
+     * @param string|null $locale Specific locale to use for translations
      * @return string The rendered block HTML
      */
-    public function render(Block $block, array $additionalData = []): string
+    public function render(Block $block, array $additionalData = [], string $locale = null): string
     {
         // Get the block type
         $blockType = $block->blockType;
@@ -37,7 +38,8 @@ class BlockRenderer
         }
 
         // Get block data with translations applied
-        $blockData = $block->getTranslatedData();
+        $locale = $locale ?: app()->getLocale();
+        $blockData = $block->getTranslatedData($locale);
 
         // Find the most appropriate view for this block
         $viewPath = $this->findBlockView($template, $blockType->slug, $block->view_version);

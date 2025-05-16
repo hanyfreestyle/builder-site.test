@@ -70,6 +70,35 @@ class TemplateSeeder extends Seeder
             'is_active' => true,
             'is_default' => false,
         ]);
+        
+        // 3. Create Default Template
+        $defaultTemplate = Template::create([
+            'name' => 'Default',
+            'slug' => 'default',
+            'description' => 'A clean, modern Bootstrap 5 template suitable for any type of website',
+            'thumbnail' => 'templates/default-thumbnail.jpg',
+            'settings' => [
+                'colors' => [
+                    'primary' => '#007bff',
+                    'secondary' => '#6c757d',
+                    'accent' => '#fd7e14',
+                    'background' => '#ffffff',
+                    'text' => '#212529',
+                ],
+                'fonts' => [
+                    'primary' => 'Roboto, sans-serif',
+                    'heading' => 'Roboto, sans-serif',
+                    'base_size' => '16px',
+                ],
+                'spacing' => [
+                    'base' => '1rem',
+                    'section' => '3rem',
+                ],
+            ],
+            'supported_languages' => ['en', 'ar'],
+            'is_active' => true,
+            'is_default' => false,
+        ]);
 
         // Get all block types
         $blockTypes = BlockType::all();
@@ -111,6 +140,14 @@ class TemplateSeeder extends Seeder
 
             // Associate with Agency template
             $agencyTemplate->blockTypes()->attach($blockType->id, [
+                'view_versions' => json_encode($viewVersions),
+                'default_view_version' => $defaultViewVersion,
+                'is_enabled' => true,
+                'sort_order' => $blockType->sort_order,
+            ]);
+            
+            // Associate with Default template
+            $defaultTemplate->blockTypes()->attach($blockType->id, [
                 'view_versions' => json_encode($viewVersions),
                 'default_view_version' => $defaultViewVersion,
                 'is_enabled' => true,
