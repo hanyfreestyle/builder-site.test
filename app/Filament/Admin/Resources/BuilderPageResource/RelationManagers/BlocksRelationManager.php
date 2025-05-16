@@ -351,25 +351,31 @@ class BlocksRelationManager extends RelationManager
                                         $fields = [];
 
                                         foreach ($schema as $field) {
-                                            $name = $field['name'] ?? '';
-                                            $label = $field['label'] ?? $name;
-                                            $translatable = $field['translatable'] ?? true;
-                                            $type = $field['type'] ?? 'text';
-
-                                            // Skip non-translatable fields
-                                            if (!$translatable) {
-                                                continue;
-                                            }
-
-                                            // Skip non-text fields
-                                            if (!in_array($type, ['text', 'textarea', 'rich_text'])) {
-                                                continue;
-                                            }
-
-                                            // Add field
-                                            if ($type === 'textarea' || $type === 'rich_text') {
-                                                $fields[] = Forms\Components\Textarea::make($name)
-                                                    ->label($label);
+                                        $name = $field['name'] ?? '';
+                                        $label = $field['label'] ?? $name;
+                                        $translatable = $field['translatable'] ?? true;
+                                        $type = $field['type'] ?? 'text';
+                                        
+                                        // Skip non-translatable fields
+                                        if (!$translatable) {
+                                        continue;
+                                        }
+                                        
+                                        // Handle different field types for translation
+                                        if ($type === 'textarea' || $type === 'rich_text') {
+                                        $fields[] = Forms\Components\Textarea::make($name)
+                                        ->label($label);
+                                        } elseif ($type === 'link') {
+                                        // For link type, we need to handle the text part
+                                        $fields[] = Forms\Components\TextInput::make("{$name}.text")
+                                        ->label("{$label} (نص الرابط)");
+                                        } elseif ($type === 'repeater') {
+                                        // For repeater type, we create a KeyValue field to translate the titles/descriptions
+                                        $fields[] = Forms\Components\KeyValue::make("{$name}")
+                                                ->label($label)
+                                                    ->keyLabel('عنصر')
+                                                    ->valueLabel('الترجمة')
+                                                    ->helperText('استخدم المفتاح للإشارة إلى العنصر والحقل مثل "0.title" أو "1.description"');
                                             } else {
                                                 $fields[] = Forms\Components\TextInput::make($name)
                                                     ->label($label);
@@ -408,25 +414,55 @@ class BlocksRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('blockType.name')
                     ->label('نوع البلوك')
+                    ->description(fn ($record) => $record->blockType?->category ?? '')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('view_version')
-                    ->label('إصدار العرض'),
+                Tables\Columns\TextColumn::make('data.title')
+                    ->label('العنوان')
+                    ->searchable()
+                    ->limit(30),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('نشط')
                     ->boolean(),
+                    
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label('الترتيب')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('view_version')
+                    ->label('إصدار العرض')
+                    ->badge(),
 
                 Tables\Columns\IconColumn::make('is_visible')
                     ->label('ظاهر')
                     ->boolean(),
-
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->label('الترتيب')
-                    ->sortable(),
+                    
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('تاريخ الإنشاء')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('تاريخ التحديث')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('block_type_id')
+                    ->label('نوع البلوك')
+                    ->options(function () {
+                        return BlockType::pluck('name', 'id');
+                    })
+                    ->searchable(),
+                    
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label('نشط'),
+                    
+                Tables\Filters\TernaryFilter::make('is_visible')
+                    ->label('ظاهر'),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
