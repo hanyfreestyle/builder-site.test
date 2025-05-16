@@ -20,18 +20,19 @@ class MenuItemsRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\TextInput::make('title')
+                    ->label(__('site-builder/general.title'))
                     ->required()
                     ->maxLength(255),
                 
                 Forms\Components\Select::make('parent_id')
-                    ->label('Parent Item')
+                    ->label(__('site-builder/menu-item.labels.parent'))
                     ->options(function () {
                         $menuId = $this->getOwnerRecord()->id;
                         return \App\Models\Builder\MenuItem::where('menu_id', $menuId)
                             ->whereNull('parent_id')
                             ->pluck('title', 'id');
                     })
-                    ->placeholder('No parent (top level)'),
+                    ->placeholder(__('site-builder/menu-item.labels.no_parent')),
                 
                 Forms\Components\Select::make('type')
                     ->label(__('site-builder/menu-item.labels.type'))
@@ -62,22 +63,22 @@ class MenuItemsRelationManager extends RelationManager
                     ->helperText(__('site-builder/menu-item.help_text.icon')),
                 
                 Forms\Components\KeyValue::make('translations')
-                    ->label('Translations')
-                    ->keyLabel('Locale')
-                    ->valueLabel('Title')
-                    ->keyPlaceholder('Enter language code (e.g., "ar", "fr")')
-                    ->valuePlaceholder('Translated title'),
+                    ->label(__('site-builder/general.translations'))
+                    ->keyLabel(__('site-builder/translation.locale'))
+                    ->valueLabel(__('site-builder/general.title'))
+                    ->keyPlaceholder(__('site-builder/translation.key_placeholder'))
+                    ->valuePlaceholder(__('site-builder/translation.value_placeholder')),
                 
                 Forms\Components\Toggle::make('target_blank')
-                    ->label('Open in New Tab')
+                    ->label(__('site-builder/menu-item.labels.target_blank'))
                     ->default(false),
                 
                 Forms\Components\Toggle::make('is_active')
-                    ->label('Active')
+                    ->label(__('site-builder/general.is_active'))
                     ->default(true),
                 
                 Forms\Components\TextInput::make('sort_order')
-                    ->label('Sort Order')
+                    ->label(__('site-builder/general.sort_order'))
                     ->numeric()
                     ->default(0),
             ]);
@@ -89,13 +90,15 @@ class MenuItemsRelationManager extends RelationManager
             ->recordTitleAttribute('title')
             ->columns([
                 Tables\Columns\TextColumn::make('title')
+                    ->label(__('site-builder/general.title'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('parent.title')
-                    ->label('Parent')
-                    ->placeholder('Top Level'),
+                    ->label(__('site-builder/menu-item.labels.parent'))
+                    ->placeholder(__('site-builder/menu-item.labels.no_parent')),
                 
                 Tables\Columns\TextColumn::make('type')
+                    ->label(__('site-builder/menu-item.labels.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'url' => 'gray',
@@ -106,24 +109,25 @@ class MenuItemsRelationManager extends RelationManager
                     }),
                 
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('site-builder/general.is_active'))
                     ->boolean(),
                 
                 Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('site-builder/general.sort_order'))
                     ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
+                    ->label(__('site-builder/menu-item.labels.type'))
                     ->options(MenuItemType::options()),
                 Tables\Filters\SelectFilter::make('parent_id')
-                    ->label('Parent')
+                    ->label(__('site-builder/menu-item.labels.parent'))
                     ->options(function () {
                         $menuId = $this->getOwnerRecord()->id;
                         return \App\Models\Builder\MenuItem::where('menu_id', $menuId)
                             ->whereNull('parent_id')
                             ->pluck('title', 'id')
-                            ->toArray() + ['' => 'Top Level'];
+                            ->toArray() + ['' => __('site-builder/menu-item.labels.no_parent')];
                     }),
             ])
             ->headerActions([
@@ -133,7 +137,7 @@ class MenuItemsRelationManager extends RelationManager
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('moveUp')
-                    ->label('Move Up')
+                    ->label(__('site-builder/menu-item.labels.move_up'))
                     ->icon('heroicon-o-arrow-up')
                     ->action(function ($record) {
                         $currentOrder = $record->sort_order;
@@ -150,7 +154,7 @@ class MenuItemsRelationManager extends RelationManager
                         }
                     }),
                 Tables\Actions\Action::make('moveDown')
-                    ->label('Move Down')
+                    ->label(__('site-builder/menu-item.labels.move_down'))
                     ->icon('heroicon-o-arrow-down')
                     ->action(function ($record) {
                         $currentOrder = $record->sort_order;
@@ -171,11 +175,11 @@ class MenuItemsRelationManager extends RelationManager
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('activate')
-                        ->label('Activate')
+                        ->label(__('site-builder/general.activate'))
                         ->icon('heroicon-o-check-circle')
                         ->action(fn (Builder $query) => $query->update(['is_active' => true])),
                     Tables\Actions\BulkAction::make('deactivate')
-                        ->label('Deactivate')
+                        ->label(__('site-builder/general.deactivate'))
                         ->icon('heroicon-o-x-circle')
                         ->action(fn (Builder $query) => $query->update(['is_active' => false])),
                 ]),

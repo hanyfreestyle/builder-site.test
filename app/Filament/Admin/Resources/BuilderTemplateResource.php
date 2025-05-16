@@ -23,11 +23,26 @@ class BuilderTemplateResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
-    protected static ?string $navigationLabel = 'Templates';
+    protected static ?string $navigationLabel = 'templates';
 
-    protected static ?string $modelLabel = 'Template';
+    protected static ?string $modelLabel = 'template';
 
-    protected static ?string $pluralModelLabel = 'Templates';
+    protected static ?string $pluralModelLabel = 'templates';
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('site-builder/general.templates');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('site-builder/template.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('site-builder/general.templates');
+    }
 
     public static function form(Form $form): Form
     {
@@ -35,98 +50,104 @@ class BuilderTemplateResource extends Resource
             ->schema([
                 Forms\Components\Tabs::make('Tabs')
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make('Basic Information')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/template.tabs.basic_info'))
                             ->schema([
                                 Forms\Components\TextInput::make('name')
+                                    ->label(__('site-builder/general.name'))
                                     ->required()
                                     ->maxLength(255),
                                 
                                 Forms\Components\TextInput::make('slug')
+                                    ->label(__('site-builder/general.slug'))
                                     ->required()
                                     ->maxLength(255)
                                     ->unique(Template::class, 'slug', fn ($record) => $record)
                                     ->alphaDash(),
                                 
                                 Forms\Components\Textarea::make('description')
+                                    ->label(__('site-builder/general.description'))
                                     ->maxLength(65535)
                                     ->columnSpanFull(),
                                 
                                 Forms\Components\FileUpload::make('thumbnail')
+                                    ->label(__('site-builder/general.thumbnail'))
                                     ->image()
                                     ->directory('templates/thumbnails'),
                                 
                                 Forms\Components\Toggle::make('is_active')
+                                    ->label(__('site-builder/general.is_active'))
                                     ->default(true),
                                 
                                 Forms\Components\Toggle::make('is_default')
+                                    ->label(__('site-builder/general.is_default'))
                                     ->default(false),
                             ])
                             ->columns(2),
                         
-                        Forms\Components\Tabs\Tab::make('Settings')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/template.tabs.settings'))
                             ->schema([
-                                Forms\Components\Section::make('Colors')
+                                Forms\Components\Section::make(__('site-builder/template.settings.colors'))
                                     ->schema([
                                         Forms\Components\ColorPicker::make('settings.colors.primary')
-                                            ->label('Primary Color')
+                                            ->label(__('site-builder/template.colors.primary'))
                                             ->default('#007bff'),
                                         
                                         Forms\Components\ColorPicker::make('settings.colors.secondary')
-                                            ->label('Secondary Color')
+                                            ->label(__('site-builder/template.colors.secondary'))
                                             ->default('#6c757d'),
                                         
                                         Forms\Components\ColorPicker::make('settings.colors.accent')
-                                            ->label('Accent Color')
+                                            ->label(__('site-builder/template.colors.accent'))
                                             ->default('#fd7e14'),
                                         
                                         Forms\Components\ColorPicker::make('settings.colors.background')
-                                            ->label('Background Color')
+                                            ->label(__('site-builder/template.colors.background'))
                                             ->default('#ffffff'),
                                         
                                         Forms\Components\ColorPicker::make('settings.colors.text')
-                                            ->label('Text Color')
+                                            ->label(__('site-builder/template.colors.text'))
                                             ->default('#212529'),
                                     ])
                                     ->columns(2),
                                 
-                                Forms\Components\Section::make('Fonts')
+                                Forms\Components\Section::make(__('site-builder/template.settings.fonts'))
                                     ->schema([
                                         Forms\Components\TextInput::make('settings.fonts.primary')
-                                            ->label('Primary Font')
+                                            ->label(__('site-builder/template.fonts.primary'))
                                             ->default('Roboto, sans-serif'),
                                         
                                         Forms\Components\TextInput::make('settings.fonts.heading')
-                                            ->label('Heading Font')
+                                            ->label(__('site-builder/template.fonts.heading'))
                                             ->default('Roboto, sans-serif'),
                                         
                                         Forms\Components\TextInput::make('settings.fonts.base_size')
-                                            ->label('Base Font Size')
+                                            ->label(__('site-builder/template.fonts.base_size'))
                                             ->default('16px'),
                                     ])
                                     ->columns(2),
                                 
-                                Forms\Components\Section::make('Spacing')
+                                Forms\Components\Section::make(__('site-builder/template.settings.spacing'))
                                     ->schema([
                                         Forms\Components\TextInput::make('settings.spacing.base')
-                                            ->label('Base Spacing')
+                                            ->label(__('site-builder/template.spacing.base'))
                                             ->default('1rem'),
                                         
                                         Forms\Components\TextInput::make('settings.spacing.section')
-                                            ->label('Section Spacing')
+                                            ->label(__('site-builder/template.spacing.section'))
                                             ->default('3rem'),
                                     ])
                                     ->columns(2),
                             ]),
                         
-                        Forms\Components\Tabs\Tab::make('Languages')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/template.tabs.languages'))
                             ->schema([
                                 Forms\Components\CheckboxList::make('supported_languages')
-                                    ->label('Supported Languages')
+                                    ->label(__('site-builder/template.labels.supported_languages'))
                                     ->options([
-                                        'en' => 'English',
-                                        'ar' => 'Arabic',
-                                        'fr' => 'French',
-                                        'es' => 'Spanish',
+                                        'en' => __('site-builder/translation.locale_en'),
+                                        'ar' => __('site-builder/translation.locale_ar'),
+                                        'fr' => __('site-builder/translation.locale_fr'),
+                                        'es' => __('site-builder/translation.locale_es'),
                                         'de' => 'German',
                                     ])
                                     ->default(['en'])
@@ -142,28 +163,35 @@ class BuilderTemplateResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('site-builder/general.name'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('slug')
+                    ->label(__('site-builder/general.slug'))
                     ->searchable(),
                 
                 Tables\Columns\ImageColumn::make('thumbnail')
+                    ->label(__('site-builder/general.thumbnail'))
                     ->square(),
                 
                 Tables\Columns\IconColumn::make('is_active')
+                    ->label(__('site-builder/general.is_active'))
                     ->boolean()
                     ->sortable(),
                 
                 Tables\Columns\IconColumn::make('is_default')
+                    ->label(__('site-builder/general.is_default'))
                     ->boolean()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('site-builder/general.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('site-builder/general.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

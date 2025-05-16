@@ -24,11 +24,26 @@ class BuilderPageResource extends Resource
 
     protected static ?int $navigationSort = 30;
 
-    protected static ?string $navigationLabel = 'Pages';
+    protected static ?string $navigationLabel = 'pages';
 
-    protected static ?string $modelLabel = 'Page';
+    protected static ?string $modelLabel = 'page';
 
-    protected static ?string $pluralModelLabel = 'Pages';
+    protected static ?string $pluralModelLabel = 'pages';
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('site-builder/general.pages');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('site-builder/page.singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('site-builder/general.pages');
+    }
 
     public static function form(Form $form): Form
     {
@@ -36,30 +51,33 @@ class BuilderPageResource extends Resource
             ->schema([
                 Forms\Components\Tabs::make('Tabs')
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make('Basic Information')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/page.tabs.basic_info'))
                             ->schema([
                                 Forms\Components\Select::make('template_id')
-                                    ->label('Template')
+                                    ->label(__('site-builder/page.labels.template'))
                                     ->options(Template::where('is_active', true)->pluck('name', 'id'))
                                     ->required()
                                     ->searchable(),
                                 
                                 Forms\Components\TextInput::make('title')
+                                    ->label(__('site-builder/general.title'))
                                     ->required()
                                     ->maxLength(255),
                                 
                                 Forms\Components\TextInput::make('slug')
+                                    ->label(__('site-builder/general.slug'))
                                     ->required()
                                     ->maxLength(255)
                                     ->unique(Page::class, 'slug', fn ($record) => $record)
                                     ->alphaDash(),
                                 
                                 Forms\Components\Textarea::make('description')
+                                    ->label(__('site-builder/general.description'))
                                     ->maxLength(65535),
                                 
                                 Forms\Components\Toggle::make('is_homepage')
-                                    ->label('Is Homepage')
-                                    ->helperText('Only one page can be set as homepage')
+                                    ->label(__('site-builder/page.labels.is_homepage'))
+                                    ->helperText(__('site-builder/page.help_text.is_homepage'))
                                     ->reactive()
                                     ->afterStateUpdated(function (Forms\Set $set, $state) {
                                         if ($state) {
@@ -68,89 +86,91 @@ class BuilderPageResource extends Resource
                                     }),
                                 
                                 Forms\Components\Toggle::make('is_active')
+                                    ->label(__('site-builder/general.is_active'))
                                     ->default(true)
                                     ->disabled(fn (Forms\Get $get) => $get('is_homepage')),
                                 
                                 Forms\Components\TextInput::make('sort_order')
+                                    ->label(__('site-builder/general.sort_order'))
                                     ->numeric()
                                     ->default(0),
                             ])
                             ->columns(2),
                         
-                        Forms\Components\Tabs\Tab::make('SEO')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/page.tabs.seo'))
                             ->schema([
                                 Forms\Components\TextInput::make('meta_tags.title')
-                                    ->label('Meta Title')
+                                    ->label(__('site-builder/page.seo.meta_title'))
                                     ->maxLength(60)
-                                    ->helperText('Optimal length: 50-60 characters'),
+                                    ->helperText(__('site-builder/page.help_text.meta_title')),
                                 
                                 Forms\Components\Textarea::make('meta_tags.description')
-                                    ->label('Meta Description')
+                                    ->label(__('site-builder/page.seo.meta_description'))
                                     ->maxLength(160)
                                     ->rows(3)
-                                    ->helperText('Optimal length: 150-160 characters'),
+                                    ->helperText(__('site-builder/page.help_text.meta_description')),
                                 
                                 Forms\Components\TextInput::make('meta_tags.keywords')
-                                    ->label('Meta Keywords')
-                                    ->helperText('Comma-separated keywords'),
+                                    ->label(__('site-builder/page.seo.meta_keywords'))
+                                    ->helperText(__('site-builder/page.help_text.meta_keywords')),
                                 
                                 Forms\Components\Select::make('meta_tags.robots')
-                                    ->label('Robots')
+                                    ->label(__('site-builder/page.seo.robots'))
                                     ->options([
-                                        'index, follow' => 'Index, Follow',
-                                        'noindex, follow' => 'No Index, Follow',
-                                        'index, nofollow' => 'Index, No Follow',
-                                        'noindex, nofollow' => 'No Index, No Follow',
+                                        'index, follow' => __('site-builder/page.seo.robots_options.index_follow'),
+                                        'noindex, follow' => __('site-builder/page.seo.robots_options.noindex_follow'),
+                                        'index, nofollow' => __('site-builder/page.seo.robots_options.index_nofollow'),
+                                        'noindex, nofollow' => __('site-builder/page.seo.robots_options.noindex_nofollow'),
                                     ])
                                     ->default('index, follow'),
                                 
                                 Forms\Components\TextInput::make('meta_tags.og:title')
-                                    ->label('OG Title')
+                                    ->label(__('site-builder/page.seo.og_title'))
                                     ->maxLength(60),
                                 
                                 Forms\Components\Textarea::make('meta_tags.og:description')
-                                    ->label('OG Description')
+                                    ->label(__('site-builder/page.seo.og_description'))
                                     ->maxLength(160)
                                     ->rows(3),
                                 
                                 Forms\Components\FileUpload::make('meta_tags.og:image')
-                                    ->label('OG Image')
+                                    ->label(__('site-builder/page.seo.og_image'))
                                     ->image()
                                     ->directory('pages/og-images'),
                             ])
                             ->columns(2),
                         
-                        Forms\Components\Tabs\Tab::make('Translations')
+                        Forms\Components\Tabs\Tab::make(__('site-builder/general.translations'))
                             ->schema([
                                 Forms\Components\Repeater::make('translations')
-                                    ->label('Translations')
+                                    ->label(__('site-builder/general.translations'))
                                     ->schema([
                                         Forms\Components\Select::make('locale')
-                                            ->label('Language')
+                                            ->label(__('site-builder/translation.locale'))
                                             ->options([
-                                                'ar' => 'Arabic',
-                                                'fr' => 'French',
-                                                'es' => 'Spanish',
+                                                'ar' => __('site-builder/translation.locale_ar'),
+                                                'fr' => __('site-builder/translation.locale_fr'),
+                                                'es' => __('site-builder/translation.locale_es'),
                                                 'de' => 'German',
                                                 // Add more languages as needed
                                             ])
                                             ->required(),
                                         
                                         Forms\Components\TextInput::make('title')
-                                            ->label('Translated Title')
+                                            ->label(__('site-builder/page.translations.title'))
                                             ->required()
                                             ->maxLength(255),
                                         
                                         Forms\Components\Textarea::make('description')
-                                            ->label('Translated Description')
+                                            ->label(__('site-builder/page.translations.description'))
                                             ->maxLength(65535),
                                         
                                         Forms\Components\TextInput::make('meta_title')
-                                            ->label('Translated Meta Title')
+                                            ->label(__('site-builder/page.translations.meta_title'))
                                             ->maxLength(60),
                                         
                                         Forms\Components\Textarea::make('meta_description')
-                                            ->label('Translated Meta Description')
+                                            ->label(__('site-builder/page.translations.meta_description'))
                                             ->maxLength(160)
                                             ->rows(3),
                                     ])
@@ -167,34 +187,39 @@ class BuilderPageResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
+                    ->label(__('site-builder/general.title'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('slug')
+                    ->label(__('site-builder/general.slug'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('template.name')
-                    ->label('Template')
+                    ->label(__('site-builder/page.labels.template'))
                     ->searchable(),
                 
                 Tables\Columns\IconColumn::make('is_homepage')
-                    ->label('Homepage')
+                    ->label(__('site-builder/page.labels.is_homepage'))
                     ->boolean(),
                 
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('site-builder/general.is_active'))
                     ->boolean()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('sort_order')
+                    ->label(__('site-builder/general.sort_order'))
                     ->numeric()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('site-builder/general.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('site-builder/general.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -202,17 +227,17 @@ class BuilderPageResource extends Resource
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\SelectFilter::make('template_id')
-                    ->label('Template')
+                    ->label(__('site-builder/page.labels.template'))
                     ->options(Template::pluck('name', 'id')),
                 Tables\Filters\TernaryFilter::make('is_homepage')
-                    ->label('Homepage'),
+                    ->label(__('site-builder/page.labels.is_homepage')),
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active'),
+                    ->label(__('site-builder/general.is_active')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('view')
-                    ->label('View')
+                    ->label(__('site-builder/general.view'))
                     ->icon('heroicon-o-eye')
                     ->url(fn ($record) => route('builder.page', ['slug' => $record->slug]))
                     ->openUrlInNewTab(),
@@ -223,11 +248,11 @@ class BuilderPageResource extends Resource
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\BulkAction::make('activate')
-                        ->label('Activate')
+                        ->label(__('site-builder/general.activate'))
                         ->icon('heroicon-o-check-circle')
                         ->action(fn (Builder $query) => $query->update(['is_active' => true])),
                     Tables\Actions\BulkAction::make('deactivate')
-                        ->label('Deactivate')
+                        ->label(__('site-builder/general.deactivate'))
                         ->icon('heroicon-o-x-circle')
                         ->action(function (Builder $query) {
                             // Don't deactivate the homepage

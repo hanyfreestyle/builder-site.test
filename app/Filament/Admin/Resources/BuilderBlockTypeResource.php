@@ -74,13 +74,13 @@ class BuilderBlockTypeResource extends Resource
                                 Forms\Components\TextInput::make('icon')
                                     ->label(__('site-builder/general.icon'))
                                     ->maxLength(255)
-                                    ->helperText('رمز FontAwesome أو رمز آخر، مثال: "fas fa-home"'),
+                                    ->helperText(__('site-builder/block-type.help_text.icon')),
                                 
                                 Forms\Components\Select::make('category')
-                                ->label(__('site-builder/block-type.labels.category'))
-                                ->options(BlockCategory::options())
-                                ->default(BlockCategory::BASIC)
-                                            ->helperText(__('site-builder/block-type.help_text.category')),
+                                    ->label(__('site-builder/block-type.labels.category'))
+                                    ->options(BlockCategory::options())
+                                    ->default(BlockCategory::BASIC)
+                                    ->helperText(__('site-builder/block-type.help_text.category')),
                                 
                                 Forms\Components\Toggle::make('is_active')
                                     ->label(__('site-builder/general.is_active'))
@@ -172,33 +172,35 @@ class BuilderBlockTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('الاسم')
+                    ->label(__('site-builder/general.name'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('slug')
-                    ->label('الرابط')
+                    ->label(__('site-builder/general.slug'))
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('category')
-                    ->label('التصنيف')
+                    ->label(__('site-builder/block-type.labels.category'))
                     ->searchable(),
                 
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('نشط')
+                    ->label(__('site-builder/general.is_active'))
                     ->boolean()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('sort_order')
-                    ->label('الترتيب')
+                    ->label(__('site-builder/general.sort_order'))
                     ->numeric()
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('site-builder/general.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('site-builder/general.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
