@@ -29,6 +29,10 @@ return [
         'third' => 'ثلث عرض',
         'two_thirds' => 'ثلثي عرض',
         'full' => 'عرض كامل',
+        'quarter' => 'ربع عرض',
+        'three_quarters' => 'ثلاثة أرباع عرض',
+        'sixth' => 'سدس عرض',
+        'five_sixths' => 'خمسة أسداس عرض',
     ],
     'default_values' => 'القيم الافتراضية للحقول',
     'labels' => [

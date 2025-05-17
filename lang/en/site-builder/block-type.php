@@ -29,6 +29,10 @@ return [
         'third' => 'One Third',
         'two_thirds' => 'Two Thirds',
         'full' => 'Full Width',
+        'quarter' => 'One Quarter',
+        'three_quarters' => 'Three Quarters',
+        'sixth' => 'One Sixth',
+        'five_sixths' => 'Five Sixths',
     ],
     'default_values' => 'Default Field Values',
     'labels' => [
