@@ -69,7 +69,18 @@ class Page extends Model
     }
 
     /**
-     * Get the blocks for the page.
+     * Get all blocks for the page (including those linked via pivot table).
+     */
+    public function allBlocks()
+    {
+        return $this->belongsToMany(Block::class, 'builder_block_page')
+            ->withPivot('sort_order')
+            ->withTimestamps()
+            ->orderBy('pivot_sort_order');
+    }
+    
+    /**
+     * Get the blocks directly attached to the page (legacy support).
      */
     public function blocks(): HasMany
     {

@@ -48,7 +48,17 @@ class Block extends Model
     ];
 
     /**
-     * Get the page that owns the block.
+     * Get the pages related to this block.
+     */
+    public function pages()
+    {
+        return $this->belongsToMany(Page::class, 'builder_block_page')
+            ->withPivot('sort_order')
+            ->withTimestamps();
+    }
+    
+    /**
+     * Get the page that owns the block (legacy support).
      */
     public function page(): BelongsTo
     {

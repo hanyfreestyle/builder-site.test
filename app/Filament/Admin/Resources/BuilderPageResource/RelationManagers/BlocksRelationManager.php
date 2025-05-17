@@ -14,6 +14,20 @@ class BlocksRelationManager extends RelationManager
 {
     protected static string $relationship = 'blocks';
 
+    /**
+     * After creating a block, also create a relation in the pivot table
+     */
+    protected function afterCreate(): void
+    {
+        $page = $this->getOwnerRecord();
+        $block = $this->record;
+        
+        // Check if we need to create a relation in the pivot table
+        if (method_exists($block, 'pages')) {
+            $block->pages()->attach($page->id, ['sort_order' => $block->sort_order]);
+        }
+    }
+
     public function form(Form $form): Form
     {
         return $form
@@ -316,14 +330,10 @@ class BlocksRelationManager extends RelationManager
                     ->columns(2),
 
                 // Dynamic translations based on supported languages
-                Forms\Components\Section::make(function (Forms\Get $get) {
-                    // Get the page's template
-                    $page = $this->getOwnerRecord();
-                    $template = $page->template;
-                    
+                Forms\Components\Section::make(function () {
                     return __('site-builder/page.blocks.translations_heading');
                 })
-                ->description(function (Forms\Get $get) {
+                ->description(function () {
                     // Get the page's template
                     $page = $this->getOwnerRecord();
                     $template = $page->template;
@@ -402,7 +412,34 @@ class BlocksRelationManager extends RelationManager
                                     ->label($label)
                                     ->keyLabel(__('site-builder/page.blocks.repeater_item_field'))
                                     ->valueLabel(__('site-builder/page.blocks.translation'))
-                                    ->helperText(__('site-builder/page.blocks.repeater_translation_help'));
+                                    ->helperText(__('site-builder/page.blocks.repeater_translation_help'))
+                                    ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
+                                        // Convert complex values to JSON strings
+                                        if (is_array($state)) {
+                                            foreach ($state as $key => $value) {
+                                                if (is_array($value) || is_object($value)) {
+                                                    $state[$key] = json_encode($value, JSON_UNESCAPED_UNICODE);
+                                                }
+                                            }
+                                            $component->state($state);
+                                        }
+                                    })
+                                    ->dehydrateStateUsing(function ($state) {
+                                        // Try to convert JSON strings back to arrays/objects before saving
+                                        foreach ($state as $key => $value) {
+                                            if (is_string($value) && (str_starts_with(trim($value), '[') || str_starts_with(trim($value), '{'))) {
+                                                try {
+                                                    $decoded = json_decode($value, true);
+                                                    if (json_last_error() === JSON_ERROR_NONE) {
+                                                        $state[$key] = $decoded;
+                                                    }
+                                                } catch (\Exception $e) {
+                                                    // Keep the value as is if conversion fails
+                                                }
+                                            }
+                                        }
+                                        return $state;
+                                    });
                             } else {
                                 $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}")
                                     ->label($label)
