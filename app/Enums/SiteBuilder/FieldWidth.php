@@ -40,15 +40,16 @@ enum FieldWidth: string {
      * @return string|int Filament column span value
      */
     public function toColumnSpan(): string|int {
+        // Convert to actual column span values expected by Filament 3
         return match ($this) {
-            self::FULL => 'full',           // Full width
-            self::HALF => 6,                // Half width (6 of 12 columns)
-            self::THIRD => 4,               // One third (4 of 12 columns)
-            self::TWO_THIRDS => 8,          // Two thirds (8 of 12 columns)
-            self::QUARTER => 3,             // One quarter (3 of 12 columns)
-            self::THREE_QUARTERS => 9,      // Three quarters (9 of 12 columns)
-            self::SIXTH => 2,               // One sixth (2 of 12 columns)
-            self::FIVE_SIXTHS => 10,        // Five sixths (10 of 12 columns)
+            self::FULL => 12,              // Full width (12 of 12 columns)
+            self::HALF => 6,               // Half width (6 of 12 columns)
+            self::THIRD => 4,              // One third (4 of 12 columns)
+            self::TWO_THIRDS => 8,         // Two thirds (8 of 12 columns)
+            self::QUARTER => 3,            // One quarter (3 of 12 columns)
+            self::THREE_QUARTERS => 9,     // Three quarters (9 of 12 columns)
+            self::SIXTH => 2,              // One sixth (2 of 12 columns)
+            self::FIVE_SIXTHS => 10,       // Five sixths (10 of 12 columns)
         };
     }
 
@@ -91,24 +92,32 @@ enum FieldWidth: string {
      * @return string|int Column span value
      */
     public static function stringToColumnSpan(string $width): string|int {
+        // Add debugging log
+        \Illuminate\Support\Facades\Log::info('FieldWidth::stringToColumnSpan input: ' . $width);
+        
         // Try to match with an enum case first
         foreach (self::cases() as $case) {
             if ($case->value === $width) {
-                return $case->toColumnSpan();
+                $result = $case->toColumnSpan();
+                \Illuminate\Support\Facades\Log::info('FieldWidth matched enum case: ' . $case->value . ' = ' . json_encode($result));
+                return $result;
             }
         }
 
         // If not found, use similar matching as convertWidthToColumnSpan
-        return match(strtolower(trim($width))) {
-            '1/1', 'full', '100%' => 'full',
-            '1/2', '50%' => 6,
-            '1/3', '33%', '33.33%' => 4,
-            '2/3', '66%', '66.66%' => 8,
-            '1/4', '25%' => 3,
-            '3/4', '75%' => 9,
-            '1/6', '16%', '16.66%' => 2,
-            '5/6', '83%', '83.33%' => 10,
-            default => 'full',
+        $result = match(strtolower(trim($width))) {
+            '1/1', 'full', '100%' => 12,  // Full width (12 of 12 columns)
+            '1/2', '50%' => 6,            // Half width (6 of 12 columns)
+            '1/3', '33%', '33.33%' => 4,  // One third (4 of 12 columns)
+            '2/3', '66%', '66.66%' => 8,  // Two thirds (8 of 12 columns)
+            '1/4', '25%' => 3,            // One quarter (3 of 12 columns)
+            '3/4', '75%' => 9,            // Three quarters (9 of 12 columns)
+            '1/6', '16%', '16.66%' => 2,  // One sixth (2 of 12 columns)
+            '5/6', '83%', '83.33%' => 10, // Five sixths (10 of 12 columns)
+            default => 12,                 // Default to full width (12 columns)
         };
+        
+        \Illuminate\Support\Facades\Log::info('FieldWidth fallback match: ' . $width . ' = ' . json_encode($result));
+        return $result;
     }
 }

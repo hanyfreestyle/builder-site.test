@@ -238,7 +238,7 @@ class FormFieldsService
 
             // Set width and add to form fields
             if ($formField) {
-                $formField->columnSpan($fieldWidth);
+                $formField->columnSpan(2);
                 $formFields[] = $formField;
             }
         }
@@ -248,14 +248,20 @@ class FormFieldsService
 
     /**
      * Convert width string to Filament columnSpan value
-     * 
+     *
      * @param string $width Width string ('1/2', '1/3', '2/3', '1/4', '3/4', 'full', etc.)
-     * @return string|int Column span value for Filament 3
+     * @return int Column span value for Filament 3 (1-12)
      */
-    public static function convertWidthToColumnSpan(string $width): string|int
+    public static function convertWidthToColumnSpan(string $width): int
     {
+        // Add debugging log
+        \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan input: ' . $width);
+
         // Use the FieldWidth enum to convert the width to column span
-        return FieldWidth::stringToColumnSpan($width);
+        $result = FieldWidth::stringToColumnSpan($width);
+
+        \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan result: ' . json_encode($result));
+        return $result;
     }
 
     /**
@@ -268,7 +274,7 @@ class FormFieldsService
     public static function createTranslationFieldsFromSchema(array $schema, string $locale): array
     {
         $fields = [];
-        
+
         foreach ($schema as $field) {
             $name = $field['name'] ?? '';
             $label = $field['label'] ?? $name;
@@ -276,18 +282,18 @@ class FormFieldsService
             $type = $field['type'] ?? 'text';
             $required = $field['required'] ?? false;
             $width = $field['width'] ?? 'full';
-            
+
             // Skip non-translatable fields
             if (!$translatable) {
                 continue;
             }
-            
+
             // Convert width to Filament column span value
             $fieldWidth = self::convertWidthToColumnSpan($width);
-            
+
             // Create field based on type
             $translationField = null;
-            
+
             // Handle different field types for translation
             if ($type === 'textarea' || $type === 'rich_text') {
                 $translationField = Forms\Components\Textarea::make("translations.{$locale}.{$name}")
@@ -303,7 +309,7 @@ class FormFieldsService
                         ->placeholder(__('site-builder/block.link_text_placeholder'))
                         ->helperText($field['help'] ?? null)
                         ->required($required),
-                        
+
                     Forms\Components\TextInput::make("translations.{$locale}.{$name}.url")
                         ->label(__('site-builder/block.link_url'))
                         ->placeholder(__('site-builder/block.link_url_placeholder'))
@@ -351,14 +357,14 @@ class FormFieldsService
                     ->helperText($field['help'] ?? null)
                     ->required($required);
             }
-            
+
             // Apply the width to the translation field
             if ($translationField) {
                 $translationField->columnSpan($fieldWidth);
                 $fields[] = $translationField;
             }
         }
-        
+
         return $fields;
     }
 }

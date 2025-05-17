@@ -83,26 +83,26 @@ class BuilderBlockResource extends Resource {
                                         // Initialize data with default values from schema
                                         $data = [];
                                         $schema = $blockType->schema ?: [];
-                                        
+
                                         foreach ($schema as $field) {
                                             $name = $field['name'] ?? '';
                                             $defaultValue = $field['default'] ?? null;
-                                            
+
                                             if (!empty($name) && $defaultValue !== null) {
                                                 $data[$name] = $defaultValue;
                                             }
                                         }
-                                        
+
                                         // Set data with values from schema
                                         if (!empty($data)) {
                                             $set('data', $data);
-                                            
+
                                             // Debug
                                             \Illuminate\Support\Facades\Log::info('Setting data from schema defaults: ' . json_encode($data));
                                         } else {
                                             // Clear previous data
                                             $set('data', null);
-                                            
+
                                             // Debug
                                             \Illuminate\Support\Facades\Log::info('No default values found in schema for block type: ' . $state);
                                         }
@@ -186,6 +186,7 @@ class BuilderBlockResource extends Resource {
                         return FormFieldsService::createFormFieldsFromSchema($schema);
                     })
                     ->columns(2)
+                    ->columnSpanFull()
                     ->visible(fn(Forms\Get $get) => $get('block_type_id')),
 
                 // Translations Section
@@ -248,6 +249,7 @@ class BuilderBlockResource extends Resource {
                                 $languageSections[] = Forms\Components\Section::make(__('site-builder/block.language_content', ['language' => $languageName]))
                                     ->schema($fields)
                                     ->columns(2)
+                                    ->columnSpanFull()
                                     ->collapsed();
                             }
                         }
@@ -261,6 +263,7 @@ class BuilderBlockResource extends Resource {
 
                         return $languageSections;
                     })
+                    ->columnSpanFull()
                     ->visible(fn(Forms\Get $get) => $get('block_type_id')),
             ]);
     }
