@@ -15,9 +15,9 @@ class BuilderSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            BlockTypeSeeder::class,
-            TemplateSeeder::class,
-            DemoContentSeeder::class,
+//            BlockTypeSeeder::class,
+//            TemplateSeeder::class,
+//            DemoContentSeeder::class,
         ]);
     }
 }
