@@ -77,7 +77,6 @@ return new class extends Migration
         // 5. جدول البلوكات (builder_blocks)
         Schema::create('builder_blocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('page_id')->constrained('builder_pages')->onDelete('cascade');
             $table->foreignId('block_type_id')->constrained('builder_block_types')->onDelete('cascade');
             $table->json('data');
             $table->json('translations')->nullable();
@@ -120,13 +119,27 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        Schema::create('builder_block_page', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('block_id')->constrained('builder_blocks')->onDelete('cascade');
+            $table->foreignId('page_id')->constrained('builder_pages')->onDelete('cascade');
+            $table->integer('sort_order')->default(0);
+            $table->timestamps();
+
+            // Add a unique constraint to prevent duplicate relationships
+            $table->unique(['block_id', 'page_id']);
+        });
+
     }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
+        Schema::dropIfExists('builder_block_page');
         Schema::dropIfExists('builder_menu_items');
         Schema::dropIfExists('builder_menus');
         Schema::dropIfExists('builder_blocks');

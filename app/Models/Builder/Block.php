@@ -24,7 +24,6 @@ class Block extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'page_id',
         'block_type_id',
         'data',
         'translations',
@@ -55,14 +54,6 @@ class Block extends Model
         return $this->belongsToMany(Page::class, 'builder_block_page')
             ->withPivot('sort_order')
             ->withTimestamps();
-    }
-    
-    /**
-     * Get the page that owns the block (legacy support).
-     */
-    public function page(): BelongsTo
-    {
-        return $this->belongsTo(Page::class, 'page_id');
     }
 
     /**

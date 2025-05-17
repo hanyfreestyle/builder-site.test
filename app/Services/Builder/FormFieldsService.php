@@ -265,15 +265,20 @@ class FormFieldsService
             if ($type === 'textarea' || $type === 'rich_text') {
                 $fields[] = Forms\Components\Textarea::make("translations.{$locale}.{$name}")
                     ->label($label)
+                    ->placeholder($field['placeholder'] ?? null)
+                    ->helperText($field['help'] ?? null)
                     ->required(false); // Translations are optional
             } elseif ($type === 'link') {
                 // For link type, we need to handle the text part
                 $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}.text")
                     ->label("{$label} (" . __('site-builder/block.link_text') . ")")
+                    ->placeholder(__('site-builder/block.link_text_placeholder'))
+                    ->helperText($field['help'] ?? null)
                     ->required(false);
                     
                 $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}.url")
                     ->label("{$label} (" . __('site-builder/block.link_url') . ")")
+                    ->placeholder(__('site-builder/block.link_url_placeholder'))
                     ->required(false);
             } elseif ($type === 'repeater') {
                 // Create a repeater translator using KeyValue for simplicity
@@ -312,6 +317,8 @@ class FormFieldsService
             } else {
                 $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}")
                     ->label($label)
+                    ->placeholder($field['placeholder'] ?? null)
+                    ->helperText($field['help'] ?? null)
                     ->required(false);
             }
         }

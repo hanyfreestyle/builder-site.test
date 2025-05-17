@@ -76,9 +76,30 @@ class BuilderBlockResource extends Resource {
                             ->preload()
                             ->reactive()
                             ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                // Clear previous data when block type changes
-                                $set('data', null);
-                                $set('view_version', 'default');
+                                // Get the block type and load default data
+                                if ($state) {
+                                    $blockType = BlockType::find($state);
+                                    if ($blockType) {
+                                        // Load default data
+                                        if (!empty($blockType->default_data)) {
+                                            $set('data', $blockType->default_data);
+                                            
+                                            // Debug the default data
+                                            \Illuminate\Support\Facades\Log::info('Loading default data: ' . json_encode($blockType->default_data));
+                                        } else {
+                                            // Clear previous data
+                                            $set('data', null);
+                                            
+                                            // Debug empty default data
+                                            \Illuminate\Support\Facades\Log::info('No default data found for block type: ' . $state);
+                                        }
+                                        $set('view_version', 'default');
+                                    }
+                                } else {
+                                    // Clear if no block type selected
+                                    $set('data', null);
+                                    $set('view_version', 'default');
+                                }
                             }),
 
                         Forms\Components\Select::make('view_version')
@@ -157,7 +178,7 @@ class BuilderBlockResource extends Resource {
                 // Translations Section
                 Forms\Components\Section::make(__('site-builder/block.translations_heading'))
                     ->description(__('site-builder/block.translations_description'))
-                    ->schema(function (Forms\Get $get) {
+                     ->schema(function (Forms\Get $get) {
                         $blockTypeId = $get('block_type_id');
 
                         if (!$blockTypeId) {
@@ -217,6 +238,13 @@ class BuilderBlockResource extends Resource {
                                     ->collapsed();
                             }
                         }
+
+                        // Debugging information
+                        \Illuminate\Support\Facades\Log::info('Translation fields: ' . json_encode([
+                            'blockTypeId' => $blockTypeId,
+                            'schema' => $schema,
+                            'hasTranslationFields' => !empty($languageSections)
+                        ]));
 
                         return $languageSections;
                     })

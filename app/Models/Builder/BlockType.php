@@ -73,7 +73,9 @@ class BlockType extends Model
      */
     public function getDefaultData(): array
     {
-        return $this->default_data ?: [];
+        $defaultData = $this->default_data ?: [];
+        \Illuminate\Support\Facades\Log::info('BlockType ' . $this->id . ' default_data: ' . json_encode($defaultData));
+        return $defaultData;
     }
 
     /**

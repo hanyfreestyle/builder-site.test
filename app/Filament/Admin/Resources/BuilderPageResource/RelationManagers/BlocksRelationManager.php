@@ -25,10 +25,8 @@ class BlocksRelationManager extends RelationManager
         $page = $this->getOwnerRecord();
         $block = $this->record;
         
-        // Check if we need to create a relation in the pivot table
-        if (method_exists($block, 'pages')) {
-            $block->pages()->attach($page->id, ['sort_order' => $block->sort_order]);
-        }
+        // Create a relation in the pivot table
+        $block->pages()->attach($page->id, ['sort_order' => $block->sort_order ?? 0]);
     }
 
     public function table(Table $table): Table
@@ -94,22 +92,16 @@ class BlocksRelationManager extends RelationManager
                         $page = $this->getOwnerRecord();
                         $currentOrder = $record->sort_order;
                         $previousBlock = $page->blocks()
-                            ->where('sort_order', '<', $currentOrder)
-                            ->orderBy('sort_order', 'desc')
+                            ->wherePivot('sort_order', '<', $currentOrder)
+                            ->orderBy('pivot_sort_order', 'desc')
                             ->first();
 
                         if ($previousBlock) {
-                            $previousOrder = $previousBlock->sort_order;
-                            $record->update(['sort_order' => $previousOrder]);
-                            $previousBlock->update(['sort_order' => $currentOrder]);
+                            $previousOrder = $previousBlock->pivot->sort_order;
                             
-                            // Update the pivot table if using the new relation
-                            if (method_exists($record, 'pages')) {
-                                $record->pages()->updateExistingPivot($page->id, ['sort_order' => $previousOrder]);
-                                if ($previousBlock->pages) {
-                                    $previousBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentOrder]);
-                                }
-                            }
+                            // Update the pivot table only
+                            $record->pages()->updateExistingPivot($page->id, ['sort_order' => $previousOrder]);
+                            $previousBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentOrder]);
                         }
                     }),
                     
@@ -120,22 +112,16 @@ class BlocksRelationManager extends RelationManager
                         $page = $this->getOwnerRecord();
                         $currentOrder = $record->sort_order;
                         $nextBlock = $page->blocks()
-                            ->where('sort_order', '>', $currentOrder)
-                            ->orderBy('sort_order', 'asc')
+                            ->wherePivot('sort_order', '>', $currentOrder)
+                            ->orderBy('pivot_sort_order', 'asc')
                             ->first();
 
                         if ($nextBlock) {
-                            $nextOrder = $nextBlock->sort_order;
-                            $record->update(['sort_order' => $nextOrder]);
-                            $nextBlock->update(['sort_order' => $currentOrder]);
+                            $nextOrder = $nextBlock->pivot->sort_order;
                             
-                            // Update the pivot table if using the new relation
-                            if (method_exists($record, 'pages')) {
-                                $record->pages()->updateExistingPivot($page->id, ['sort_order' => $nextOrder]);
-                                if ($nextBlock->pages) {
-                                    $nextBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentOrder]);
-                                }
-                            }
+                            // Update the pivot table only
+                            $record->pages()->updateExistingPivot($page->id, ['sort_order' => $nextOrder]);
+                            $nextBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentOrder]);
                         }
                     }),
                     

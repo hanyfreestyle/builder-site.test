@@ -25,6 +25,17 @@ class EditBuilderBlock extends EditRecord
         // Make sure the translations array is set even if empty
         $data['translations'] = $data['translations'] ?? [];
         
+        // If data is empty, try to load default data from block type
+        if (empty($data['data']) && !empty($data['block_type_id'])) {
+            $blockType = \App\Models\Builder\BlockType::find($data['block_type_id']);
+            if ($blockType && !empty($blockType->default_data)) {
+                $data['data'] = $blockType->default_data;
+                
+                // Debug
+                \Illuminate\Support\Facades\Log::info('Loading default data in Edit: ' . json_encode($blockType->default_data));
+            }
+        }
+        
         // Load the connected pages
         $block = $this->record;
         $data['pages'] = $block->pages->pluck('id')->toArray();
