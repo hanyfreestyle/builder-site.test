@@ -24,6 +24,14 @@ class FormFieldsService
             $defaultValue = $field['default'] ?? null;
             $width = $field['width'] ?? 'full';
 
+            // Debug schema field values
+            \Illuminate\Support\Facades\Log::info('Field schema: ' . json_encode([
+                'name' => $name,
+                'placeholder' => $placeholder,
+                'help' => $help,
+                'default' => $defaultValue,
+            ]));
+
             // Convert width to Filament width
             $fieldWidth = match($width) {
                 '1/2' => 'md:col-span-1',

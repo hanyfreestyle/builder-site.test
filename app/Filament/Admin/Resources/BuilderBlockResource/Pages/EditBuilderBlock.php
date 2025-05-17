@@ -25,14 +25,23 @@ class EditBuilderBlock extends EditRecord
         // Make sure the translations array is set even if empty
         $data['translations'] = $data['translations'] ?? [];
         
-        // If data is empty, try to load default data from block type
+        // If data is empty, try to load default values from block type schema
         if (empty($data['data']) && !empty($data['block_type_id'])) {
             $blockType = \App\Models\Builder\BlockType::find($data['block_type_id']);
-            if ($blockType && !empty($blockType->default_data)) {
-                $data['data'] = $blockType->default_data;
+            if ($blockType) {
+                $schema = $blockType->schema ?: [];
+                
+                foreach ($schema as $field) {
+                    $name = $field['name'] ?? '';
+                    $defaultValue = $field['default'] ?? null;
+                    
+                    if (!empty($name) && $defaultValue !== null) {
+                        $data['data'][$name] = $defaultValue;
+                    }
+                }
                 
                 // Debug
-                \Illuminate\Support\Facades\Log::info('Loading default data in Edit: ' . json_encode($blockType->default_data));
+                \Illuminate\Support\Facades\Log::info('Loading default values from schema in Edit: ' . json_encode($data['data']));
             }
         }
         

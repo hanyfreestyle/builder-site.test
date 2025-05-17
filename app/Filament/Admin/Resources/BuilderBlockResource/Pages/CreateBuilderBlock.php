@@ -11,15 +11,28 @@ class CreateBuilderBlock extends CreateRecord
     
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Get the block type to load default data
+        // Get the block type to load schema
         if (!empty($data['block_type_id'])) {
             $blockType = \App\Models\Builder\BlockType::find($data['block_type_id']);
-            if ($blockType && empty($data['data'])) {
-                // Load default data from block type
-                $data['data'] = $blockType->default_data ?: [];
-                
-                // Debug to check default data
-                \Illuminate\Support\Facades\Log::info('Default data from BlockType: ' . json_encode($blockType->default_data));
+            if ($blockType) {
+                // Initialize data array if empty
+                if (empty($data['data'])) {
+                    $data['data'] = [];
+                    
+                    // Load default values from schema
+                    $schema = $blockType->schema ?: [];
+                    foreach ($schema as $field) {
+                        $name = $field['name'] ?? '';
+                        $defaultValue = $field['default'] ?? null;
+                        
+                        if (!empty($name) && $defaultValue !== null) {
+                            $data['data'][$name] = $defaultValue;
+                        }
+                    }
+                    
+                    // Debug the loaded default values
+                    \Illuminate\Support\Facades\Log::info('Created default data from schema: ' . json_encode($data['data']));
+                }
             }
         }
         

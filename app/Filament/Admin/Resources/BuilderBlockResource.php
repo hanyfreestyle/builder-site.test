@@ -76,22 +76,35 @@ class BuilderBlockResource extends Resource {
                             ->preload()
                             ->reactive()
                             ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                // Get the block type and load default data
+                                // Get the block type and load schema
                                 if ($state) {
                                     $blockType = BlockType::find($state);
                                     if ($blockType) {
-                                        // Load default data
-                                        if (!empty($blockType->default_data)) {
-                                            $set('data', $blockType->default_data);
+                                        // Initialize data with default values from schema
+                                        $data = [];
+                                        $schema = $blockType->schema ?: [];
+                                        
+                                        foreach ($schema as $field) {
+                                            $name = $field['name'] ?? '';
+                                            $defaultValue = $field['default'] ?? null;
                                             
-                                            // Debug the default data
-                                            \Illuminate\Support\Facades\Log::info('Loading default data: ' . json_encode($blockType->default_data));
+                                            if (!empty($name) && $defaultValue !== null) {
+                                                $data[$name] = $defaultValue;
+                                            }
+                                        }
+                                        
+                                        // Set data with values from schema
+                                        if (!empty($data)) {
+                                            $set('data', $data);
+                                            
+                                            // Debug
+                                            \Illuminate\Support\Facades\Log::info('Setting data from schema defaults: ' . json_encode($data));
                                         } else {
                                             // Clear previous data
                                             $set('data', null);
                                             
-                                            // Debug empty default data
-                                            \Illuminate\Support\Facades\Log::info('No default data found for block type: ' . $state);
+                                            // Debug
+                                            \Illuminate\Support\Facades\Log::info('No default values found in schema for block type: ' . $state);
                                         }
                                         $set('view_version', 'default');
                                     }

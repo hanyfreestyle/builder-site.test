@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('icon')->nullable();
             $table->string('category')->nullable();
             $table->json('schema');
-            $table->json('default_data')->nullable();
+
             $table->boolean('is_active')->default(true);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
