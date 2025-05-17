@@ -34,6 +34,7 @@ class BlocksRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Select::make('block_type_id')
                     ->label(__('site-builder/page.blocks.block_type'))
+                    ->placeholder(__('site-builder/block.select_block_type'))
                     ->options(function () {
                         // Get the page's template
                         $page = $this->getOwnerRecord();
@@ -48,6 +49,7 @@ class BlocksRelationManager extends RelationManager
                     ->reactive()
                     ->required()
                     ->searchable()
+                    ->preload()
                     ->afterStateUpdated(function ($state, Forms\Set $set) {
                         // Clear previous data when block type changes
                         $set('data', null);
@@ -78,6 +80,8 @@ class BlocksRelationManager extends RelationManager
                         return array_combine($versions, $versions);
                     })
                     ->default('default')
+                    ->searchable()
+                    ->preload()
                     ->required(),
 
                 // Dynamic Block Fields based on Schema for Default Language

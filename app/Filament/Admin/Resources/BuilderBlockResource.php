@@ -55,9 +55,11 @@ class BuilderBlockResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('block_type_id')
                                     ->label(__('site-builder/block.block_type'))
+                                    ->placeholder(__('site-builder/block.select_block_type'))
                                     ->options(BlockType::where('is_active', true)->pluck('name', 'id'))
                                     ->required()
                                     ->searchable()
+                                    ->preload()
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, Forms\Set $set) {
                                         // Clear previous data when block type changes
@@ -92,14 +94,18 @@ class BuilderBlockResource extends Resource
                                         return array_combine($uniqueVersions, $uniqueVersions);
                                     })
                                     ->default('default')
+                                    ->searchable()
+                                    ->preload()
                                     ->required(),
 
                                 Forms\Components\Select::make('pages')
                                     ->label(__('site-builder/block.pages'))
+                                    ->placeholder(__('site-builder/block.select_pages'))
                                     ->relationship('pages', 'title')
                                     ->multiple()
                                     ->preload()
-                                    ->required()
+                                    ->searchable()
+                                    ->nullable()
                                     ->createOptionForm([
                                         Forms\Components\TextInput::make('title')
                                             ->label(__('site-builder/general.title'))
@@ -281,6 +287,8 @@ class BuilderBlockResource extends Resource
                         ->options($options)
                         ->required($required)
                         ->placeholder($placeholder)
+                        ->searchable()
+                        ->preload()
                         ->helperText($help)
                         ->default($defaultValue);
                     break;
@@ -492,7 +500,34 @@ class BuilderBlockResource extends Resource
                     ->label($label)
                     ->keyLabel(__('site-builder/block.repeater_item_field'))
                     ->valueLabel(__('site-builder/block.translation'))
-                    ->helperText(__('site-builder/block.repeater_translation_help'));
+                    ->helperText(__('site-builder/block.repeater_translation_help'))
+                    ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
+                        // Convert complex values to JSON strings
+                        if (is_array($state)) {
+                            foreach ($state as $key => $value) {
+                                if (is_array($value) || is_object($value)) {
+                                    $state[$key] = json_encode($value, JSON_UNESCAPED_UNICODE);
+                                }
+                            }
+                            $component->state($state);
+                        }
+                    })
+                    ->dehydrateStateUsing(function ($state) {
+                        // Try to convert JSON strings back to arrays/objects before saving
+                        foreach ($state as $key => $value) {
+                            if (is_string($value) && (str_starts_with(trim($value), '[') || str_starts_with(trim($value), '{'))) {
+                                try {
+                                    $decoded = json_decode($value, true);
+                                    if (json_last_error() === JSON_ERROR_NONE) {
+                                        $state[$key] = $decoded;
+                                    }
+                                } catch (\Exception $e) {
+                                    // Keep the value as is if conversion fails
+                                }
+                            }
+                        }
+                        return $state;
+                    });
             } else {
                 $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}")
                     ->label($label)
@@ -550,13 +585,15 @@ class BuilderBlockResource extends Resource
                 Tables\Filters\SelectFilter::make('block_type_id')
                     ->label(__('site-builder/block.block_type'))
                     ->options(BlockType::pluck('name', 'id'))
-                    ->searchable(),
+                    ->searchable()
+                    ->preload(),
 
                 Tables\Filters\SelectFilter::make('pages')
                     ->label(__('site-builder/block.pages'))
                     ->options(Page::pluck('title', 'id'))
                     ->relationship('pages', 'id')
                     ->searchable()
+                    ->preload()
                     ->multiple(),
 
                 Tables\Filters\TernaryFilter::make('is_active')

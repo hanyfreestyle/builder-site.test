@@ -5,6 +5,7 @@ return [
     'site_builder' => 'Site Builder',
     'templates' => 'Templates',
     'block_types' => 'Block Types',
+    'blocks' => 'Blocks',
     'pages' => 'Pages',
     'menus' => 'Menus',
     

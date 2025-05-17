@@ -5,6 +5,7 @@ return [
     'site_builder' => 'منشئ المواقع',
     'templates' => 'القوالب',
     'block_types' => 'أنواع البلوكات',
+    'blocks' => 'البلوكات',
     'pages' => 'الصفحات',
     'menus' => 'القوائم',
     

@@ -8,6 +8,7 @@ return [
     ],
     'labels' => [
         'template' => 'القالب',
+        'select_pages' => 'اختر الصفحات',
         'is_homepage' => 'الصفحة الرئيسية',
         'use_default_template' => 'استخدام القالب الافتراضي',
     ],

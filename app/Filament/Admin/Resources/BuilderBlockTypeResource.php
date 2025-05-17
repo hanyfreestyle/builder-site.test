@@ -76,6 +76,7 @@ class BuilderBlockTypeResource extends Resource {
                                     ->label(__('site-builder/block-type.labels.category'))
                                     ->options(BlockCategory::options())
                                     ->default(BlockCategory::BASIC)
+                                    ->searchable()
                                     ->helperText(__('site-builder/block-type.help_text.category')),
 
                                 Forms\Components\Toggle::make('is_active')

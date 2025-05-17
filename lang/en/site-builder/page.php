@@ -8,6 +8,7 @@ return [
     ],
     'labels' => [
         'template' => 'Template',
+        'select_pages' => 'Select Pages',
         'is_homepage' => 'Homepage',
         'use_default_template' => 'Use Default Template',
     ],
