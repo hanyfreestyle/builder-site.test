@@ -90,18 +90,18 @@ class BlocksRelationManager extends RelationManager
                     ->icon('heroicon-o-arrow-up')
                     ->action(function ($record) {
                         $page = $this->getOwnerRecord();
-                        $currentOrder = $record->sort_order;
+                        $currentSortOrder = $record->pivot->sort_order;
                         $previousBlock = $page->blocks()
-                            ->wherePivot('sort_order', '<', $currentOrder)
-                            ->orderBy('pivot_sort_order', 'desc')
+                            ->wherePivot('sort_order', '<', $currentSortOrder)
+                            ->orderBy('builder_block_page.sort_order', 'desc')
                             ->first();
 
                         if ($previousBlock) {
-                            $previousOrder = $previousBlock->pivot->sort_order;
+                            $previousSortOrder = $previousBlock->pivot->sort_order;
                             
                             // Update the pivot table only
-                            $record->pages()->updateExistingPivot($page->id, ['sort_order' => $previousOrder]);
-                            $previousBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentOrder]);
+                            $record->pages()->updateExistingPivot($page->id, ['sort_order' => $previousSortOrder]);
+                            $previousBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentSortOrder]);
                         }
                     }),
                     
@@ -110,18 +110,18 @@ class BlocksRelationManager extends RelationManager
                     ->icon('heroicon-o-arrow-down')
                     ->action(function ($record) {
                         $page = $this->getOwnerRecord();
-                        $currentOrder = $record->sort_order;
+                        $currentSortOrder = $record->pivot->sort_order;
                         $nextBlock = $page->blocks()
-                            ->wherePivot('sort_order', '>', $currentOrder)
-                            ->orderBy('pivot_sort_order', 'asc')
+                            ->wherePivot('sort_order', '>', $currentSortOrder)
+                            ->orderBy('builder_block_page.sort_order', 'asc')
                             ->first();
 
                         if ($nextBlock) {
-                            $nextOrder = $nextBlock->pivot->sort_order;
+                            $nextSortOrder = $nextBlock->pivot->sort_order;
                             
                             // Update the pivot table only
-                            $record->pages()->updateExistingPivot($page->id, ['sort_order' => $nextOrder]);
-                            $nextBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentOrder]);
+                            $record->pages()->updateExistingPivot($page->id, ['sort_order' => $nextSortOrder]);
+                            $nextBlock->pages()->updateExistingPivot($page->id, ['sort_order' => $currentSortOrder]);
                         }
                     }),
                     
@@ -133,8 +133,8 @@ class BlocksRelationManager extends RelationManager
                 Tables\Actions\DetachBulkAction::make()
                     ->label(__('site-builder/page.blocks.detach_selected')),
             ])
-            ->reorderable('sort_order')
-            ->defaultSort('sort_order');
+            ->reorderable('builder_block_page.sort_order')
+            ->defaultSort('builder_block_page.sort_order');
     }
     
     public function form(Form $form): Form

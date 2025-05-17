@@ -53,7 +53,8 @@ class Block extends Model
     {
         return $this->belongsToMany(Page::class, 'builder_block_page')
             ->withPivot('sort_order')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderBy('builder_block_page.sort_order', 'asc');
     }
 
     /**
