@@ -88,18 +88,6 @@ class BlockTypeSeeder extends Seeder
                     'width' => '1/2',
                 ],
             ],
-            'default_data' => [
-                'title' => 'Welcome to Our Website',
-                'subtitle' => 'Check out our amazing features and services.',
-                'link1' => [
-                    'text' => 'Get Started',
-                    'url' => '#',
-                ],
-                'link2' => [
-                    'text' => 'Learn More',
-                    'url' => '#',
-                ],
-            ],
             'is_active' => true,
             'sort_order' => 10,
         ]);
@@ -160,28 +148,6 @@ class BlockTypeSeeder extends Seeder
                     'translatable' => false,
                     'width' => '1/2',
                 ],
-            ],
-            'default_data' => [
-                'title' => 'Our Features',
-                'subtitle' => 'Check out what makes us special.',
-                'features' => [
-                    [
-                        'icon' => 'fas fa-rocket',
-                        'title' => 'Fast & Reliable',
-                        'description' => 'Our service is quick and dependable.',
-                    ],
-                    [
-                        'icon' => 'fas fa-shield-alt',
-                        'title' => 'Secure',
-                        'description' => 'Your data is protected with us.',
-                    ],
-                    [
-                        'icon' => 'fas fa-cogs',
-                        'title' => 'Customizable',
-                        'description' => 'Tailor our services to your needs.',
-                    ],
-                ],
-                'columns' => '3',
             ],
             'is_active' => true,
             'sort_order' => 20,
@@ -251,12 +217,6 @@ class BlockTypeSeeder extends Seeder
                     'width' => '1/2',
                 ],
             ],
-            'default_data' => [
-                'title' => 'About Us',
-                'content' => '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eget felis eget turpis varius.</p>',
-                'image_position' => 'right',
-                'text_alignment' => 'left',
-            ],
             'is_active' => true,
             'sort_order' => 30,
         ]);
@@ -318,29 +278,6 @@ class BlockTypeSeeder extends Seeder
                     'translatable' => false,
                     'width' => '1/2',
                 ],
-            ],
-            'default_data' => [
-                'title' => 'Our Gallery',
-                'description' => 'Check out our latest photos.',
-                'images' => [
-                    [
-                        'image' => '',
-                        'caption' => 'Image 1',
-                        'alt' => 'Gallery Image 1',
-                    ],
-                    [
-                        'image' => '',
-                        'caption' => 'Image 2',
-                        'alt' => 'Gallery Image 2',
-                    ],
-                    [
-                        'image' => '',
-                        'caption' => 'Image 3',
-                        'alt' => 'Gallery Image 3',
-                    ],
-                ],
-                'columns' => '3',
-                'enable_lightbox' => true,
             ],
             'is_active' => true,
             'sort_order' => 40,
@@ -410,15 +347,6 @@ class BlockTypeSeeder extends Seeder
                     'translatable' => false,
                     'width' => 'full',
                 ],
-            ],
-            'default_data' => [
-                'title' => 'Ready to Get Started?',
-                'description' => 'Join thousands of satisfied customers today.',
-                'button' => [
-                    'text' => 'Contact Us',
-                    'url' => '#contact',
-                ],
-                'style' => 'standard',
             ],
             'is_active' => true,
             'sort_order' => 50,
@@ -540,44 +468,6 @@ class BlockTypeSeeder extends Seeder
                     'width' => 'half',
                     'default' => 5000
                 ]
-            ] ,
-            'default_data' => [
-                'slides' => [
-                    [
-                        'image' => '',
-                        'image_alt' => 'Slider Image',
-                        'subtitle' => 'Plumbing & Repairing Services',
-                        'title' => 'Efficient Residential Plumbing Services',
-                        'description' => 'Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea elitr.',
-                        'primary_button' => [
-                            'text' => 'Read More',
-                            'url' => '#'
-                        ],
-                        'secondary_button' => [
-                            'text' => 'Free Quote',
-                            'url' => '#'
-                        ]
-                    ],
-                    [
-                        'image' => '',
-                        'image_alt' => 'Slider Image',
-                        'subtitle' => 'Plumbing & Repairing Services',
-                        'title' => 'Efficient Commercial Plumbing Services',
-                        'description' => 'Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea elitr.',
-                        'primary_button' => [
-                            'text' => 'Read More',
-                            'url' => '#'
-                        ],
-                        'secondary_button' => [
-                            'text' => 'Free Quote',
-                            'url' => '#'
-                        ]
-                    ]
-                ],
-                'overlay_opacity' => '0.4',
-                'auto_play' => true,
-                'loop' => true,
-                'interval' => 5000
             ] ,
             'is_active' => true,
             'sort_order' => 10,
