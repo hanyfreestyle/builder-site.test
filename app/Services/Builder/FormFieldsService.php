@@ -3,6 +3,7 @@
 namespace App\Services\Builder;
 
 use Filament\Forms;
+use App\Enums\SiteBuilder\FieldWidth;
 
 class FormFieldsService
 {
@@ -253,22 +254,16 @@ class FormFieldsService
      */
     public static function convertWidthToColumnSpan(string $width): string|int
     {
-        // Filament 3 uses a 12-column grid
-        return match(strtolower(trim($width))) {
-            '1/1', 'full', '100%' => 'full', // Full width
-            '1/2', '50%' => 6,              // Half width (6 of 12 columns)
-            '1/3', '33%', '33.33%' => 4,    // One third (4 of 12 columns)
-            '2/3', '66%', '66.66%' => 8,    // Two thirds (8 of 12 columns)
-            '1/4', '25%' => 3,              // One quarter (3 of 12 columns)
-            '3/4', '75%' => 9,              // Three quarters (9 of 12 columns)
-            '1/6', '16%', '16.66%' => 2,    // One sixth (2 of 12 columns)
-            '5/6', '83%', '83.33%' => 10,   // Five sixths (10 of 12 columns)
-            default => 'full',              // Default to full width
-        };
+        // Use the FieldWidth enum to convert the width to column span
+        return FieldWidth::stringToColumnSpan($width);
     }
 
     /**
      * Create translation fields based on block type schema
+     *
+     * @param array $schema Schema array of fields
+     * @param string $locale Current locale code
+     * @return array Array of form fields for translations
      */
     public static function createTranslationFieldsFromSchema(array $schema, string $locale): array
     {
@@ -280,38 +275,48 @@ class FormFieldsService
             $translatable = $field['translatable'] ?? true;
             $type = $field['type'] ?? 'text';
             $required = $field['required'] ?? false;
+            $width = $field['width'] ?? 'full';
             
             // Skip non-translatable fields
             if (!$translatable) {
                 continue;
             }
             
+            // Convert width to Filament column span value
+            $fieldWidth = self::convertWidthToColumnSpan($width);
+            
+            // Create field based on type
+            $translationField = null;
+            
             // Handle different field types for translation
             if ($type === 'textarea' || $type === 'rich_text') {
-                $fields[] = Forms\Components\Textarea::make("translations.{$locale}.{$name}")
+                $translationField = Forms\Components\Textarea::make("translations.{$locale}.{$name}")
                     ->label($label)
                     ->placeholder($field['placeholder'] ?? null)
                     ->helperText($field['help'] ?? null)
-                    ->required(false); // Translations are optional
+                    ->required($required); // Make required if the original field is required
             } elseif ($type === 'link') {
                 // For link type, we need to handle the text part
-                $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}.text")
-                    ->label("{$label} (" . __('site-builder/block.link_text') . ")")
-                    ->placeholder(__('site-builder/block.link_text_placeholder'))
-                    ->helperText($field['help'] ?? null)
-                    ->required(false);
-                    
-                $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}.url")
-                    ->label("{$label} (" . __('site-builder/block.link_url') . ")")
-                    ->placeholder(__('site-builder/block.link_url_placeholder'))
-                    ->required(false);
+                $translationField = Forms\Components\Group::make([
+                    Forms\Components\TextInput::make("translations.{$locale}.{$name}.text")
+                        ->label(__('site-builder/block.link_text'))
+                        ->placeholder(__('site-builder/block.link_text_placeholder'))
+                        ->helperText($field['help'] ?? null)
+                        ->required($required),
+                        
+                    Forms\Components\TextInput::make("translations.{$locale}.{$name}.url")
+                        ->label(__('site-builder/block.link_url'))
+                        ->placeholder(__('site-builder/block.link_url_placeholder'))
+                        ->required($required),
+                ])->label($label);
             } elseif ($type === 'repeater') {
                 // Create a repeater translator using KeyValue for simplicity
-                $fields[] = Forms\Components\KeyValue::make("translations.{$locale}.{$name}")
+                $translationField = Forms\Components\KeyValue::make("translations.{$locale}.{$name}")
                     ->label($label)
                     ->keyLabel(__('site-builder/block.repeater_item_field'))
                     ->valueLabel(__('site-builder/block.translation'))
                     ->helperText(__('site-builder/block.repeater_translation_help'))
+                    ->required($required)
                     ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
                         // Convert complex values to JSON strings
                         if (is_array($state)) {
@@ -340,11 +345,17 @@ class FormFieldsService
                         return $state;
                     });
             } else {
-                $fields[] = Forms\Components\TextInput::make("translations.{$locale}.{$name}")
+                $translationField = Forms\Components\TextInput::make("translations.{$locale}.{$name}")
                     ->label($label)
                     ->placeholder($field['placeholder'] ?? null)
                     ->helperText($field['help'] ?? null)
-                    ->required(false);
+                    ->required($required);
+            }
+            
+            // Apply the width to the translation field
+            if ($translationField) {
+                $translationField->columnSpan($fieldWidth);
+                $fields[] = $translationField;
             }
         }
         
