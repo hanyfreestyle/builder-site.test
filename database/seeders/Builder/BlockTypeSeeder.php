@@ -423,5 +423,165 @@ class BlockTypeSeeder extends Seeder
             'is_active' => true,
             'sort_order' => 50,
         ]);
+
+        // إنشاء بلوك Slider Carousel
+        BlockType::create([
+            'name' => 'Slider Carousel',
+            'slug' => 'slider_carousel',
+            'description' => 'Slider carousel with image background, title, description and buttons',
+            'icon' => 'heroicon-o-photo',
+            'category' => 'Basic',
+            'schema' =>  [
+                [
+                    'name' => 'slides',
+                    'label' => 'Slides',
+                    'type' => 'repeater',
+                    'required' => true,
+                    'translatable' => true,
+                    'width' => 'full',
+                    'fields' => [
+                        [
+                            'name' => 'image',
+                            'label' => 'Background Image',
+                            'type' => 'image',
+                            'required' => true,
+                            'translatable' => false,
+                            'width' => 'full',
+                        ],
+                        [
+                            'name' => 'image_alt',
+                            'label' => 'Image Alt Text',
+                            'type' => 'text',
+                            'required' => false,
+                            'translatable' => true,
+                            'width' => 'full',
+                        ],
+                        [
+                            'name' => 'subtitle',
+                            'label' => 'Subtitle',
+                            'type' => 'text',
+                            'required' => false,
+                            'translatable' => true,
+                            'width' => 'full',
+                        ],
+                        [
+                            'name' => 'title',
+                            'label' => 'Title',
+                            'type' => 'text',
+                            'required' => true,
+                            'translatable' => true,
+                            'width' => 'full',
+                        ],
+                        [
+                            'name' => 'description',
+                            'label' => 'Description',
+                            'type' => 'textarea',
+                            'required' => false,
+                            'translatable' => true,
+                            'width' => 'full',
+                        ],
+                        [
+                            'name' => 'primary_button',
+                            'label' => 'Primary Button',
+                            'type' => 'link',
+                            'required' => false,
+                            'translatable' => true,
+                            'width' => 'half',
+                        ],
+                        [
+                            'name' => 'secondary_button',
+                            'label' => 'Secondary Button',
+                            'type' => 'link',
+                            'required' => false,
+                            'translatable' => true,
+                            'width' => 'half',
+                        ]
+                    ]
+                ],
+                [
+                    'name' => 'overlay_opacity',
+                    'label' => 'Overlay Opacity',
+                    'type' => 'select',
+                    'required' => false,
+                    'translatable' => false,
+                    'width' => 'half',
+                    'options' => [
+                        '0.2' => '20%',
+                        '0.4' => '40%',
+                        '0.6' => '60%',
+                        '0.8' => '80%',
+                    ],
+                    'default' => '0.4'
+                ],
+                [
+                    'name' => 'auto_play',
+                    'label' => 'Auto Play',
+                    'type' => 'toggle',
+                    'required' => false,
+                    'translatable' => false,
+                    'width' => 'half',
+                    'default' => true
+                ],
+                [
+                    'name' => 'loop',
+                    'label' => 'Loop Slides',
+                    'type' => 'toggle',
+                    'required' => false,
+                    'translatable' => false,
+                    'width' => 'half',
+                    'default' => true
+                ],
+                [
+                    'name' => 'interval',
+                    'label' => 'Interval (ms)',
+                    'type' => 'number',
+                    'required' => false,
+                    'translatable' => false,
+                    'width' => 'half',
+                    'default' => 5000
+                ]
+            ] ,
+            'default_data' => [
+                'slides' => [
+                    [
+                        'image' => '',
+                        'image_alt' => 'Slider Image',
+                        'subtitle' => 'Plumbing & Repairing Services',
+                        'title' => 'Efficient Residential Plumbing Services',
+                        'description' => 'Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea elitr.',
+                        'primary_button' => [
+                            'text' => 'Read More',
+                            'url' => '#'
+                        ],
+                        'secondary_button' => [
+                            'text' => 'Free Quote',
+                            'url' => '#'
+                        ]
+                    ],
+                    [
+                        'image' => '',
+                        'image_alt' => 'Slider Image',
+                        'subtitle' => 'Plumbing & Repairing Services',
+                        'title' => 'Efficient Commercial Plumbing Services',
+                        'description' => 'Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea elitr.',
+                        'primary_button' => [
+                            'text' => 'Read More',
+                            'url' => '#'
+                        ],
+                        'secondary_button' => [
+                            'text' => 'Free Quote',
+                            'url' => '#'
+                        ]
+                    ]
+                ],
+                'overlay_opacity' => '0.4',
+                'auto_play' => true,
+                'loop' => true,
+                'interval' => 5000
+            ] ,
+            'is_active' => true,
+            'sort_order' => 10,
+        ]);
+
     }
 }

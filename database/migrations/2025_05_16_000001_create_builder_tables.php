@@ -52,7 +52,7 @@ return new class extends Migration
             $table->boolean('is_enabled')->default(true);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
-            
+
             // معرف فريد للربط بين القالب ونوع البلوك
             $table->unique(['template_id', 'block_type_id']);
         });
@@ -61,6 +61,7 @@ return new class extends Migration
         Schema::create('builder_pages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('template_id')->constrained('builder_templates')->onDelete('cascade');
+            $table->boolean('use_default_template')->default(false);
             $table->string('title');
             $table->string('slug')->unique();
             $table->string('description')->nullable();
