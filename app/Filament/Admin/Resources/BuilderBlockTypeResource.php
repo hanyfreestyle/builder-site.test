@@ -15,8 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderBlockTypeResource\Pages;
 
-class BuilderBlockTypeResource extends Resource
-{
+class BuilderBlockTypeResource extends Resource {
     protected static ?string $model = BlockType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
@@ -31,26 +30,23 @@ class BuilderBlockTypeResource extends Resource
 
     protected static ?string $pluralModelLabel = 'block_types';
 
-    public static function getNavigationLabel(): string
-    {
+    public static function getNavigationLabel(): string {
         return __('site-builder/general.block_types');
     }
 
-    public static function getModelLabel(): string
-    {
+    public static function getModelLabel(): string {
         return __('site-builder/block-type.singular');
     }
 
-    public static function getPluralModelLabel(): string
-    {
+    public static function getPluralModelLabel(): string {
         return __('site-builder/general.block_types');
     }
 
-    public static function form(Form $form): Form
-    {
+    public static function form(Form $form): Form {
         return $form
             ->schema([
                 Forms\Components\Tabs::make('Tabs')
+                    ->activeTab(2)
                     ->tabs([
                         Forms\Components\Tabs\Tab::make(__('site-builder/block-type.tabs.basic_info'))
                             ->schema([
@@ -63,7 +59,7 @@ class BuilderBlockTypeResource extends Resource
                                     ->label(__('site-builder/general.slug'))
                                     ->required()
                                     ->maxLength(255)
-                                    ->unique(BlockType::class, 'slug', fn ($record) => $record)
+                                    ->unique(BlockType::class, 'slug', fn($record) => $record)
                                     ->alphaDash(),
 
                                 Forms\Components\Textarea::make('description')
@@ -98,6 +94,25 @@ class BuilderBlockTypeResource extends Resource
                                 Forms\Components\Repeater::make('schema')
                                     ->label(__('site-builder/block-type.labels.schema'))
                                     ->schema([
+                                        Forms\Components\Group::make()->schema([
+                                            Forms\Components\Toggle::make('required')
+                                                ->label(__('site-builder/block-type.labels.field_required'))
+                                                ->default(false),
+
+                                            Forms\Components\Toggle::make('translatable')
+                                                ->label(__('site-builder/block-type.labels.field_translatable'))
+                                                ->default(true)
+                                                ->helperText(__('site-builder/block-type.help_text.field_translatable')),
+
+                                            Forms\Components\Select::make('width')
+                                                ->label(__('site-builder/block-type.labels.field_width'))
+                                                ->options(FieldWidth::options())
+                                                ->default(FieldWidth::FULL)
+                                                ->required(),
+
+                                        ])->columnSpanFull()->columns(4),
+
+
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('site-builder/block-type.labels.field_name'))
                                             ->required()
@@ -114,11 +129,10 @@ class BuilderBlockTypeResource extends Resource
                                             ->label(__('site-builder/block-type.labels.field_type'))
                                             ->options(BlockTypeField::options())
                                             ->default(BlockTypeField::TEXT)
+                                            ->searchable()
+                                            ->preload()
                                             ->required(),
 
-                                        Forms\Components\Toggle::make('required')
-                                            ->label(__('site-builder/block-type.labels.field_required'))
-                                            ->default(false),
 
                                         Forms\Components\TextInput::make('placeholder')
                                             ->label(__('site-builder/block-type.labels.field_placeholder'))
@@ -132,28 +146,20 @@ class BuilderBlockTypeResource extends Resource
                                         Forms\Components\KeyValue::make('options')
                                             ->label(__('site-builder/block-type.labels.field_options'))
                                             ->helperText(__('site-builder/block-type.help_text.field_options'))
-                                            ->visible(fn (Forms\Get $get) => in_array($get('type'), ['select', 'radio', 'checkbox'])),
+                                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['select', 'radio', 'checkbox'])),
 
-                                        Forms\Components\Toggle::make('translatable')
-                                            ->label(__('site-builder/block-type.labels.field_translatable'))
-                                            ->default(true)
-                                            ->helperText(__('site-builder/block-type.help_text.field_translatable')),
 
                                         Forms\Components\TextInput::make('help')
                                             ->label(__('site-builder/block-type.labels.field_help'))
                                             ->maxLength(255)
                                             ->helperText(__('site-builder/block-type.help_text.field_help')),
 
-                                        Forms\Components\Select::make('width')
-                                            ->label(__('site-builder/block-type.labels.field_width'))
-                                            ->options(FieldWidth::options())
-                                            ->default(FieldWidth::FULL)
-                                            ->required(),
+
                                     ])
                                     ->columns(2)
                                     ->columnSpanFull()
                                     ->collapsible()
-                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                                    ->itemLabel(fn(array $state): ?string => $state['label'] ?? null),
                             ]),
 
                         Forms\Components\Tabs\Tab::make(__('site-builder/block-type.tabs.default_data'))
@@ -194,8 +200,7 @@ class BuilderBlockTypeResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
-    {
+    public static function table(Table $table): Table {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -247,15 +252,13 @@ class BuilderBlockTypeResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
+    public static function getRelations(): array {
         return [
             //
         ];
     }
 
-    public static function getPages(): array
-    {
+    public static function getPages(): array {
         return [
             'index' => Pages\ListBuilderBlockTypes::route('/'),
             'create' => Pages\CreateBuilderBlockType::route('/create'),
@@ -263,8 +266,7 @@ class BuilderBlockTypeResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
+    public static function getEloquentQuery(): Builder {
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
