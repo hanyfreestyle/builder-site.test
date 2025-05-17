@@ -158,9 +158,9 @@ class BuilderBlockTypeResource extends Resource
 
                         Forms\Components\Tabs\Tab::make(__('site-builder/block-type.tabs.default_data'))
                             ->schema([
-//                                Forms\Components\KeyValue::make('default_data')
-//                                    ->label(__('site-builder/block-type.default_values'))
-//                                    ->helperText(__('site-builder/block-type.help_text.default_values')),
+                                Forms\Components\KeyValue::make('default_data')
+                                    ->label(__('site-builder/block-type.default_values'))
+                                    ->helperText(__('site-builder/block-type.help_text.default_values')),
                             ]),
                     ])
                     ->columnSpanFull(),

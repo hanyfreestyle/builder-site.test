@@ -35,7 +35,7 @@ class TemplateSeeder extends Seeder {
                     'section' => '3rem',
                 ],
             ],
-            'supported_languages' => ['en', 'ar', 'fr'],
+            'supported_languages' => ['en', 'ar'],
             'is_active' => true,
             'is_default' => true,
         ]);
