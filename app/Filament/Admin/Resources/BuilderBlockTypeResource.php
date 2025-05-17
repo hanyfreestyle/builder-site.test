@@ -160,7 +160,34 @@ class BuilderBlockTypeResource extends Resource
                             ->schema([
                                 Forms\Components\KeyValue::make('default_data')
                                     ->label(__('site-builder/block-type.default_values'))
-                                    ->helperText(__('site-builder/block-type.help_text.default_values')),
+                                    ->helperText(__('site-builder/block-type.help_text.default_values'))
+                                    ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
+                                        // Convert complex values to JSON strings
+                                        if (is_array($state)) {
+                                            foreach ($state as $key => $value) {
+                                                if (is_array($value) || is_object($value)) {
+                                                    $state[$key] = json_encode($value, JSON_UNESCAPED_UNICODE);
+                                                }
+                                            }
+                                            $component->state($state);
+                                        }
+                                    })
+                                    ->dehydrateStateUsing(function ($state) {
+                                        // Try to convert JSON strings back to arrays/objects before saving
+                                        foreach ($state as $key => $value) {
+                                            if (is_string($value) && (str_starts_with(trim($value), '[') || str_starts_with(trim($value), '{'))) {
+                                                try {
+                                                    $decoded = json_decode($value, true);
+                                                    if (json_last_error() === JSON_ERROR_NONE) {
+                                                        $state[$key] = $decoded;
+                                                    }
+                                                } catch (\Exception $e) {
+                                                    // Keep the value as is if conversion fails
+                                                }
+                                            }
+                                        }
+                                        return $state;
+                                    }),
                             ]),
                     ])
                     ->columnSpanFull(),
