@@ -103,10 +103,40 @@ class BlockTypesRelationManager extends RelationManager
                             ->label('Sort Order')
                             ->numeric()
                             ->default(0),
-                    ]),
+                    ])
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // تأكد من تخزين view_versions كجيسون
+                        if (isset($data['view_versions']) && is_array($data['view_versions'])) {
+                            $data['view_versions'] = json_encode($data['view_versions']);
+                        } elseif (isset($data['view_versions']) && is_string($data['view_versions'])) {
+                            // إذا كان نصًا، تحقق مما إذا كان بالفعل JSON
+                            if (!str_starts_with($data['view_versions'], '[')) {
+                                $data['view_versions'] = json_encode([$data['view_versions']]);
+                            }
+                        } else {
+                            $data['view_versions'] = json_encode(['default']);
+                        }
+                        
+                        return $data;
+                    }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // تأكد من تخزين view_versions كجيسون
+                        if (isset($data['view_versions']) && is_array($data['view_versions'])) {
+                            $data['view_versions'] = json_encode($data['view_versions']);
+                        } elseif (isset($data['view_versions']) && is_string($data['view_versions'])) {
+                            // إذا كان نصًا، تحقق مما إذا كان بالفعل JSON
+                            if (!str_starts_with($data['view_versions'], '[')) {
+                                $data['view_versions'] = json_encode([$data['view_versions']]);
+                            }
+                        } else {
+                            $data['view_versions'] = json_encode(['default']);
+                        }
+                        
+                        return $data;
+                    }),
                 Tables\Actions\DetachAction::make(),
             ])
             ->bulkActions([
