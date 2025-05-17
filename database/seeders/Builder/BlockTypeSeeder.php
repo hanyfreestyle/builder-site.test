@@ -5,13 +5,11 @@ namespace Database\Seeders\Builder;
 use App\Models\Builder\BlockType;
 use Illuminate\Database\Seeder;
 
-class BlockTypeSeeder extends Seeder
-{
+class BlockTypeSeeder extends Seeder {
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void {
         // 1. Hero Block
         BlockType::create([
             'name' => 'Hero Section',
@@ -359,7 +357,7 @@ class BlockTypeSeeder extends Seeder
             'description' => 'Slider carousel with image background, title, description and buttons',
             'icon' => 'heroicon-o-photo',
             'category' => 'Basic',
-            'schema' =>  [
+            'schema' => [
                 [
                     'name' => 'slides',
                     'label' => 'Slides',
@@ -468,7 +466,27 @@ class BlockTypeSeeder extends Seeder
                     'width' => 'half',
                     'default' => 5000
                 ]
-            ] ,
+            ],
+            'is_active' => true,
+            'sort_order' => 10,
+        ]);
+
+        // إنشاء بلوك Slider Carousel
+        BlockType::create([
+            'name' => 'Test Block',
+            'slug' => 'test_block',
+            'category' => 'Basic',
+            'schema' => [
+                [
+                    'name' => 'title',
+                    'label' => 'Title',
+                    'type' => 'text',
+                    'required' => true,
+                    'translatable' => true,
+                    'width' => 'full',
+                ],
+
+            ],
             'is_active' => true,
             'sort_order' => 10,
         ]);

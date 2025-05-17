@@ -32,13 +32,8 @@ class FormFieldsService
                 'default' => $defaultValue,
             ]));
 
-            // Convert width to Filament width
-            $fieldWidth = match($width) {
-                '1/2' => 'md:col-span-1',
-                '1/3' => 'md:col-span-1',
-                '2/3' => 'md:col-span-2',
-                default => 'col-span-2',
-            };
+            // Convert width to Filament column span value
+            $fieldWidth = self::convertWidthToColumnSpan($width);
 
             // Create field based on type
             switch ($type) {
@@ -248,6 +243,28 @@ class FormFieldsService
         }
 
         return $formFields;
+    }
+
+    /**
+     * Convert width string to Filament columnSpan value
+     * 
+     * @param string $width Width string ('1/2', '1/3', '2/3', '1/4', '3/4', 'full', etc.)
+     * @return string|int Column span value for Filament 3
+     */
+    public static function convertWidthToColumnSpan(string $width): string|int
+    {
+        // Filament 3 uses a 12-column grid
+        return match(strtolower(trim($width))) {
+            '1/1', 'full', '100%' => 'full', // Full width
+            '1/2', '50%' => 6,              // Half width (6 of 12 columns)
+            '1/3', '33%', '33.33%' => 4,    // One third (4 of 12 columns)
+            '2/3', '66%', '66.66%' => 8,    // Two thirds (8 of 12 columns)
+            '1/4', '25%' => 3,              // One quarter (3 of 12 columns)
+            '3/4', '75%' => 9,              // Three quarters (9 of 12 columns)
+            '1/6', '16%', '16.66%' => 2,    // One sixth (2 of 12 columns)
+            '5/6', '83%', '83.33%' => 10,   // Five sixths (10 of 12 columns)
+            default => 'full',              // Default to full width
+        };
     }
 
     /**
