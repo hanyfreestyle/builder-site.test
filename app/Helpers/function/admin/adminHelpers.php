@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Storage;
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -14,9 +15,9 @@ if (!function_exists('isLocalSuperAdmin')) {
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 if (!function_exists('getImageDirForPdf')) {
     function getImageDirForPdf($row): string {
-        if (config('app.env') === 'local' and $row){
-            $img = public_path('images/'.$row);
-        }else{
+        if (config('app.env') === 'local' and $row) {
+            $img = public_path('images/' . $row);
+        } else {
             $img = Storage::disk('root_folder')->url($row);
         }
         return $img;
@@ -31,4 +32,26 @@ if (!function_exists('cashDay')) {
         return $lifeTime;
     }
 }
+
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+if (!function_exists('calcRatio')) {
+    function calcRatio($width, $height): string {
+        $gcd = gcd($width, $height);
+        $widthRatio = $width / $gcd;
+        $heightRatio = $height / $gcd;
+        return $widthRatio . ':' . $heightRatio;
+    }
+}
+if (!function_exists('gcd')) {
+    function gcd(int $a, int $b) {
+        return ($b === 0)
+            ? $a
+            : gcd($b, $a % $b);
+    }
+}
+
+
+
 

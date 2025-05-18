@@ -9,9 +9,6 @@ use Intervention\Image\Encoders\WebpEncoder;
 use Illuminate\Support\Facades\Storage;
 
 class WebpUploadFixedSizeBulider extends FileUpload {
-//    use UploadFileFunctionTrait;
-
-
     protected int $filter = 4;
     protected int $width = 300;
     protected int $height = 300;
@@ -21,6 +18,9 @@ class WebpUploadFixedSizeBulider extends FileUpload {
     protected int $thumbHeight = 100;
     protected string $diskDir = 'root_folder';
     protected string $uploadDirectory = 'uploads-site';
+
+    // اسم اللاحقة للصورة المصغرة
+    protected string $thumbnailSuffix = '_thumbnail';
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -55,11 +55,33 @@ class WebpUploadFixedSizeBulider extends FileUpload {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public function setUploadDirectory(string $dir): static {
+        $this->uploadDirectory = $dir;
+        return $this;
+    }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public function setRequiredUpload(bool $value = true): static {
+        if ($value) {
+            $this->required();
+        }
+        return $this;
+    }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public function setThumbnailSuffix(string $suffix = '_thumbnail'): static {
+        $this->thumbnailSuffix = $suffix;
+        return $this;
+    }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     protected function setUp(): void {
         parent::setUp();
-
         $this->disk($this->diskDir)
-            ->visibility($this->diskDir)
+            ->visibility('public')
             ->directory($this->uploadDirectory)
             ->acceptedFileTypes(['image/*'])
             ->image()
@@ -70,19 +92,43 @@ class WebpUploadFixedSizeBulider extends FileUpload {
             ->dehydrated(true)
             ->preserveFilenames()
             ->deleteUploadedFileUsing(fn($file, $record) => $this->handleFileDeletion($file, $record))
-            ->saveUploadedFileUsing(fn($file, $record, $livewire) => $this->handleUploadFixedSize($file, $record, $livewire))
-            ->imageCropAspectRatio($this->handleAspectRatioFixedSize());
+            ->saveUploadedFileUsing(fn($file, $record, $livewire) => $this->handleUploadFixedSize($file, $record, $livewire));
     }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     protected function handleFileDeletion($file, $record): void {
+        // 1. حذف الملف الأساسي من التخزين
         Storage::disk($this->diskDir)->delete($file);
 
-//        if ($this->fileName == 'photo' and $record && $record->photo_thumbnail) {
-//            Storage::disk($this->diskDir)->delete($record->photo_thumbnail);
-//            $record->photo_thumbnail = null;
-//        }
+        // 2. التحقق من تفعيل الثمبنايل ووجود السجل
+        if ($this->generateThumbnail && $record) {
+            // 3. الحصول على اسم الحقل الحالي (مثال: "photo")
+            $currentField = $this->getFieldName();
+
+            // 4. بناء اسم حقل الثمبنايل (مثال: "photo_thumbnail")
+            $thumbnailField = $currentField . $this->thumbnailSuffix;
+
+            // 5. التحقق من وجود الثمبنايل في الـ data
+            if (isset($record->data[$thumbnailField])) {
+                // 6. حذف ملف الثمبنايل من التخزين
+                Storage::disk($this->diskDir)->delete($record->data[$thumbnailField]);
+
+                if ($record && is_array($record->data)) {
+                    $currentField = $this->getFieldName();
+                    $thumbnailField = $currentField . $this->thumbnailSuffix;
+
+                    $record->data = array_merge($record->data, [
+                        $currentField => null,
+                        $thumbnailField => null
+                    ]);
+
+                    if (method_exists($record, 'save')) {
+                        $record->save();
+                    }
+                }
+            }
+        }
     }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -97,52 +143,26 @@ class WebpUploadFixedSizeBulider extends FileUpload {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    protected function resolveFilename($record): string {
-        $filenameBase = uniqid('img_') ;
-//        if($this->renameTo){
-//            $filenameBase =  uniqid($this->renameTo."-");
-//            return Url_Slug($filenameBase);
-//        }
-//        if($this->renameFromDb ){
-//            if($record->{$this->renameFromDb}){
-//                $filenameBase =  uniqid($record->{$this->renameFromDb}."-");
-//                return Url_Slug($filenameBase);
-//            }
-//        }
-
+    protected function resolveFilename($file, $record = null): string {
+        $filenameBase = uniqid('img-');
         return Url_Slug($filenameBase);
     }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-//    protected function handleAspectRatioFixedSize(): string|null {
-//        return null;
-//    }
-
-    protected function handleAspectRatioFixedSize(): ?string {
-        // إذا لم يتم تحديد العرض أو الارتفاع، لا نحتاج لنسبة
-        if (!$this->width || !$this->height) {
-            return null;
+    protected function getFieldName(): string {
+        try {
+            $statePath = $this->getStatePath();
+            $parts = explode('.', $statePath);
+            return end($parts);
+        } catch (\Exception $e) {
+            return 'photo';
         }
-        // إيجاد القاسم المشترك الأكبر (GCD) لتبسيط النسبة
-        $gcd = $this->gcd($this->width, $this->height);
-
-        $widthRatio = $this->width / $gcd;
-        $heightRatio = $this->height / $gcd;
-        // إعادة النسبة بالشكل "عرض:ارتفاع"
-        // مثال: لو كانت (300, 300) => "1:1"
-        //       لو كانت (1920,1080) => "16:9"
-        return $widthRatio . ':' . $heightRatio;
     }
 
-    protected function gcd(int $a, int $b): int {
-        return ($b === 0)
-            ? $a
-            : $this->gcd($b, $a % $b);
-    }
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    protected function handleUploadFixedSize($file, $record): string {
+    protected function handleUploadFixedSize($file, $record, $livewire = null): string {
         // تأكد من وجود الملف المؤقت
         $realPath = $file->getRealPath();
         if (!file_exists($realPath)) {
@@ -165,18 +185,25 @@ class WebpUploadFixedSizeBulider extends FileUpload {
             'type' => $this->filter,
             'width' => $this->width,
             'height' => $this->height,
+            'quality' => $this->quality
         ];
         $this->processImageFixedSize($manager, $realPath, $newPath, $size);
 
+        // إذا كان توليد الصورة المصغرة مفعلاً
         if ($this->generateThumbnail) {
             $size = [
                 'type' => $this->filter,
                 'width' => $this->thumbWidth,
                 'height' => $this->thumbHeight,
+                'quality' => $this->quality
             ];
             $this->processImageFixedSize($manager, $realPath, $thumbnailPath, $size);
-            if ($record) {
-                $record->data['photo_thumbnail'] = $thumbnailPath;
+
+            // تحديث بيانات النموذج
+            if ($livewire) {
+                $fieldName = $this->getFieldName();
+                $thumbnailField = $fieldName . $this->thumbnailSuffix;
+                $livewire->data['data'][$thumbnailField] = $thumbnailPath;
             }
         }
 
@@ -186,7 +213,6 @@ class WebpUploadFixedSizeBulider extends FileUpload {
         // إعادة مسار الصورة الأساسية
         return $newPath;
     }
-
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -201,9 +227,7 @@ class WebpUploadFixedSizeBulider extends FileUpload {
 
         $savePath = Storage::disk($this->diskDir)->path($savePath);
 
-//        $manager = new ImageManager(new GdDriver());
         $image = $manager->read($realPath);
-
 
         switch ($type) {
             case 1:
@@ -231,9 +255,6 @@ class WebpUploadFixedSizeBulider extends FileUpload {
                 break;
         }
 
-
         $image->save($savePath);
     }
-
-
 }

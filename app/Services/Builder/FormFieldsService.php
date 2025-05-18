@@ -6,7 +6,11 @@ use App\FilamentCustom\UploadFile\WebpUploadFixedSize;
 use App\FilamentCustom\UploadFile\WebpUploadFixedSizeBulider;
 use Filament\Forms;
 use App\Enums\SiteBuilder\FieldWidth;
+use Filament\Forms\Components\TextInput;
 use Guava\FilamentIconPicker\Forms\IconPicker;
+use Illuminate\Support\Facades\Log;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 
 class FormFieldsService {
     /**
@@ -87,22 +91,27 @@ class FormFieldsService {
                     break;
 
                 case 'image':
-//                    $formField = Forms\Components\FileUpload::make("data.{$name}")
-//                        ->label($label)
-//                        ->image()
-//                        ->directory('images')
-//                        ->required($required)
-//
-
-
+                    // إنشاء حقل الصورة
                     $formField = WebpUploadFixedSizeBulider::make("data.{$name}")
                         ->label($label)
                         ->setThumbnail($with_thumbnail)
-//                    ->setResize($img_width, $img_height, 90)
-//                    ->setThumbnailSize($thumb_width, $thumb_height)
-//                    ->setUploadDirectory("site-builder-test")
-//                    ->setRequiredUpload($required)
                         ->helperText($help);
+
+                    // إضافة إعدادات إضافية إذا كانت متوفرة
+                    if ($img_width && $img_height) {
+                        $formField->setResize($img_width, $img_height, 90);
+                        $formField->imageCropAspectRatio(calcRatio($img_width,$img_height));
+                    }
+
+                    if ($with_thumbnail && $thumb_width && $thumb_height) {
+                        $formField->setThumbnailSize($thumb_width, $thumb_height);
+                    }
+
+                    // إضافة حقل مخفي للصورة المصغرة
+                    if ($with_thumbnail) {
+                        $thumbnailFieldName = $name . '_thumbnail';
+                        $formFields[] = Forms\Components\Hidden::make("data.{$thumbnailFieldName}");
+                    }
                     break;
 
 
@@ -242,7 +251,105 @@ class FormFieldsService {
             }
         }
 
+        // إضافة حقل مخفي للحفاظ على الصور المصغرة
+        $formFields[] = self::addThumbnailPreserver();
+
         return $formFields;
+    }
+
+    /**
+     * إضافة حقل مخفي للحفاظ على الصور المصغرة عند الحفظ
+     */
+    private static function addThumbnailPreserver(): Forms\Components\Hidden
+    {
+        return Forms\Components\Hidden::make('__thumbnail_preserver')
+            ->dehydrated(false)
+            ->reactive()
+            ->dehydrateStateUsing(function ($state, $livewire) {
+                // هذه الدالة تنفذ قبل حفظ النموذج
+                try {
+                    if (is_object($livewire) && method_exists($livewire, 'getRecord')) {
+                        $record = $livewire->getRecord();
+
+                        if ($record && isset($record->data) && is_array($record->data)) {
+                            Log::debug("Processing record data: " . json_encode($record->data));
+
+                            // البحث عن حقول الصور
+                            foreach ($record->data as $key => $value) {
+                                // تخطي الحقول التي تنتهي بـ _thumbnail
+                                if (str_ends_with($key, '_thumbnail')) {
+                                    continue;
+                                }
+
+                                // معالجة الصور المخزنة كنص
+                                if (is_string($value) && strpos($value, 'uploads-site') === 0) {
+                                    self::processThumbnailForImageField($record, $key, $value);
+                                }
+
+                                // معالجة الصور المخزنة كمصفوفة (Filament FileUpload)
+                                elseif (is_array($value)) {
+                                    foreach ($value as $uuid => $fileInfo) {
+                                        // تحقق مما إذا كان المفتاح UUID صالحًا
+                                        if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid)) {
+                                            // استخراج مسار الملف
+                                            $filePath = null;
+                                            if (is_string($fileInfo)) {
+                                                $filePath = $fileInfo;
+                                            } elseif (is_array($fileInfo) && isset($fileInfo['path'])) {
+                                                $filePath = $fileInfo['path'];
+                                            }
+
+                                            if ($filePath && strpos($filePath, 'uploads-site') === 0) {
+                                                self::processThumbnailForImageField($record, $key, $filePath);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // حفظ التغييرات
+                            $record->save();
+                            Log::info("Saved record with thumbnails: " . json_encode($record->data));
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Error in thumbnail preserver: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                }
+
+                return null;
+            });
+    }
+
+    /**
+     * معالجة الصورة المصغرة لحقل صورة محدد
+     */
+    private static function processThumbnailForImageField($record, string $fieldName, string $photoPath): void
+    {
+        try {
+            // استخراج اسم الملف والمسار
+            $pathInfo = pathinfo($photoPath);
+            if (!isset($pathInfo['dirname']) || !isset($pathInfo['filename'])) {
+                Log::debug("Invalid photo path: {$photoPath}");
+                return;
+            }
+
+            $dir = $pathInfo['dirname'];
+            $filename = $pathInfo['filename'];
+
+            // إنشاء مسار الصورة المصغرة
+            $thumbnailField = $fieldName . '_thumbnail';
+            $thumbnailPath = $dir . '/' . $filename . '_thumb.webp';
+
+            // التحقق مما إذا كان الملف موجودًا وحفظه في البيانات
+            if (\Illuminate\Support\Facades\Storage::disk('root_folder')->exists($thumbnailPath)) {
+                $record->data[$thumbnailField] = $thumbnailPath;
+                Log::info("Set thumbnail for {$fieldName}: {$thumbnailField} = {$thumbnailPath}");
+            } else {
+                Log::debug("Thumbnail file not found for {$fieldName}: {$thumbnailPath}");
+            }
+        } catch (\Exception $e) {
+            Log::error("Error processing thumbnail for {$fieldName}: " . $e->getMessage());
+        }
     }
 
     /**
