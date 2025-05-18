@@ -236,9 +236,9 @@ class FormFieldsService
                     break;
             }
 
-            // Set width and add to form fields
+            // Set column span based on field width
             if ($formField) {
-                $formField->columnSpan(2);
+                $formField->columnSpan($fieldWidth);
                 $formFields[] = $formField;
             }
         }
@@ -248,7 +248,7 @@ class FormFieldsService
 
     /**
      * Convert width string to Filament columnSpan value
-     *
+     * 
      * @param string $width Width string ('1/2', '1/3', '2/3', '1/4', '3/4', 'full', etc.)
      * @return int Column span value for Filament 3 (1-12)
      */
@@ -256,10 +256,20 @@ class FormFieldsService
     {
         // Add debugging log
         \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan input: ' . $width);
-
-        // Use the FieldWidth enum to convert the width to column span
-        $result = FieldWidth::stringToColumnSpan($width);
-
+        
+        // Map width values to column spans for a 12-column grid
+        $result = match(strtolower(trim($width))) {
+            '1/1', 'full', '100%' => 12,  // Full width (12 of 12 columns)
+            '1/2', '50%' => 6,            // Half width (6 of 12 columns)
+            '1/3', '33%', '33.33%' => 4,  // One third (4 of 12 columns) 
+            '2/3', '66%', '66.66%' => 8,  // Two thirds (8 of 12 columns)
+            '1/4', '25%' => 3,            // One quarter (3 of 12 columns)
+            '3/4', '75%' => 9,            // Three quarters (9 of 12 columns)
+            '1/6', '16%', '16.66%' => 2,  // One sixth (2 of 12 columns)
+            '5/6', '83%', '83.33%' => 10, // Five sixths (10 of 12 columns)
+            default => 12,                // Default to full width
+        };
+        
         \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan result: ' . json_encode($result));
         return $result;
     }
@@ -358,8 +368,9 @@ class FormFieldsService
                     ->required($required);
             }
 
-            // Apply the width to the translation field
+            // Apply the column span to the translation field
             if ($translationField) {
+                $fieldWidth = self::convertWidthToColumnSpan($width);
                 $translationField->columnSpan($fieldWidth);
                 $fields[] = $translationField;
             }

@@ -44,109 +44,114 @@ class BuilderBlockResource extends Resource {
                 // Basic Information Section
                 Forms\Components\Section::make(__('site-builder/block.tabs.basic_info'))
                     ->schema([
-                        Forms\Components\Group::make()->schema([
-                            Forms\Components\Select::make('pages')
-                                ->label(__('site-builder/block.pages'))
-                                ->placeholder(__('site-builder/block.select_pages'))
-                                ->relationship('pages', 'title')
-                                ->multiple()
-                                ->preload()
-                                ->columnSpan(2)
-                                ->searchable(),
+                        Forms\Components\Grid::make(12)
+                            ->schema([
+                                Forms\Components\Select::make('pages')
+                                    ->label(__('site-builder/block.pages'))
+                                    ->placeholder(__('site-builder/block.select_pages'))
+                                    ->relationship('pages', 'title')
+                                    ->multiple()
+                                    ->preload()
+                                    ->columnSpan(6)
+                                    ->searchable(),
 
-                            Forms\Components\Toggle::make('is_active')
-                                ->label(__('site-builder/general.is_active'))
-                                ->inline(false)
-                                ->default(true),
+                                Forms\Components\Grid::make(6)
+                                    ->schema([
+                                        Forms\Components\Toggle::make('is_active')
+                                            ->label(__('site-builder/general.is_active'))
+                                            ->inline(false)
+                                            ->default(true),
 
-                            Forms\Components\Toggle::make('is_visible')
-                                ->label(__('site-builder/block.is_visible'))
-                                ->inline(false)
-                                ->default(true),
+                                        Forms\Components\Toggle::make('is_visible')
+                                            ->label(__('site-builder/block.is_visible'))
+                                            ->inline(false)
+                                            ->default(true),
+                                    ])
+                                    ->columnSpan(6),
 
-                        ])->columnSpanFull()->columns(4),
+                                Forms\Components\Select::make('block_type_id')
+                                    ->label(__('site-builder/block.block_type'))
+                                    ->placeholder(__('site-builder/block.select_block_type'))
+                                    ->options(BlockType::where('is_active', true)->pluck('name', 'id'))
+                                    ->required()
+                                    ->searchable()
+                                    ->preload()
+                                    ->reactive()
+                                    ->columnSpan(6)
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        // Get the block type and load schema
+                                        if ($state) {
+                                            $blockType = BlockType::find($state);
+                                            if ($blockType) {
+                                                // Initialize data with default values from schema
+                                                $data = [];
+                                                $schema = $blockType->schema ?: [];
 
+                                                foreach ($schema as $field) {
+                                                    $name = $field['name'] ?? '';
+                                                    $defaultValue = $field['default'] ?? null;
 
-                        Forms\Components\Select::make('block_type_id')
-                            ->label(__('site-builder/block.block_type'))
-                            ->placeholder(__('site-builder/block.select_block_type'))
-                            ->options(BlockType::where('is_active', true)->pluck('name', 'id'))
-                            ->required()
-                            ->searchable()
-                            ->preload()
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                // Get the block type and load schema
-                                if ($state) {
-                                    $blockType = BlockType::find($state);
-                                    if ($blockType) {
-                                        // Initialize data with default values from schema
-                                        $data = [];
-                                        $schema = $blockType->schema ?: [];
+                                                    if (!empty($name) && $defaultValue !== null) {
+                                                        $data[$name] = $defaultValue;
+                                                    }
+                                                }
 
-                                        foreach ($schema as $field) {
-                                            $name = $field['name'] ?? '';
-                                            $defaultValue = $field['default'] ?? null;
+                                                // Set data with values from schema
+                                                if (!empty($data)) {
+                                                    $set('data', $data);
 
-                                            if (!empty($name) && $defaultValue !== null) {
-                                                $data[$name] = $defaultValue;
+                                                    // Debug
+                                                    \Illuminate\Support\Facades\Log::info('Setting data from schema defaults: ' . json_encode($data));
+                                                } else {
+                                                    // Clear previous data
+                                                    $set('data', null);
+
+                                                    // Debug
+                                                    \Illuminate\Support\Facades\Log::info('No default values found in schema for block type: ' . $state);
+                                                }
+                                                $set('view_version', 'default');
                                             }
-                                        }
-
-                                        // Set data with values from schema
-                                        if (!empty($data)) {
-                                            $set('data', $data);
-
-                                            // Debug
-                                            \Illuminate\Support\Facades\Log::info('Setting data from schema defaults: ' . json_encode($data));
                                         } else {
-                                            // Clear previous data
+                                            // Clear if no block type selected
                                             $set('data', null);
-
-                                            // Debug
-                                            \Illuminate\Support\Facades\Log::info('No default values found in schema for block type: ' . $state);
+                                            $set('view_version', 'default');
                                         }
-                                        $set('view_version', 'default');
-                                    }
-                                } else {
-                                    // Clear if no block type selected
-                                    $set('data', null);
-                                    $set('view_version', 'default');
-                                }
-                            }),
+                                    }),
 
-                        Forms\Components\Select::make('view_version')
-                            ->label(__('site-builder/block.view_version'))
-                            ->options(function (Forms\Get $get) {
-                                $blockTypeId = $get('block_type_id');
-                                if (!$blockTypeId) {
-                                    return ['default' => 'Default'];
-                                }
+                                Forms\Components\Select::make('view_version')
+                                    ->label(__('site-builder/block.view_version'))
+                                    ->options(function (Forms\Get $get) {
+                                        $blockTypeId = $get('block_type_id');
+                                        if (!$blockTypeId) {
+                                            return ['default' => 'Default'];
+                                        }
 
-                                $blockType = BlockType::find($blockTypeId);
-                                if (!$blockType) {
-                                    return ['default' => 'Default'];
-                                }
+                                        $blockType = BlockType::find($blockTypeId);
+                                        if (!$blockType) {
+                                            return ['default' => 'Default'];
+                                        }
 
-                                // Get templates that use this block type
-                                $templates = $blockType->templates;
+                                        // Get templates that use this block type
+                                        $templates = $blockType->templates;
 
-                                // Collect all view versions from all templates
-                                $allVersions = collect(['default']);
-                                foreach ($templates as $template) {
-                                    $versions = $blockType->getAvailableViewVersionsForTemplate($template->id);
-                                    $allVersions = $allVersions->merge($versions);
-                                }
+                                        // Collect all view versions from all templates
+                                        $allVersions = collect(['default']);
+                                        foreach ($templates as $template) {
+                                            $versions = $blockType->getAvailableViewVersionsForTemplate($template->id);
+                                            $allVersions = $allVersions->merge($versions);
+                                        }
 
-                                $uniqueVersions = $allVersions->unique()->values()->toArray();
-                                return array_combine($uniqueVersions, $uniqueVersions);
-                            })
-                            ->default('default')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                                        $uniqueVersions = $allVersions->unique()->values()->toArray();
+                                        return array_combine($uniqueVersions, $uniqueVersions);
+                                    })
+                                    ->default('default')
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(6)
+                                    ->required(),
+                            ])
                     ])
-                    ->columns(2),
+                    ->collapsible(),
 
                 // Content Section (Conditional based on blockType)
                 Forms\Components\Section::make(__('site-builder/block.tabs.content'))
@@ -183,16 +188,20 @@ class BuilderBlockResource extends Resource {
                         }
 
                         // Create form fields based on schema
-                        return FormFieldsService::createFormFieldsFromSchema($schema);
+                        return [
+                            Forms\Components\Grid::make(12)
+                                ->schema(
+                                    FormFieldsService::createFormFieldsFromSchema($schema)
+                                )
+                        ];
                     })
-                    ->columns(2)
-                    ->columnSpanFull()
-                    ->visible(fn(Forms\Get $get) => $get('block_type_id')),
+                    ->visible(fn(Forms\Get $get) => $get('block_type_id'))
+                    ->collapsible(),
 
                 // Translations Section
                 Forms\Components\Section::make(__('site-builder/block.translations_heading'))
                     ->description(__('site-builder/block.translations_description'))
-                     ->schema(function (Forms\Get $get) {
+                    ->schema(function (Forms\Get $get) {
                         $blockTypeId = $get('block_type_id');
 
                         if (!$blockTypeId) {
@@ -247,9 +256,10 @@ class BuilderBlockResource extends Resource {
                                 };
 
                                 $languageSections[] = Forms\Components\Section::make(__('site-builder/block.language_content', ['language' => $languageName]))
-                                    ->schema($fields)
-                                    ->columns(2)
-                                    ->columnSpanFull()
+                                    ->schema([
+                                        Forms\Components\Grid::make(12)
+                                            ->schema($fields)
+                                    ])
                                     ->collapsed();
                             }
                         }
@@ -263,8 +273,8 @@ class BuilderBlockResource extends Resource {
 
                         return $languageSections;
                     })
-                    ->columnSpanFull()
-                    ->visible(fn(Forms\Get $get) => $get('block_type_id')),
+                    ->visible(fn(Forms\Get $get) => $get('block_type_id'))
+                    ->collapsible(),
             ]);
     }
 
