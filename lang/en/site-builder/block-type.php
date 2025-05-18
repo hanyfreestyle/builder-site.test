@@ -66,4 +66,21 @@ return [
         'category' => 'Category for grouping blocks, e.g., "basic", "media", "advanced"',
         'default_values' => 'Set default values for block fields',
     ],
+    // New translations for additional fields
+    'image_with_thumbnail' => 'With Thumbnail',
+    'image_width' => 'Image Width',
+    'image_height' => 'Image Height',
+    'thumb_width' => 'Thumbnail Width',
+    'thumb_height' => 'Thumbnail Height',
+    'default_icon' => 'Default Icon',
+    'repeater_fields' => 'Repeater Fields',
+    'option_key' => 'Key',
+    'option_value' => 'Value',
+    'enter_option_key' => 'Enter option key',
+    'enter_option_value' => 'Enter option value',
+    'add_option' => 'Add New Option',
+    'field_radio' => [
+        'true' => 'True',
+        'false' => 'False',
+    ],
 ];
