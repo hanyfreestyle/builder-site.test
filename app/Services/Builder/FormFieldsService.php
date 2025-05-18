@@ -2,6 +2,8 @@
 
 namespace App\Services\Builder;
 
+use App\FilamentCustom\UploadFile\WebpUploadFixedSize;
+use App\FilamentCustom\UploadFile\WebpUploadFixedSizeBulider;
 use Filament\Forms;
 use App\Enums\SiteBuilder\FieldWidth;
 use Guava\FilamentIconPicker\Forms\IconPicker;
@@ -23,6 +25,11 @@ class FormFieldsService {
             $help = $field['help'] ?? null;
             $defaultValue = $field['default'] ?? null;
             $width = $field['width'] ?? 'full';
+            $with_thumbnail = $field['config']['with_thumbnail'] ?? false;
+            $img_width = $field['config']['width'] ?? 100;
+            $img_height = $field['config']['height'] ?? 100;
+            $thumb_width = $field['config']['thumb_width'] ?? 100;
+            $thumb_height = $field['config']['thumb_height'] ?? 100;
 
             // Convert width to Filament column span value
             $fieldWidth = self::convertWidthToColumnSpan($width);
@@ -44,6 +51,7 @@ class FormFieldsService {
                         ->required($required)
                         ->placeholder($placeholder)
                         ->helperText($help)
+                        ->rows(6)
                         ->default($defaultValue);
                     break;
 
@@ -79,11 +87,21 @@ class FormFieldsService {
                     break;
 
                 case 'image':
-                    $formField = Forms\Components\FileUpload::make("data.{$name}")
+//                    $formField = Forms\Components\FileUpload::make("data.{$name}")
+//                        ->label($label)
+//                        ->image()
+//                        ->directory('images')
+//                        ->required($required)
+//
+
+
+                    $formField = WebpUploadFixedSizeBulider::make("data.{$name}")
                         ->label($label)
-                        ->image()
-                        ->directory('images')
-                        ->required($required)
+                        ->setThumbnail($with_thumbnail)
+//                    ->setResize($img_width, $img_height, 90)
+//                    ->setThumbnailSize($thumb_width, $thumb_height)
+//                    ->setUploadDirectory("site-builder-test")
+//                    ->setRequiredUpload($required)
                         ->helperText($help);
                     break;
 
@@ -142,8 +160,7 @@ class FormFieldsService {
                             ->required($required)
                             ->placeholder(__('site-builder/block.link_url_placeholder'))
                             ->default($defaultValue['url'] ?? null),
-                    ])
-                        ->label($label);
+                    ])->columns(2)->label($label);
                     break;
 
                 case 'number':
@@ -235,9 +252,6 @@ class FormFieldsService {
      * @return int Column span value for Filament 3 (1-12)
      */
     public static function convertWidthToColumnSpan(string $width): int {
-        // Add debugging log
-        \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan input: ' . $width);
-
         // Map width values to column spans for a 12-column grid
         $result = match (strtolower(trim($width))) {
             '1/1', 'full', '100%' => 12,  // Full width (12 of 12 columns)
@@ -250,8 +264,6 @@ class FormFieldsService {
             '5/6', '83%', '83.33%' => 10, // Five sixths (10 of 12 columns)
             default => 12,                // Default to full width
         };
-
-        \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan result: ' . json_encode($result));
         return $result;
     }
 
@@ -278,9 +290,6 @@ class FormFieldsService {
                 continue;
             }
 
-            // Convert width to Filament column span value
-            $fieldWidth = self::convertWidthToColumnSpan($width);
-
             // Create field based on type
             $translationField = null;
 
@@ -290,6 +299,7 @@ class FormFieldsService {
                     ->label($label)
                     ->placeholder($field['placeholder'] ?? null)
                     ->helperText($field['help'] ?? null)
+                    ->rows(6)
                     ->required($required); // Make required if the original field is required
             } elseif ($type === 'rich_text') {
                 $translationField = Forms\Components\RichEditor::make("translations.{$locale}.{$name}")
@@ -311,7 +321,7 @@ class FormFieldsService {
                         ->label(__('site-builder/block.link_url'))
                         ->placeholder(__('site-builder/block.link_url_placeholder'))
                         ->required($required),
-                ])->label($label);
+                ])->columns(2)->label($label);
             } elseif ($type === 'repeater') {
                 // Create a repeater translator using KeyValue for simplicity
                 $translationField = Forms\Components\KeyValue::make("translations.{$locale}.{$name}")

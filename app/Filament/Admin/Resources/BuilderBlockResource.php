@@ -195,76 +195,73 @@ class BuilderBlockResource extends Resource {
 
                 // Translations Section
 
-                Forms\Components\Section::make(__('site-builder/block.translations_heading'))
+                Forms\Components\Group::make()->schema(function (Forms\Get $get) {
+                    $blockTypeId = $get('block_type_id');
 
-                    ->description(__('site-builder/block.translations_description'))
-                    ->schema(function (Forms\Get $get) {
-                        $blockTypeId = $get('block_type_id');
+                    if (!$blockTypeId) {
+                        return [
+                            Forms\Components\Placeholder::make('no_block_type_trans')
+                                ->content(__('site-builder/block.please_select_block_type'))
+                        ];
+                    }
 
-                        if (!$blockTypeId) {
-                            return [
-                                Forms\Components\Placeholder::make('no_block_type_trans')
-                                    ->content(__('site-builder/block.please_select_block_type'))
-                            ];
+                    $blockType = BlockType::find($blockTypeId);
+
+                    if (!$blockType) {
+                        return [];
+                    }
+
+                    $schema = $blockType->schema ?: [];
+
+                    if (empty($schema)) {
+                        return [];
+                    }
+
+                    // Get all supported languages in the system
+                    $supportedLanguages = config('app.supported_locales', ['ar', 'en']);
+
+                    // Remove default language (first language is considered default)
+                    $defaultLanguage = $supportedLanguages[0] ?? 'ar';
+                    $translationLanguages = array_filter($supportedLanguages, function ($lang) use ($defaultLanguage) {
+                        return $lang !== $defaultLanguage;
+                    });
+
+                    if (empty($translationLanguages)) {
+                        return [
+                            Forms\Components\Placeholder::make('no_translations')
+                                ->content(__('site-builder/block.no_translations_needed'))
+                        ];
+                    }
+
+                    // Create sections for each language
+                    $languageSections = [];
+
+                    foreach ($translationLanguages as $locale) {
+                        $fields = FormFieldsService::createTranslationFieldsFromSchema($schema, $locale);
+
+                        if (!empty($fields)) {
+                            $languageName = match ($locale) {
+                                'ar' => __('site-builder/translation.locale_ar'),
+                                'en' => __('site-builder/translation.locale_en'),
+                                'fr' => __('site-builder/translation.locale_fr'),
+                                'es' => __('site-builder/translation.locale_es'),
+                                'de' => __('site-builder/translation.locale_de'),
+                                default => $locale,
+                            };
+
+                            $languageSections[] = Forms\Components\Section::make(__('site-builder/block.language_content', ['language' => $languageName]))
+                                ->schema([
+                                    Forms\Components\Grid::make(12)
+                                        ->schema($fields)
+                                ]);
                         }
-
-                        $blockType = BlockType::find($blockTypeId);
-
-                        if (!$blockType) {
-                            return [];
-                        }
-
-                        $schema = $blockType->schema ?: [];
-
-                        if (empty($schema)) {
-                            return [];
-                        }
-
-                        // Get all supported languages in the system
-                        $supportedLanguages = config('app.supported_locales', ['ar', 'en']);
-
-                        // Remove default language (first language is considered default)
-                        $defaultLanguage = $supportedLanguages[0] ?? 'ar';
-                        $translationLanguages = array_filter($supportedLanguages, function ($lang) use ($defaultLanguage) {
-                            return $lang !== $defaultLanguage;
-                        });
-
-                        if (empty($translationLanguages)) {
-                            return [
-                                Forms\Components\Placeholder::make('no_translations')
-                                    ->content(__('site-builder/block.no_translations_needed'))
-                            ];
-                        }
-
-                        // Create sections for each language
-                        $languageSections = [];
-
-                        foreach ($translationLanguages as $locale) {
-                            $fields = FormFieldsService::createTranslationFieldsFromSchema($schema, $locale);
-
-                            if (!empty($fields)) {
-                                $languageName = match ($locale) {
-                                    'ar' => __('site-builder/translation.locale_ar'),
-                                    'en' => __('site-builder/translation.locale_en'),
-                                    'fr' => __('site-builder/translation.locale_fr'),
-                                    'es' => __('site-builder/translation.locale_es'),
-                                    'de' => __('site-builder/translation.locale_de'),
-                                    default => $locale,
-                                };
-
-                                $languageSections[] = Forms\Components\Section::make(__('site-builder/block.language_content', ['language' => $languageName]))
-                                    ->schema([
-                                        Forms\Components\Grid::make(12)
-                                            ->schema($fields)
-                                    ]);
-                            }
-                        }
+                    }
 
 
-                        return $languageSections;
-                    })
+                    return $languageSections;
+                })
                     ->visible(fn(Forms\Get $get) => $get('block_type_id'))
-                    ->collapsible(),
+                    ->columnSpanFull(),
             ]);
     }
 
