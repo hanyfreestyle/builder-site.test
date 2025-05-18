@@ -4,14 +4,13 @@ namespace App\Services\Builder;
 
 use Filament\Forms;
 use App\Enums\SiteBuilder\FieldWidth;
+use Guava\FilamentIconPicker\Forms\IconPicker;
 
-class FormFieldsService
-{
+class FormFieldsService {
     /**
      * Create form fields based on block type schema
      */
-    public static function createFormFieldsFromSchema(array $schema): array
-    {
+    public static function createFormFieldsFromSchema(array $schema): array {
         $formFields = [];
 
         foreach ($schema as $field) {
@@ -24,14 +23,6 @@ class FormFieldsService
             $help = $field['help'] ?? null;
             $defaultValue = $field['default'] ?? null;
             $width = $field['width'] ?? 'full';
-
-            // Debug schema field values
-            \Illuminate\Support\Facades\Log::info('Field schema: ' . json_encode([
-                'name' => $name,
-                'placeholder' => $placeholder,
-                'help' => $help,
-                'default' => $defaultValue,
-            ]));
 
             // Convert width to Filament column span value
             $fieldWidth = self::convertWidthToColumnSpan($width);
@@ -78,20 +69,11 @@ class FormFieldsService
                         ->default($defaultValue);
                     break;
 
-                case 'checkbox':
+                case 'radio':
                     $formField = Forms\Components\Toggle::make("data.{$name}")
                         ->label($label)
-                        ->required($required)
-                        ->helperText($help)
-                        ->default($defaultValue ?: false);
-                    break;
-
-                case 'radio':
-                    $options = $field['options'] ?? [];
-                    $formField = Forms\Components\Radio::make("data.{$name}")
-                        ->label($label)
-                        ->options($options)
-                        ->required($required)
+                        ->default($defaultValue)
+                        ->inline(false)
                         ->helperText($help)
                         ->default($defaultValue);
                     break;
@@ -105,13 +87,6 @@ class FormFieldsService
                         ->helperText($help);
                     break;
 
-                case 'file':
-                    $formField = Forms\Components\FileUpload::make("data.{$name}")
-                        ->label($label)
-                        ->directory('files')
-                        ->required($required)
-                        ->helperText($help);
-                    break;
 
                 case 'date':
                     $formField = Forms\Components\DatePicker::make("data.{$name}")
@@ -140,12 +115,18 @@ class FormFieldsService
                     break;
 
                 case 'icon':
-                    $formField = Forms\Components\TextInput::make("data.{$name}")
+                    $formField = IconPicker::make("data.{$name}")
                         ->label($label)
                         ->required($required)
-                        ->placeholder($placeholder)
+                        ->searchLabels()
+                        ->preload()
                         ->helperText($help ?: __('site-builder/block.icon_help'))
-                        ->default($defaultValue);
+                        ->columns([
+                            'default' => 2,
+                            'lg' => 6,
+                            '2xl' => 8,
+                        ])
+                        ->sets(['fas', 'fab', "fontawesome-solid", "fontawesome-brands"]);
                     break;
 
                 case 'link':
@@ -162,7 +143,7 @@ class FormFieldsService
                             ->placeholder(__('site-builder/block.link_url_placeholder'))
                             ->default($defaultValue['url'] ?? null),
                     ])
-                    ->label($label);
+                        ->label($label);
                     break;
 
                 case 'number':
@@ -194,6 +175,7 @@ class FormFieldsService
                                 $subSchema[] = Forms\Components\Textarea::make($subName)
                                     ->label($subLabel)
                                     ->required($subField['required'] ?? false);
+
                             } elseif ($subType === 'image') {
                                 $subSchema[] = Forms\Components\FileUpload::make($subName)
                                     ->label($subLabel)
@@ -248,20 +230,19 @@ class FormFieldsService
 
     /**
      * Convert width string to Filament columnSpan value
-     * 
+     *
      * @param string $width Width string ('1/2', '1/3', '2/3', '1/4', '3/4', 'full', etc.)
      * @return int Column span value for Filament 3 (1-12)
      */
-    public static function convertWidthToColumnSpan(string $width): int
-    {
+    public static function convertWidthToColumnSpan(string $width): int {
         // Add debugging log
         \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan input: ' . $width);
-        
+
         // Map width values to column spans for a 12-column grid
-        $result = match(strtolower(trim($width))) {
+        $result = match (strtolower(trim($width))) {
             '1/1', 'full', '100%' => 12,  // Full width (12 of 12 columns)
             '1/2', '50%' => 6,            // Half width (6 of 12 columns)
-            '1/3', '33%', '33.33%' => 4,  // One third (4 of 12 columns) 
+            '1/3', '33%', '33.33%' => 4,  // One third (4 of 12 columns)
             '2/3', '66%', '66.66%' => 8,  // Two thirds (8 of 12 columns)
             '1/4', '25%' => 3,            // One quarter (3 of 12 columns)
             '3/4', '75%' => 9,            // Three quarters (9 of 12 columns)
@@ -269,7 +250,7 @@ class FormFieldsService
             '5/6', '83%', '83.33%' => 10, // Five sixths (10 of 12 columns)
             default => 12,                // Default to full width
         };
-        
+
         \Illuminate\Support\Facades\Log::info('FormFieldsService::convertWidthToColumnSpan result: ' . json_encode($result));
         return $result;
     }
@@ -281,8 +262,7 @@ class FormFieldsService
      * @param string $locale Current locale code
      * @return array Array of form fields for translations
      */
-    public static function createTranslationFieldsFromSchema(array $schema, string $locale): array
-    {
+    public static function createTranslationFieldsFromSchema(array $schema, string $locale): array {
         $fields = [];
 
         foreach ($schema as $field) {
@@ -305,12 +285,19 @@ class FormFieldsService
             $translationField = null;
 
             // Handle different field types for translation
-            if ($type === 'textarea' || $type === 'rich_text') {
+            if ($type === 'textarea') {
                 $translationField = Forms\Components\Textarea::make("translations.{$locale}.{$name}")
                     ->label($label)
                     ->placeholder($field['placeholder'] ?? null)
                     ->helperText($field['help'] ?? null)
                     ->required($required); // Make required if the original field is required
+            } elseif ($type === 'rich_text') {
+                $translationField = Forms\Components\RichEditor::make("translations.{$locale}.{$name}")
+                    ->label($label)
+                    ->placeholder($field['placeholder'] ?? null)
+                    ->helperText($field['help'] ?? null)
+                    ->required($required); // Make required if the original field is required
+
             } elseif ($type === 'link') {
                 // For link type, we need to handle the text part
                 $translationField = Forms\Components\Group::make([

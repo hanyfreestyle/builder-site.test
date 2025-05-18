@@ -11,10 +11,8 @@ enum BlockTypeField: string {
     case TEXTAREA = 'textarea';
     case RICH_TEXT = 'rich_text';
     case SELECT = 'select';
-    case CHECKBOX = 'checkbox';
     case RADIO = 'radio';
     case IMAGE = 'image';
-    case FILE = 'file';
     case DATE = 'date';
     case TIME = 'time';
     case COLOR = 'color';
@@ -29,10 +27,8 @@ enum BlockTypeField: string {
             self::TEXTAREA => __('site-builder/block-type.field_types.textarea'),
             self::RICH_TEXT => __('site-builder/block-type.field_types.rich_text'),
             self::SELECT => __('site-builder/block-type.field_types.select'),
-            self::CHECKBOX => __('site-builder/block-type.field_types.checkbox'),
             self::RADIO => __('site-builder/block-type.field_types.radio'),
             self::IMAGE => __('site-builder/block-type.field_types.image'),
-            self::FILE => __('site-builder/block-type.field_types.file'),
             self::DATE => __('site-builder/block-type.field_types.date'),
             self::TIME => __('site-builder/block-type.field_types.time'),
             self::COLOR => __('site-builder/block-type.field_types.color'),

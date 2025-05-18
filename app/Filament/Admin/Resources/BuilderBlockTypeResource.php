@@ -7,6 +7,11 @@ use App\Enums\SiteBuilder\BlockTypeField;
 use App\Enums\SiteBuilder\FieldWidth;
 use App\Models\Builder\BlockType;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -78,19 +83,17 @@ class BuilderBlockTypeResource extends Resource {
                 Forms\Components\Repeater::make('schema')
                     ->label(__('site-builder/block-type.labels.schema'))
                     ->schema([
-                        Forms\Components\Group::make()->schema([
-                            Forms\Components\Toggle::make('required')
-                                ->label(__('site-builder/block-type.labels.field_required'))
-                                ->inline(false)
-                                ->default(false),
 
-                            Forms\Components\Toggle::make('translatable')
-                                ->label(__('site-builder/block-type.labels.field_translatable'))
-                                ->default(true)
-                                ->inline(false)
-                                ->helperText(__('site-builder/block-type.help_text.field_translatable')),
+                        Group::make()->schema([
+                            Select::make('type')
+                                ->label(__('site-builder/block-type.labels.field_type'))
+                                ->options(BlockTypeField::options())
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->reactive(),
 
-                            Forms\Components\Select::make('width')
+                            Select::make('width')
                                 ->label(__('site-builder/block-type.labels.field_width'))
                                 ->options(FieldWidth::options())
                                 ->default(FieldWidth::FULL)
@@ -98,84 +101,87 @@ class BuilderBlockTypeResource extends Resource {
                                 ->preload()
                                 ->required(),
 
+                            Toggle::make('required')
+                                ->label(__('site-builder/block-type.labels.field_required'))
+                                ->inline(false)
+                                ->default(false),
+
+                            Toggle::make('translatable')
+                                ->label(__('site-builder/block-type.labels.field_translatable'))
+                                ->default(false)
+                                ->inline(false)
+                                ->helperText(__('site-builder/block-type.help_text.field_translatable')),
+
                         ])->columnSpanFull()->columns(4),
 
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('site-builder/block-type.labels.field_name'))
-                            ->required()
-                            ->maxLength(255)
-                            ->helperText(__('site-builder/block-type.help_text.field_name')),
+                        Group::make()->schema([
+                            TextInput::make('name')
+                                ->label(__('site-builder/block-type.labels.field_name'))
+                                ->required()
+                                ->maxLength(255)
+                                ->helperText(__('site-builder/block-type.help_text.field_name')),
 
-                        Forms\Components\TextInput::make('label')
-                            ->label(__('site-builder/block-type.labels.field_label'))
-                            ->required()
-                            ->maxLength(255)
-                            ->helperText(__('site-builder/block-type.help_text.field_label')),
+                            TextInput::make('label')
+                                ->label(__('site-builder/block-type.labels.field_label'))
+                                ->required()
+                                ->maxLength(255)
+                                ->helperText(__('site-builder/block-type.help_text.field_label')),
 
-                        Forms\Components\Select::make('type')
-                            ->label(__('site-builder/block-type.labels.field_type'))
-                            ->options(BlockTypeField::options())
-                            ->default(BlockTypeField::TEXT)
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->reactive(),
+                            TextInput::make('help')
+                                ->label(__('site-builder/block-type.labels.field_help'))
+                                ->maxLength(255)
+                                ->helperText(__('site-builder/block-type.help_text.field_help')),
+
+                            // حقل placeholder يظهر لأنواع محددة من الحقول
+                            TextInput::make('placeholder')
+                                ->label(__('site-builder/block-type.labels.field_placeholder'))
+                                ->maxLength(255)
+                                ->visible(fn(Forms\Get $get) => in_array($get('type'), ['text', 'textarea', 'rich_text', 'number', 'select'])),
+
+                        ])->columnSpanFull()->columns(4),
+
 
                         // حقول خاصة بنوع الصورة
-                        Forms\Components\Group::make([
-                            Forms\Components\Toggle::make('config.with_thumbnail')
+                        Group::make([
+                            Toggle::make('config.with_thumbnail')
                                 ->label(__('site-builder/block-type.image_with_thumbnail'))
                                 ->default(false)
+                                ->reactive()
                                 ->inline(),
 
-                            Forms\Components\Grid::make(12)->schema([
-                                Forms\Components\TextInput::make('config.width')
+                            Grid::make(12)->schema([
+                                TextInput::make('config.width')
                                     ->label(__('site-builder/block-type.image_width'))
                                     ->numeric()
                                     ->default(800)
                                     ->minValue(1)
-                                    ->columnSpan(6),
+                                    ->columnSpan(3),
 
-                                Forms\Components\TextInput::make('config.height')
+                                TextInput::make('config.height')
                                     ->label(__('site-builder/block-type.image_height'))
                                     ->numeric()
                                     ->default(600)
                                     ->minValue(1)
-                                    ->columnSpan(6),
-                            ]),
+                                    ->columnSpan(3),
 
-                            Forms\Components\Grid::make(12)->schema([
-                                Forms\Components\TextInput::make('config.thumb_width')
+                                TextInput::make('config.thumb_width')
                                     ->label(__('site-builder/block-type.thumb_width'))
                                     ->numeric()
                                     ->default(200)
                                     ->minValue(1)
-                                    ->columnSpan(6),
+                                    ->columnSpan(3)
+                                    ->visible(fn(Forms\Get $get) => $get('config.with_thumbnail') === true),
 
-                                Forms\Components\TextInput::make('config.thumb_height')
+                                TextInput::make('config.thumb_height')
                                     ->label(__('site-builder/block-type.thumb_height'))
                                     ->numeric()
                                     ->default(150)
                                     ->minValue(1)
-                                    ->columnSpan(6),
-                            ])->visible(fn (Forms\Get $get) => $get('config.with_thumbnail') === true),
-                        ])->visible(fn (Forms\Get $get) => $get('type') === 'image')
-                            ->columnSpanFull(),
+                                    ->columnSpan(3)
+                                    ->visible(fn(Forms\Get $get) => $get('config.with_thumbnail') === true),
+                            ]),
+                        ])->columnSpanFull()->visible(fn(Forms\Get $get) => $get('type') === 'image'),
 
-                        // حقول خاصة بنوع الأيقون
-                        Forms\Components\Group::make([
-                            IconPicker::make('config.default_icon')
-                                ->label(__('site-builder/block-type.default_icon'))
-                                ->searchLabels()
-                                ->preload()
-                                ->columns([
-                                    'default' => 2,
-                                    'lg' => 6,
-                                    '2xl' => 8,
-                                ])
-                                ->sets(['fas', 'fab', "fontawesome-solid", "fontawesome-brands"])
-                        ])->visible(fn (Forms\Get $get) => $get('type') === 'icon')
-                            ->columnSpanFull(),
 
                         // حقول خاصة بنوع repeater
                         Forms\Components\Repeater::make('config.fields')
@@ -204,36 +210,22 @@ class BuilderBlockTypeResource extends Resource {
                             ])
                             ->collapsible()
                             ->itemLabel(fn(array $state): ?string => $state['label'] ?? null)
-                            ->visible(fn (Forms\Get $get) => $get('type') === 'repeater')
+                            ->visible(fn(Forms\Get $get) => $get('type') === 'repeater')
                             ->columnSpanFull(),
 
-                        // حقل placeholder يظهر لأنواع محددة من الحقول
-                        Forms\Components\TextInput::make('placeholder')
-                            ->label(__('site-builder/block-type.labels.field_placeholder'))
-                            ->maxLength(255)
-                            ->visible(fn (Forms\Get $get) => in_array($get('type'), ['text', 'textarea', 'rich_text', 'number', 'email', 'password', 'date', 'time', 'select'])),
 
                         // حقل القيم الافتراضية للنصوص والأرقام
-                        Forms\Components\TextInput::make('default')
+                        TextInput::make('default')
                             ->label(__('site-builder/block-type.labels.field_default'))
                             ->maxLength(255)
                             ->helperText(__('site-builder/block-type.help_text.field_default'))
-                            ->visible(fn (Forms\Get $get) => in_array($get('type'), ['text', 'textarea', 'number'])),
+                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['text', 'textarea', 'rich_text', 'number'])),
 
                         // حقل اللون الافتراضي
                         Forms\Components\ColorPicker::make('default')
                             ->label(__('site-builder/block-type.labels.field_default'))
-                            ->visible(fn (Forms\Get $get) => $get('type') === 'color'),
+                            ->visible(fn(Forms\Get $get) => $get('type') === 'color'),
 
-                        // حقل التاريخ الافتراضي
-                        Forms\Components\DatePicker::make('default')
-                            ->label(__('site-builder/block-type.labels.field_default'))
-                            ->visible(fn (Forms\Get $get) => $get('type') === 'date'),
-
-                        // حقل الوقت الافتراضي
-                        Forms\Components\TimePicker::make('default')
-                            ->label(__('site-builder/block-type.labels.field_default'))
-                            ->visible(fn (Forms\Get $get) => $get('type') === 'time'),
 
                         // حقل القيمة الافتراضية للراديو
                         Forms\Components\Radio::make('default')
@@ -242,7 +234,7 @@ class BuilderBlockTypeResource extends Resource {
                                 'true' => __('site-builder/block-type.field_radio.true'),
                                 'false' => __('site-builder/block-type.field_radio.false'),
                             ])
-                            ->visible(fn (Forms\Get $get) => $get('type') === 'radio'),
+                            ->visible(fn(Forms\Get $get) => $get('type') === 'radio'),
 
                         Forms\Components\KeyValue::make('options')
                             ->label(__('site-builder/block-type.labels.field_options'))
@@ -252,8 +244,8 @@ class BuilderBlockTypeResource extends Resource {
                             ->keyPlaceholder(__('site-builder/block-type.enter_option_key'))
                             ->valuePlaceholder(__('site-builder/block-type.enter_option_value'))
                             ->addActionLabel(__('site-builder/block-type.add_option'))
-                            ->required(fn (Forms\Get $get) => in_array($get('type'), ['select', 'checkbox', 'radio']))
-                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['select', 'checkbox', 'radio']))
+                            ->required(fn(Forms\Get $get) => in_array($get('type'), ['select']))
+                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['select']))
                             ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
                                 // Convert complex values to JSON strings
                                 if (is_array($state)) {
@@ -282,14 +274,9 @@ class BuilderBlockTypeResource extends Resource {
                                 return $state;
                             }),
 
-                        Forms\Components\TextInput::make('help')
-                            ->label(__('site-builder/block-type.labels.field_help'))
-                            ->maxLength(255)
-                            ->helperText(__('site-builder/block-type.help_text.field_help')),
-
                         // احفاء حقل default للأنواع التي لا تحتاجه
                         Forms\Components\Hidden::make('default')
-                            ->visible(fn (Forms\Get $get) => in_array($get('type'), ['select', 'checkbox', 'repeater', 'file', 'image'])),
+                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['select', 'checkbox', 'repeater', 'file', 'image'])),
                     ])
                     ->columns(2)
                     ->columnSpanFull()
