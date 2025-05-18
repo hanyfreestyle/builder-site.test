@@ -100,14 +100,9 @@ class BuilderBlockResource extends Resource {
                                                 if (!empty($data)) {
                                                     $set('data', $data);
 
-                                                    // Debug
-                                                    \Illuminate\Support\Facades\Log::info('Setting data from schema defaults: ' . json_encode($data));
                                                 } else {
                                                     // Clear previous data
                                                     $set('data', null);
-
-                                                    // Debug
-                                                    \Illuminate\Support\Facades\Log::info('No default values found in schema for block type: ' . $state);
                                                 }
                                                 $set('view_version', 'default');
                                             }
@@ -199,7 +194,9 @@ class BuilderBlockResource extends Resource {
                     ->collapsible(),
 
                 // Translations Section
+
                 Forms\Components\Section::make(__('site-builder/block.translations_heading'))
+
                     ->description(__('site-builder/block.translations_description'))
                     ->schema(function (Forms\Get $get) {
                         $blockTypeId = $get('block_type_id');
@@ -259,17 +256,10 @@ class BuilderBlockResource extends Resource {
                                     ->schema([
                                         Forms\Components\Grid::make(12)
                                             ->schema($fields)
-                                    ])
-                                    ->collapsed();
+                                    ]);
                             }
                         }
 
-                        // Debugging information
-                        \Illuminate\Support\Facades\Log::info('Translation fields: ' . json_encode([
-                            'blockTypeId' => $blockTypeId,
-                            'schema' => $schema,
-                            'hasTranslationFields' => !empty($languageSections)
-                        ]));
 
                         return $languageSections;
                     })
