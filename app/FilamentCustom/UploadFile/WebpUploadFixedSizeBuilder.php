@@ -8,7 +8,7 @@ use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Encoders\WebpEncoder;
 use Illuminate\Support\Facades\Storage;
 
-class WebpUploadFixedSizeBulider extends FileUpload {
+class WebpUploadFixedSizeBuilder extends FileUpload {
     protected int $filter = 4;
     protected int $width = 300;
     protected int $height = 300;

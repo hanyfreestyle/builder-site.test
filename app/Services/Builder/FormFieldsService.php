@@ -2,20 +2,17 @@
 
 namespace App\Services\Builder;
 
-use App\FilamentCustom\UploadFile\WebpUploadFixedSize;
-use App\FilamentCustom\UploadFile\WebpUploadFixedSizeBulider;
+use App\FilamentCustom\UploadFile\WebpUploadFixedSizeBuilder;
 use Filament\Forms;
-use App\Enums\SiteBuilder\FieldWidth;
-use Filament\Forms\Components\TextInput;
 use Guava\FilamentIconPicker\Forms\IconPicker;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 
 class FormFieldsService {
-    /**
-     * Create form fields based on block type schema
-     */
+    
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function createFormFieldsFromSchema(array $schema): array {
         $formFields = [];
 
@@ -92,7 +89,7 @@ class FormFieldsService {
 
                 case 'image':
                     // إنشاء حقل الصورة
-                    $formField = WebpUploadFixedSizeBulider::make("data.{$name}")
+                    $formField = WebpUploadFixedSizeBuilder::make("data.{$name}")
                         ->label($label)
                         ->setThumbnail($with_thumbnail)
                         ->helperText($help);
