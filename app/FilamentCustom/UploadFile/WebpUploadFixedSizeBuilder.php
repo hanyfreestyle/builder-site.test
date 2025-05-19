@@ -249,6 +249,103 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
         }
     }
 
+    protected function handleFileDeletion($file, $record): void {
+        // التأكد من وجود الملف والسجل
+        if (!$record || !$file) {
+            return;
+        }
+
+        try {
+            // 1. حذف الملف الأساسي من التخزين
+            Storage::disk($this->diskDir)->delete($file);
+
+            // 2. الحصول على مسار الحالة لتحديد نوع الحقل
+            $statePath = $this->getStatePath();
+            $currentField = $this->getFieldName();
+            $thumbnailField = $currentField . $this->thumbnailSuffix;
+
+            // 3. تحديد إذا كان الحقل داخل مكرر (مع UUID)
+            $isInRepeater = preg_match(
+                '/^data\.data\.([a-zA-Z0-9_]+)\.([a-f0-9\-]{36})\.([a-zA-Z0-9_]+)$/',
+                $statePath,
+                $matches
+            );
+
+            // نسخ بيانات السجل لتجنب المشاكل أثناء التعديل
+            $data = $record->data;
+
+            if ($isInRepeater) {
+                // 4. معالجة الحقول داخل المكرر
+                $repeaterName = $matches[1]; // مثال: "icons"
+                $itemUuid = $matches[2];     // مثال: "uuid-string"
+                $fieldInRepeater = $matches[3]; // مثال: "photo"
+                $thumbnailFieldName = $fieldInRepeater . $this->thumbnailSuffix;
+
+                // 5. التأكد من وجود المكرر
+                if (isset($data[$repeaterName]) && is_array($data[$repeaterName])) {
+                    $foundIndex = null;
+
+                    // 6. البحث عن العنصر المناسب في المكرر
+                    foreach ($data[$repeaterName] as $index => $item) {
+                        // البحث باستخدام مسار الملف
+                        if (isset($item[$fieldInRepeater]) && $item[$fieldInRepeater] === $file) {
+                            $foundIndex = $index;
+                            break;
+                        }
+
+                        // البحث باستخدام UUID إذا كان موجوداً
+                        if (isset($item['uuid']) && $item['uuid'] === $itemUuid) {
+                            $foundIndex = $index;
+                            break;
+                        }
+                    }
+
+                    // 7. إذا وجدنا العنصر، نقوم بتحديثه
+                    if ($foundIndex !== null) {
+                        // حذف الصورة المصغرة من التخزين
+                        if ($this->generateThumbnail && isset($data[$repeaterName][$foundIndex][$thumbnailFieldName])) {
+                            Storage::disk($this->diskDir)->delete($data[$repeaterName][$foundIndex][$thumbnailFieldName]);
+                        }
+
+                        // تعيين قيم الحقول إلى null
+                        $data[$repeaterName][$foundIndex][$fieldInRepeater] = null;
+                        if ($this->generateThumbnail) {
+                            $data[$repeaterName][$foundIndex][$thumbnailFieldName] = null;
+                        }
+                    }
+                    // 8. إذا لم نجد العنصر وكان هناك عنصر واحد فقط، نفترض أنه العنصر المطلوب
+                    elseif (count($data[$repeaterName]) === 1) {
+                        if ($this->generateThumbnail && isset($data[$repeaterName][0][$thumbnailFieldName])) {
+                            Storage::disk($this->diskDir)->delete($data[$repeaterName][0][$thumbnailFieldName]);
+                            $data[$repeaterName][0][$thumbnailFieldName] = null;
+                        }
+                        $data[$repeaterName][0][$fieldInRepeater] = null;
+                    }
+                }
+            } else {
+                // 9. معالجة الحقول العادية
+                // حذف الصورة المصغرة من التخزين
+                if ($this->generateThumbnail && isset($data[$thumbnailField])) {
+                    Storage::disk($this->diskDir)->delete($data[$thumbnailField]);
+                }
+
+                // تعيين قيم الحقول إلى null
+                $data[$currentField] = null;
+                if ($this->generateThumbnail) {
+                    $data[$thumbnailField] = null;
+                }
+            }
+
+            // 10. حفظ التغييرات
+            $record->data = $data;
+            if (method_exists($record, 'save')) {
+                $record->save();
+            }
+        } catch (\Exception $e) {
+            // الاستمرار في الكود حتى في حالة حدوث خطأ
+        }
+    }
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     /*** عملية مساعدة لإنشاء المجلد إذا لم يكن موجودًا */
