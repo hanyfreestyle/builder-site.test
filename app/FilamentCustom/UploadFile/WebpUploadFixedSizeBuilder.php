@@ -3,6 +3,7 @@
 namespace App\FilamentCustom\UploadFile;
 
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Encoders\WebpEncoder;
@@ -203,25 +204,27 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
             if ($livewire) {
                 $fieldName = $this->getFieldName();
                 $thumbnailField = $fieldName . $this->thumbnailSuffix;
-
-                // الحصول على المسار الكامل للحقل الحالي في نموذج البيانات
                 $statePath = $this->getStatePath();
 
-                // التحقق من وجود الحقل في مكرر
-                if (preg_match('/data\.([^\.]+)\.([0-9]+)\.([^\.]+)$/', $statePath, $matches)) {
-                    $repeaterName = $matches[1]; // اسم المكرر (مثل "icons")
-                    $itemIndex = $matches[2];    // رقم العنصر (مثل 0،1،2...)
-                    $fieldInRepeater = $matches[3]; // اسم الحقل (مثل "photo")
+                // التعديل هنا: دعم UUID في المكرر
+                if (preg_match('/data\.([a-zA-Z0-9_]+)\.([a-fA-F0-9\-]+)\.([a-zA-Z0-9_]+)$/', $statePath, $matches)) {
+                    $repeaterName = $matches[1]; // اسم المكرر (مثال: "icons")
+                    $itemUuid = $matches[2];     // UUID الخاص بالعنصر
+                    $fieldInRepeater = $matches[3]; // اسم الحقل (مثال: "photo")
 
-                    // تحديث المسار للثمبنايل داخل المكرر
-                    $thumbnailPathInRepeater = "data.{$repeaterName}.{$itemIndex}.{$fieldInRepeater}_thumbnail";
+                    // بناء مسار الصورة المصغرة داخل المكرر
+                    $thumbnailFieldPath = "data.{$repeaterName}.{$itemUuid}.{$fieldInRepeater}_thumbnail";
 
-                    // تحديث بيانات الـ Livewire باستخدام data_set()
-                    data_set($livewire, $thumbnailPathInRepeater, $thumbnailPath);
+                    // تحديث بيانات الـ Livewire
+                    data_set($livewire, $thumbnailFieldPath, $thumbnailPath);
+
+                    // طباعة معلومات التصحيح (يمكن حذفها لاحقًا)
+                    Log::info("Thumbnail Path in Repeater: {$thumbnailFieldPath} = {$thumbnailPath}");
 
                 } else if (strpos($statePath, 'data.') === 0) {
-                    // الحقل الرئيسي - أسلوب التحديث العادي
+                    // الحقول العادية خارج المكرر
                     $livewire->data['data'][$thumbnailField] = $thumbnailPath;
+                   Log::info("Thumbnail Path in Main: {$thumbnailField} = {$thumbnailPath}");
                 }
             }
         }

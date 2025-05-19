@@ -275,7 +275,7 @@ class FormFieldsService {
                                         $subSchema[] = Forms\Components\Hidden::make($thumbnailFieldName)
                                             ->reactive()
                                             ->dehydrated(true)
-                                            ->statePath("data.{$name}.{$thumbnailFieldName}"); // إضافة statePath لتحديد المسار الصحيح
+                                            ->statePath("{$subName}_thumbnail"); // تحديد المسار بدون UUID (سيتم إدارته تلقائيًا)
                                     }
                                     break;
 
