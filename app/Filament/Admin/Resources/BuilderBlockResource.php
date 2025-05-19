@@ -7,6 +7,12 @@ use App\Models\Builder\BlockType;
 use App\Models\Builder\Page;
 use App\Services\Builder\FormFieldsService;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -42,11 +48,11 @@ class BuilderBlockResource extends Resource {
         return $form
             ->schema([
                 // Basic Information Section
-                Forms\Components\Section::make(__('site-builder/block.tabs.basic_info'))
+                Section::make(__('site-builder/block.tabs.basic_info'))
                     ->schema([
-                        Forms\Components\Grid::make(12)
+                        Grid::make(12)
                             ->schema([
-                                Forms\Components\Select::make('pages')
+                                Select::make('pages')
                                     ->label(__('site-builder/block.pages'))
                                     ->placeholder(__('site-builder/block.select_pages'))
                                     ->relationship('pages', 'title')
@@ -55,21 +61,20 @@ class BuilderBlockResource extends Resource {
                                     ->columnSpan(6)
                                     ->searchable(),
 
-                                Forms\Components\Grid::make(6)
+                                Grid::make(6)
                                     ->schema([
-                                        Forms\Components\Toggle::make('is_active')
+                                        Toggle::make('is_active')
                                             ->label(__('site-builder/general.is_active'))
                                             ->inline(false)
                                             ->default(true),
-
-                                        Forms\Components\Toggle::make('is_visible')
+                                        Toggle::make('is_visible')
                                             ->label(__('site-builder/block.is_visible'))
                                             ->inline(false)
                                             ->default(true),
                                     ])
                                     ->columnSpan(6),
 
-                                Forms\Components\Select::make('block_type_id')
+                                Select::make('block_type_id')
                                     ->label(__('site-builder/block.block_type'))
                                     ->placeholder(__('site-builder/block.select_block_type'))
                                     ->options(BlockType::where('is_active', true)->pluck('name', 'id'))
@@ -113,7 +118,7 @@ class BuilderBlockResource extends Resource {
                                         }
                                     }),
 
-                                Forms\Components\Select::make('view_version')
+                                Select::make('view_version')
                                     ->label(__('site-builder/block.view_version'))
                                     ->options(function (Forms\Get $get) {
                                         $blockTypeId = $get('block_type_id');
@@ -149,45 +154,39 @@ class BuilderBlockResource extends Resource {
                     ->collapsible(),
 
                 // Content Section (Conditional based on blockType)
-                Forms\Components\Section::make(__('site-builder/block.tabs.content'))
+                Section::make(__('site-builder/block.tabs.content'))
                     ->schema(function (Forms\Get $get) {
                         $blockTypeId = $get('block_type_id');
 
                         if (!$blockTypeId) {
                             return [
-                                Forms\Components\Placeholder::make('no_block_type')
+                                Placeholder::make('no_block_type')
                                     ->label(__('site-builder/block.no_block_type_selected'))
                                     ->content(__('site-builder/block.please_select_block_type'))
                             ];
                         }
-
                         $blockType = BlockType::find($blockTypeId);
-
                         if (!$blockType) {
                             return [
-                                Forms\Components\Placeholder::make('invalid_block_type')
+                                Placeholder::make('invalid_block_type')
                                     ->label(__('site-builder/block.invalid_block_type'))
                                     ->content(__('site-builder/block.block_type_not_found'))
                             ];
                         }
-
                         $schema = $blockType->schema ?: [];
-
                         // Check if schema is empty
                         if (empty($schema)) {
                             return [
-                                Forms\Components\Placeholder::make('empty_schema')
+                                Placeholder::make('empty_schema')
                                     ->label(__('site-builder/block.empty_schema'))
                                     ->content(__('site-builder/block.no_fields_defined'))
                             ];
                         }
-
                         // Create form fields based on schema
                         return [
-                            Forms\Components\Grid::make(12)
-                                ->schema(
-                                    FormFieldsService::createFormFieldsFromSchema($schema)
-                                )
+                            Grid::make(12)->schema(
+                                FormFieldsService::createFormFieldsFromSchema($schema)
+                            )
                         ];
                     })
                     ->visible(fn(Forms\Get $get) => $get('block_type_id'))
@@ -195,47 +194,36 @@ class BuilderBlockResource extends Resource {
 
                 // Translations Section
 
-                Forms\Components\Group::make()->schema(function (Forms\Get $get) {
+                Group::make()->schema(function (Forms\Get $get) {
                     $blockTypeId = $get('block_type_id');
 
                     if (!$blockTypeId) {
                         return [
-                            Forms\Components\Placeholder::make('no_block_type_trans')
-                                ->content(__('site-builder/block.please_select_block_type'))
+                            Placeholder::make('no_block_type_trans')->content(__('site-builder/block.please_select_block_type'))
                         ];
                     }
-
                     $blockType = BlockType::find($blockTypeId);
-
                     if (!$blockType) {
                         return [];
                     }
-
                     $schema = $blockType->schema ?: [];
-
                     if (empty($schema)) {
                         return [];
                     }
-
                     // Get all supported languages in the system
                     $supportedLanguages = config('app.supported_locales', ['ar', 'en']);
-
                     // Remove default language (first language is considered default)
                     $defaultLanguage = $supportedLanguages[0] ?? 'ar';
                     $translationLanguages = array_filter($supportedLanguages, function ($lang) use ($defaultLanguage) {
                         return $lang !== $defaultLanguage;
                     });
-
                     if (empty($translationLanguages)) {
                         return [
-                            Forms\Components\Placeholder::make('no_translations')
-                                ->content(__('site-builder/block.no_translations_needed'))
+                            Placeholder::make('no_translations')->content(__('site-builder/block.no_translations_needed'))
                         ];
                     }
-
                     // Create sections for each language
                     $languageSections = [];
-
                     foreach ($translationLanguages as $locale) {
                         $fields = FormFieldsService::createTranslationFieldsFromSchema($schema, $locale);
 
@@ -248,10 +236,9 @@ class BuilderBlockResource extends Resource {
                                 'de' => __('site-builder/translation.locale_de'),
                                 default => $locale,
                             };
-
-                            $languageSections[] = Forms\Components\Section::make(__('site-builder/block.language_content', ['language' => $languageName]))
+                            $languageSections[] = Section::make(__('site-builder/block.language_content', ['language' => $languageName]))
                                 ->schema([
-                                    Forms\Components\Grid::make(12)
+                                    Grid::make(12)
                                         ->schema($fields)
                                 ]);
                         }

@@ -7,33 +7,33 @@ use App\Enums\SiteBuilder\BlockTypeField;
 use App\Enums\SiteBuilder\FieldWidth;
 use App\Models\Builder\BlockType;
 use Filament\Forms;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderBlockTypeResource\Pages;
-use Guava\FilamentIconPicker\Forms\IconPicker;
 
 class BuilderBlockTypeResource extends Resource {
     protected static ?string $model = BlockType::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
-
     protected static ?string $navigationGroup = 'Site Builder';
-
     protected static ?int $navigationSort = 20;
-
     protected static ?string $navigationLabel = 'block_types';
-
     protected static ?string $modelLabel = 'block_type';
-
     protected static ?string $pluralModelLabel = 'block_types';
 
     public static function getNavigationLabel(): string {
@@ -52,35 +52,37 @@ class BuilderBlockTypeResource extends Resource {
         return $form
             ->schema([
                 // Basic Information Section
-                Forms\Components\Section::make(__('site-builder/block-type.tabs.basic_info'))
+                Section::make(__('site-builder/block-type.tabs.basic_info'))
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('site-builder/general.name'))
-                            ->required()
-                            ->maxLength(255),
+                        Group::make()->schema([
+                            TextInput::make('name')
+                                ->label(__('site-builder/general.name'))
+                                ->required()
+                                ->maxLength(255),
 
-                        Forms\Components\TextInput::make('slug')
-                            ->label(__('site-builder/general.slug'))
-                            ->required()
-                            ->maxLength(255)
-                            ->unique(BlockType::class, 'slug', fn($record) => $record)
-                            ->alphaDash(),
+                            TextInput::make('slug')
+                                ->label(__('site-builder/general.slug'))
+                                ->required()
+                                ->maxLength(255)
+                                ->unique(BlockType::class, 'slug', fn($record) => $record)
+                                ->alphaDash(),
 
-                        Forms\Components\Select::make('category')
-                            ->label(__('site-builder/block-type.labels.category'))
-                            ->options(BlockCategory::options())
-                            ->default(BlockCategory::BASIC)
-                            ->searchable()
-                            ->helperText(__('site-builder/block-type.help_text.category')),
+                            Select::make('category')
+                                ->label(__('site-builder/block-type.labels.category'))
+                                ->options(BlockCategory::options())
+                                ->default(BlockCategory::BASIC)
+                                ->searchable()
+                                ->helperText(__('site-builder/block-type.help_text.category')),
+//                            Toggle::make('is_active')
+//                                ->inline(false)
+//                                ->label(__('site-builder/general.is_active'))
+//                                ->default(true),
+                        ])->columns(3),
+                    ]),
 
-                        Forms\Components\Toggle::make('is_active')
-                            ->label(__('site-builder/general.is_active'))
-                            ->default(true),
-                    ])
-                    ->columns(2),
 
                 // Schema Section
-                Forms\Components\Repeater::make('schema')
+                Repeater::make('schema')
                     ->label(__('site-builder/block-type.labels.schema'))
                     ->schema([
 
@@ -140,7 +142,6 @@ class BuilderBlockTypeResource extends Resource {
 
                         ])->columnSpanFull()->columns(4),
 
-
                         // حقول خاصة بنوع الصورة
                         Group::make([
                             Toggle::make('config.with_thumbnail')
@@ -170,7 +171,7 @@ class BuilderBlockTypeResource extends Resource {
                                     ->default(200)
                                     ->minValue(1)
                                     ->columnSpan(3)
-                                    ->visible(fn(Forms\Get $get) => $get('config.with_thumbnail') === true),
+                                    ->visible(fn(Get $get) => $get('config.with_thumbnail') === true),
 
                                 TextInput::make('config.thumb_height')
                                     ->label(__('site-builder/block-type.thumb_height'))
@@ -178,65 +179,32 @@ class BuilderBlockTypeResource extends Resource {
                                     ->default(150)
                                     ->minValue(1)
                                     ->columnSpan(3)
-                                    ->visible(fn(Forms\Get $get) => $get('config.with_thumbnail') === true),
+                                    ->visible(fn(Get $get) => $get('config.with_thumbnail') === true),
                             ]),
-                        ])->columnSpanFull()->visible(fn(Forms\Get $get) => $get('type') === 'image'),
-
-
-                        // حقول خاصة بنوع repeater
-                        Forms\Components\Repeater::make('config.fields')
-                            ->label(__('site-builder/block-type.repeater_fields'))
-                            ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('site-builder/block-type.labels.field_name'))
-                                    ->required()
-                                    ->maxLength(255),
-
-                                Forms\Components\TextInput::make('label')
-                                    ->label(__('site-builder/block-type.labels.field_label'))
-                                    ->required()
-                                    ->maxLength(255),
-
-                                Forms\Components\Select::make('type')
-                                    ->label(__('site-builder/block-type.labels.field_type'))
-                                    ->options(array_filter(BlockTypeField::options(), fn($key) => $key != 'repeater', ARRAY_FILTER_USE_KEY))
-                                    ->required()
-                                    ->searchable(),
-
-                                Forms\Components\Toggle::make('required')
-                                    ->label(__('site-builder/block-type.labels.field_required'))
-                                    ->inline(false)
-                                    ->default(false),
-                            ])
-                            ->collapsible()
-                            ->itemLabel(fn(array $state): ?string => $state['label'] ?? null)
-                            ->visible(fn(Forms\Get $get) => $get('type') === 'repeater')
-                            ->columnSpanFull(),
-
+                        ])->columnSpanFull()->visible(fn(Get $get) => $get('type') === 'image'),
 
                         // حقل القيم الافتراضية للنصوص والأرقام
                         TextInput::make('default')
                             ->label(__('site-builder/block-type.labels.field_default'))
                             ->maxLength(255)
                             ->helperText(__('site-builder/block-type.help_text.field_default'))
-                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['text', 'textarea', 'rich_text', 'number'])),
+                            ->visible(fn(Get $get) => in_array($get('type'), ['text', 'textarea', 'rich_text', 'number'])),
 
                         // حقل اللون الافتراضي
-                        Forms\Components\ColorPicker::make('default')
+                        ColorPicker::make('default')
                             ->label(__('site-builder/block-type.labels.field_default'))
-                            ->visible(fn(Forms\Get $get) => $get('type') === 'color'),
-
+                            ->visible(fn(Get $get) => $get('type') === 'color'),
 
                         // حقل القيمة الافتراضية للراديو
-                        Forms\Components\Radio::make('default')
+                        Radio::make('default')
                             ->label(__('site-builder/block-type.labels.field_default'))
                             ->options([
                                 'true' => __('site-builder/block-type.field_radio.true'),
                                 'false' => __('site-builder/block-type.field_radio.false'),
                             ])
-                            ->visible(fn(Forms\Get $get) => $get('type') === 'radio'),
+                            ->visible(fn(Get $get) => $get('type') === 'radio'),
 
-                        Forms\Components\KeyValue::make('options')
+                        KeyValue::make('options')
                             ->label(__('site-builder/block-type.labels.field_options'))
                             ->helperText(__('site-builder/block-type.help_text.field_options'))
                             ->keyLabel(__('site-builder/block-type.option_key'))
@@ -244,9 +212,9 @@ class BuilderBlockTypeResource extends Resource {
                             ->keyPlaceholder(__('site-builder/block-type.enter_option_key'))
                             ->valuePlaceholder(__('site-builder/block-type.enter_option_value'))
                             ->addActionLabel(__('site-builder/block-type.add_option'))
-                            ->required(fn(Forms\Get $get) => in_array($get('type'), ['select']))
-                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['select']))
-                            ->afterStateHydrated(function (Forms\Components\KeyValue $component, $state) {
+                            ->required(fn(Get $get) => in_array($get('type'), ['select']))
+                            ->visible(fn(Get $get) => in_array($get('type'), ['select']))
+                            ->afterStateHydrated(function (KeyValue $component, $state) {
                                 // Convert complex values to JSON strings
                                 if (is_array($state)) {
                                     foreach ($state as $key => $value) {
@@ -275,8 +243,43 @@ class BuilderBlockTypeResource extends Resource {
                             }),
 
                         // احفاء حقل default للأنواع التي لا تحتاجه
-                        Forms\Components\Hidden::make('default')
-                            ->visible(fn(Forms\Get $get) => in_array($get('type'), ['select', 'checkbox', 'repeater', 'file', 'image'])),
+                        Hidden::make('default')
+                            ->visible(fn(Get $get) => in_array($get('type'), ['select', 'checkbox', 'repeater', 'file', 'image'])),
+
+                        // حقول خاصة بنوع repeater
+                        Repeater::make('config.fields')
+                            ->label(__('site-builder/block-type.repeater_fields'))
+                            ->schema([
+                                Group::make()->schema([
+                                    Select::make('type')
+                                        ->label(__('site-builder/block-type.labels.field_type'))
+                                        ->options(array_filter(BlockTypeField::options(), fn($key) => $key != 'repeater', ARRAY_FILTER_USE_KEY))
+                                        ->required()
+                                        ->searchable(),
+
+                                    TextInput::make('name')
+                                        ->label(__('site-builder/block-type.labels.field_name'))
+                                        ->required()
+                                        ->maxLength(255),
+
+                                    TextInput::make('label')
+                                        ->label(__('site-builder/block-type.labels.field_label'))
+                                        ->required()
+                                        ->maxLength(255),
+
+
+                                    Toggle::make('required')
+                                        ->label(__('site-builder/block-type.labels.field_required'))
+                                        ->inline(false)
+                                        ->default(false),
+                                ])->columns(4),
+
+
+                            ])
+                            ->collapsible()
+                            ->itemLabel(fn(array $state): ?string => $state['label'] ?? null)
+                            ->visible(fn(Get $get) => $get('type') === 'repeater')
+                            ->columnSpanFull(),
                     ])
                     ->columns(2)
                     ->columnSpanFull()
@@ -285,6 +288,8 @@ class BuilderBlockTypeResource extends Resource {
             ]);
     }
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {
         return $table
             ->columns([
