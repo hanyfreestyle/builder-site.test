@@ -203,30 +203,22 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
             if ($livewire) {
                 $fieldName = $this->getFieldName();
                 $thumbnailField = $fieldName . $this->thumbnailSuffix;
-                
+
                 // الحصول على المسار الكامل للحقل الحالي في نموذج البيانات
                 $statePath = $this->getStatePath();
-                
+
                 // التحقق من وجود الحقل في مكرر
                 if (preg_match('/data\.([^\.]+)\.([0-9]+)\.([^\.]+)$/', $statePath, $matches)) {
-                    // الحقل داخل مكرر - نحتاج إلى استخراج المعلومات
-                    $repeaterName = $matches[1];  // اسم المكرر (مثل "icons")
-                    $itemIndex = (int)$matches[2]; // رقم العنصر داخل المكرر (مثل 0، 1، 2)
-                    $fieldInRepeater = $matches[3]; // اسم الحقل داخل المكرر (مثل "photo")
-                    
-                    // بناء مسار حقل الصورة المصغرة
-                    $thumbnailFieldPath = "data.{$repeaterName}.{$itemIndex}.{$fieldInRepeater}_thumbnail"; // إضافة اللاحقة مباشرة
-                    
-                    // تحديث مباشر للبيانات في المكرر
-                    if (isset($livewire->data['data'][$repeaterName][$itemIndex])) {
-                        $livewire->data['data'][$repeaterName][$itemIndex]["{$fieldInRepeater}_thumbnail"] = $thumbnailPath;
-                    }
-                                       
-                    // أيضاً نستخدم data_set للتأكيد
-                    data_set($livewire, $thumbnailFieldPath, $thumbnailPath);
-                    
-                    // طباعة معلومات للتصحيح - ازل هذا السطر بعد التأكد من عمل الكود
-                    file_put_contents(storage_path('logs/thumbnail_debug.log'), "\n[" . date('Y-m-d H:i:s') . "] Path: {$thumbnailFieldPath} Value: $thumbnailPath Index: $itemIndex Field: $fieldInRepeater", FILE_APPEND);
+                    $repeaterName = $matches[1]; // اسم المكرر (مثل "icons")
+                    $itemIndex = $matches[2];    // رقم العنصر (مثل 0،1،2...)
+                    $fieldInRepeater = $matches[3]; // اسم الحقل (مثل "photo")
+
+                    // تحديث المسار للثمبنايل داخل المكرر
+                    $thumbnailPathInRepeater = "data.{$repeaterName}.{$itemIndex}.{$fieldInRepeater}_thumbnail";
+
+                    // تحديث بيانات الـ Livewire باستخدام data_set()
+                    data_set($livewire, $thumbnailPathInRepeater, $thumbnailPath);
+
                 } else if (strpos($statePath, 'data.') === 0) {
                     // الحقل الرئيسي - أسلوب التحديث العادي
                     $livewire->data['data'][$thumbnailField] = $thumbnailPath;
