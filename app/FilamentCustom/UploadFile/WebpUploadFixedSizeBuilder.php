@@ -92,7 +92,7 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
             ->reorderable(true)
             ->dehydrated(true)
             ->preserveFilenames()
-            ->deleteUploadedFileUsing(fn($file, $record) => $this->handleFileDeletion($file, $record))
+            ->deleteUploadedFileUsing(fn($file, $record,$livewire) => $this->handleFileDeletion($file, $record,$livewire))
             ->saveUploadedFileUsing(fn($file, $record, $livewire) => $this->handleUploadFixedSize($file, $record, $livewire));
     }
 
@@ -249,7 +249,7 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
         }
     }
 
-    protected function handleFileDeletion($file, $record): void {
+    protected function handleFileDeletion($file, $record,$livewire): void {
         // التأكد من وجود الملف والسجل
         if (!$record || !$file) {
             return;
@@ -340,6 +340,18 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
             $record->data = $data;
             if (method_exists($record, 'save')) {
                 $record->save();
+                try {
+                    // محاولة استخدام طريقة redirect إذا كانت متاحة
+                    $livewire->redirect(request()->header('Referer'));
+                } catch (\Exception $e) {
+                    try {
+                        // محاولة باستخدام الـ dispatchBrowserEvent
+                        $livewire->dispatchBrowserEvent('refresh-page', []);
+                    } catch (\Exception $e) {
+                        // محاولة أخيرة باستخدام JavaScript مباشرة
+                        echo "<script>window.location.reload();</script>";
+                    }
+                }
             }
         } catch (\Exception $e) {
             // الاستمرار في الكود حتى في حالة حدوث خطأ
