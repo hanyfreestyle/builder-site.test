@@ -271,8 +271,14 @@ class FormFieldsService {
                                         }
                                         
                                         // إضافة حقل مخفي للصورة المصغرة - مهم وضع المسار الكامل
-                                        $thumbnailFieldName = $subName . '_thumbnail';
-                                        $subSchema[] = Forms\Components\Hidden::make($thumbnailFieldName);
+                                        $thumbnailFieldName = $subName . '_thumbnail'; // تحديد لاحقة محددة للصورة المصغرة
+                                        $subSchema[] = Forms\Components\Hidden::make($thumbnailFieldName)
+                                                      ->reactive()
+                                                      ->dehydrated(true)
+                                                      ->afterStateHydrated(function ($state) use ($thumbnailFieldName) {
+                                                          // للتأكد من أن الحقل جاهز للاستقبال
+                                                          file_put_contents(storage_path('logs/thumbnail_debug.log'), "\n[" . date('Y-m-d H:i:s') . "] Hidden field hydrated: {$thumbnailFieldName} = {$state}", FILE_APPEND);
+                                                      });
                                     }
                                     break;
 
