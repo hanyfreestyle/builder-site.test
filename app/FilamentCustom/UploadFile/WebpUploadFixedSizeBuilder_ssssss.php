@@ -3,7 +3,6 @@
 namespace App\FilamentCustom\UploadFile;
 
 use Filament\Forms\Components\FileUpload;
-use Illuminate\Support\Facades\Log;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Encoders\WebpEncoder;
@@ -98,154 +97,78 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    protected function handleFileDeletion_is_work($file, $record): void {
-        try {
-            Log::info("==== بدء عملية الحذف ====");
-            Log::info("الملف المراد حذفه: {$file}");
+    protected function handleFileDeletion($file, $record): void {
+        if (!$record || !$file) {
+            return;
+        }
 
-            // 1. حذف الملف الأساسي
-            if (Storage::disk($this->diskDir)->exists($file)) {
-                Storage::disk($this->diskDir)->delete($file);
-                Log::info("تم حذف الملف الأساسي: {$file}");
-            } else {
-                Log::warning("الملف الأساسي غير موجود: {$file}");
-            }
+        // 1. حذف الملفات من التخزين
+        Storage::disk($this->diskDir)->delete($file);
 
-            // 2. الحصول على مسار الحقل وتحليله
-            $statePath = $this->getStatePath();
-            Log::info("مسار الحقل (statePath): {$statePath}");
+        // 2. الحصول على مسار الحالة لتحديد نوع الحقل
+        $statePath = $this->getStatePath();
+        $currentField = $this->getFieldName();
+        $thumbnailField = $currentField . $this->thumbnailSuffix;
 
-            // 3. تحديد إذا كان الحقل داخل مكرر (مع UUID)
-            $isInRepeater = preg_match(
-                '/^data\.data\.([a-zA-Z0-9_]+)\.([a-f0-9\-]{36})\.([a-zA-Z0-9_]+)$/',
-                $statePath,
-                $matches
-            );
+        // 3. التحقق مما إذا كان الحقل داخل مكرر
+        if (preg_match('/data\.data\.([a-zA-Z0-9_]+)\.([a-fA-F0-9\-]+)\.([a-zA-Z0-9_]+)$/', $statePath, $matches) ||
+            preg_match('/data\.([a-zA-Z0-9_]+)\.([a-fA-F0-9\-]+)\.([a-zA-Z0-9_]+)$/', $statePath, $matches)) {
+            // 3.1 حقل داخل مكرر
+            $repeaterName = $matches[1]; // اسم المكرر (مثل "icons")
+            $itemUuid = $matches[2];     // معرف العنصر
+            $fieldInRepeater = $matches[3]; // اسم الحقل في المكرر (مثل "photo")
+            $thumbnailFieldName = $fieldInRepeater . $this->thumbnailSuffix;
 
-            if ($isInRepeater) {
-                Log::info("تم التعرف على الحقل داخل مكرر", $matches);
-                $repeaterName = $matches[1]; // مثال: "icons"
-                $itemUuid = $matches[2];     // مثال: "e5c3a475-55e4-4b3f-a62e-c7b6c441433b"
-                $currentField = $matches[3];  // مثال: "photo"
-                $thumbnailField = $currentField . $this->thumbnailSuffix;
-
-                // 4. نسخ البيانات لتجنب مشكلة التعديل غير المباشر
-                $data = $record->data;
-                Log::info("البيانات قبل التعديل:", $data);
-
-                // المكرر موجود ولكن قد يكون كمصفوفة عددية وليس مصفوفة مفتاحية
-                if (isset($data[$repeaterName]) && is_array($data[$repeaterName])) {
-                    $foundIndex = null;
-
-                    // البحث في جميع عناصر المكرر
-                    foreach ($data[$repeaterName] as $index => $item) {
-                        // نبحث بناءً على محتوى الحقل - الصورة يجب أن تكون موجودة لنتأكد من أننا نحذف العنصر الصحيح
-                        if (isset($item[$currentField]) && $item[$currentField] === $file) {
-                            $foundIndex = $index;
-                            break;
-                        }
-
-                        // إذا لم نجد الملف مباشرة، قد نبحث عن UUID في العنصر (إذا كان مخزنًا)
-                        if (isset($item['uuid']) && $item['uuid'] === $itemUuid) {
-                            $foundIndex = $index;
-                            break;
-                        }
-                    }
-
-                    if ($foundIndex !== null) {
-                        Log::info("تم العثور على العنصر في المكرر بالفهرس: {$foundIndex}");
-
-                        // 5. حذف ملف الثمبنايل إذا وجد
-                        $thumbnailFile = $data[$repeaterName][$foundIndex][$thumbnailField] ?? null;
-                        if ($thumbnailFile) {
-                            if (Storage::disk($this->diskDir)->exists($thumbnailFile)) {
-                                Storage::disk($this->diskDir)->delete($thumbnailFile);
-                                Log::info("تم حذف ملف الثمبنايل: {$thumbnailFile}");
-                            } else {
-                                Log::warning("ملف الثمبنايل غير موجود: {$thumbnailFile}");
-                            }
-                        }
-
-                        // 6. تحديث البيانات داخل المكرر
-                        $data[$repeaterName][$foundIndex][$currentField] = null;
-                        $data[$repeaterName][$foundIndex][$thumbnailField] = null;
-                        Log::info("البيانات بعد التعديل:", $data[$repeaterName][$foundIndex]);
-
-                        // 7. حفظ التغييرات
-                        $record->data = $data;
-                        if ($record->save()) {
-                            Log::info("تم تحديث السجل بنجاح");
-                        } else {
-                            Log::error("فشل في حفظ التغييرات");
-                        }
-                    } else {
-                        Log::error("لم يتم العثور على العنصر في المكرر {$repeaterName} بالملف {$file}");
-
-                        // طريقة بديلة للبحث عن العنصر المناسب
-                        // إذا كان هناك عنصر واحد فقط، قد نفترض أنه هو العنصر المطلوب
-                        if (count($data[$repeaterName]) === 1) {
-                            Log::info("المكرر يحتوي على عنصر واحد فقط، سنقوم بتحديثه");
-
-                            $data[$repeaterName][0][$currentField] = null;
-                            if (isset($data[$repeaterName][0][$thumbnailField])) {
-                                $thumbnailFile = $data[$repeaterName][0][$thumbnailField];
-                                if (Storage::disk($this->diskDir)->exists($thumbnailFile)) {
-                                    Storage::disk($this->diskDir)->delete($thumbnailFile);
-                                    Log::info("تم حذف ملف الثمبنايل: {$thumbnailFile}");
-                                }
-                                $data[$repeaterName][0][$thumbnailField] = null;
-                            }
-
-                            $record->data = $data;
-                            if ($record->save()) {
-                                Log::info("تم تحديث السجل بنجاح");
-                            } else {
-                                Log::error("فشل في حفظ التغييرات");
-                            }
-                        }
-                    }
-                } else {
-                    Log::error("المكرر غير موجود: {$repeaterName}");
-                }
-
-            } else {
-                // 8. التعامل مع الحقول العادية
-                $currentField = $this->getFieldName();
-                $thumbnailField = $currentField . $this->thumbnailSuffix;
-                Log::info("حقل عادي - الحقل الحالي: {$currentField}, الثمبنايل: {$thumbnailField}");
-
-                $data = $record->data;
-                Log::info("البيانات قبل التعديل:", $data);
-
-                // 9. حذف ملف الثمبنايل إذا وجد
-                $thumbnailFile = $data[$thumbnailField] ?? null;
-                if ($thumbnailFile) {
-                    if (Storage::disk($this->diskDir)->exists($thumbnailFile)) {
-                        Storage::disk($this->diskDir)->delete($thumbnailFile);
-                        Log::info("تم حذف ملف الثمبنايل: {$thumbnailFile}");
-                    } else {
-                        Log::warning("ملف الثمبنايل غير موجود: {$thumbnailFile}");
-                    }
-                }
-
-                // 10. تحديث البيانات
-                $data[$currentField] = null;
-                $data[$thumbnailField] = null;
-                Log::info("البيانات بعد التعديل:", $data);
-
-                $record->data = $data;
-                if ($record->save()) {
-                    Log::info("تم تحديث السجل بنجاح");
-                } else {
-                    Log::error("فشل في حفظ التغييرات");
+            // 3.2 حذف الصورة المصغرة إذا كانت مفعلة
+            if ($this->generateThumbnail) {
+                // توليد مسار الصورة المصغرة المحتمل
+                $thumbnailFile = str_replace('.webp', '_thumb.webp', $file);
+                Storage::disk($this->diskDir)->delete($thumbnailFile);
+                
+                // يمكننا أيضًا محاولة تحديد المسار من البيانات
+                if (isset($record->data[$repeaterName][$itemUuid][$thumbnailFieldName])) {
+                    Storage::disk($this->diskDir)->delete($record->data[$repeaterName][$itemUuid][$thumbnailFieldName]);
                 }
             }
 
-            Log::info("==== انتهت عملية الحذف ====");
+            // 3.3 تحديث البيانات في القاعدة
+            if (isset($record->data[$repeaterName][$itemUuid])) {
+                $record->data[$repeaterName][$itemUuid][$fieldInRepeater] = null;
+                if ($this->generateThumbnail) {
+                    $record->data[$repeaterName][$itemUuid][$thumbnailFieldName] = null;
+                }
+                
+                // حفظ التغييرات
+                if (method_exists($record, 'save')) {
+                    $record->save();
+                }
+            }
+        } else {
+            // 4. حقل عادي (غير متداخل في مكرر)
+            if ($this->generateThumbnail) {
+                // حذف الصورة المصغرة
+                if (isset($record->data[$thumbnailField])) {
+                    Storage::disk($this->diskDir)->delete($record->data[$thumbnailField]);
+                }
+            }
 
-        } catch (\Exception $e) {
-            Log::error("حدث خطأ أثناء الحذف: " . $e->getMessage());
-            Log::error("تفاصيل الخطأ: " . $e->getTraceAsString());
+            // تحديث البيانات مباشرة
+            if (is_array($record->data)) {
+                // طريقة 1: استخدام array_merge (مثل الكود القديم)
+                $record->data = array_merge($record->data, [
+                    $currentField => null
+                ]);
+                
+                // إضافة حقل الصورة المصغرة إذا كان مفعلاً
+                if ($this->generateThumbnail) {
+                    $record->data[$thumbnailField] = null;
+                }
+                
+                // حفظ التغييرات
+                if (method_exists($record, 'save')) {
+                    $record->save();
+                }
+            }
         }
     }
 
@@ -334,7 +257,7 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
 
                     // بناء المسار الكامل للصورة المصغرة في المكرر
                     $thumbnailPathInData = "data.{$repeaterName}.{$itemUuid}.{$thumbnailFieldName}";
-
+                    
                     // 1. التحقق من موجودات data
                     if (isset($livewire->data['data'][$repeaterName])) {
                         // 2. التحقق من وجود العنصر المحدد في المكرر
@@ -361,7 +284,7 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
                     $thumbnailFieldName = $fieldInRepeater . $this->thumbnailSuffix;
 
                     $thumbnailPathInData = "data.{$repeaterName}.{$itemUuid}.{$thumbnailFieldName}";
-
+                    
                     // التحقق والتحديث
                     if (isset($livewire->data[$repeaterName][$itemUuid])) {
                         $livewire->data[$repeaterName][$itemUuid][$thumbnailFieldName] = $thumbnailPath;
@@ -383,7 +306,7 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
                     array_pop($pathParts); // إزالة اسم الحقل
                     $basePath = implode('.', $pathParts);
                     $thumbnailPath_full = $basePath . '.' . $thumbnailField;
-
+                    
                     data_set($livewire, $thumbnailPath_full, $thumbnailPath);
                 }
             }
