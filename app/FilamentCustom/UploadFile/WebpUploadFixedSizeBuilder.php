@@ -203,7 +203,34 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
             if ($livewire) {
                 $fieldName = $this->getFieldName();
                 $thumbnailField = $fieldName . $this->thumbnailSuffix;
-                $livewire->data['data'][$thumbnailField] = $thumbnailPath;
+                
+                // الحصول على المسار الكامل للحقل الحالي في نموذج البيانات
+                $statePath = $this->getStatePath();
+                
+                // تحديد ما إذا كان الحقل داخل مكرر
+                if (preg_match('/data\.([^\.]+)\.([0-9]+)\.([^\.]+)$/', $statePath, $matches)) {
+                    // الحقل داخل مكرر - نحتاج إلى استخراج المعلومات
+                    $repeaterName = $matches[1];  // اسم المكرر (مثل "icons")
+                    $itemIndex = (int)$matches[2]; // رقم العنصر داخل المكرر (مثل 0، 1، 2)
+                    $fieldInRepeater = $matches[3]; // اسم الحقل داخل المكرر (مثل "photo")
+                    
+                    // بناء مسار حقل الصورة المصغرة
+                    $thumbnailFieldPath = "data.{$repeaterName}.{$itemIndex}.{$fieldInRepeater}{$this->thumbnailSuffix}";
+                    
+                    // تحديث مباشر للبيانات في المكرر
+                    if (isset($livewire->data['data'][$repeaterName][$itemIndex])) {
+                        $livewire->data['data'][$repeaterName][$itemIndex][$fieldInRepeater . $this->thumbnailSuffix] = $thumbnailPath;
+                    }
+                                       
+                    // أيضاً نستخدم data_set للتأكيد
+                    data_set($livewire, $thumbnailFieldPath, $thumbnailPath);
+                    
+                    // طباعة معلومات للتصحيح - ازل هذا السطر بعد التأكد من عمل الكود
+                    file_put_contents(storage_path('logs/thumbnail_debug.log'), "\n[" . date('Y-m-d H:i:s') . "] Path: {$thumbnailFieldPath} = {$thumbnailPath}", FILE_APPEND);
+                } else if (strpos($statePath, 'data.') === 0) {
+                    // الحقل الرئيسي - أسلوب التحديث العادي
+                    $livewire->data['data'][$thumbnailField] = $thumbnailPath;
+                }
             }
         }
 

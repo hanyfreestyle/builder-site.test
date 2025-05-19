@@ -180,31 +180,184 @@ class FormFieldsService {
                     $subSchema = [];
 
                     // If we have nested fields, create them
-                    if (isset($field['fields']) && is_array($field['fields'])) {
-                        foreach ($field['fields'] as $subField) {
+                    if (isset($field['config']['fields']) && is_array($field['config']['fields'])) {
+                        foreach ($field['config']['fields'] as $subField) {
                             $subName = $subField['name'] ?? '';
                             $subLabel = $subField['label'] ?? $subName;
                             $subType = $subField['type'] ?? 'text';
+                            $subRequired = $subField['required'] ?? false;
+                            $subPlaceholder = $subField['placeholder'] ?? null;
+                            $subHelp = $subField['help'] ?? null;
+                            $subDefault = $subField['default'] ?? null;
+                            $subWidth = $subField['width'] ?? 'full';
+                            $subFieldWidth = self::convertWidthToColumnSpan($subWidth);
+                            
+                            // Config for image fields
+                            $subConfig = $subField['config'] ?? [];
+                            $with_thumbnail = $subConfig['with_thumbnail'] ?? false;
+                            $img_width = $subConfig['width'] ?? null;
+                            $img_height = $subConfig['height'] ?? null;
+                            $thumb_width = $subConfig['thumb_width'] ?? null;
+                            $thumb_height = $subConfig['thumb_height'] ?? null;
 
-                            // Basic subfields for now, can be expanded
-                            if ($subType === 'text') {
-                                $subSchema[] = Forms\Components\TextInput::make($subName)
-                                    ->label($subLabel)
-                                    ->required($subField['required'] ?? false);
-                            } elseif ($subType === 'textarea') {
-                                $subSchema[] = Forms\Components\Textarea::make($subName)
-                                    ->label($subLabel)
-                                    ->required($subField['required'] ?? false);
+                            // Create field based on type (similar to the main switch)
+                            switch ($subType) {
+                                case 'text':
+                                    $subFormField = Forms\Components\TextInput::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+                                
+                                case 'textarea':
+                                    $subFormField = Forms\Components\Textarea::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->helperText($subHelp)
+                                        ->rows(6)
+                                        ->default($subDefault);
+                                    break;
 
-                            } elseif ($subType === 'image') {
-                                $subSchema[] = Forms\Components\FileUpload::make($subName)
-                                    ->label($subLabel)
-                                    ->image()
-                                    ->required($subField['required'] ?? false);
-                            } elseif ($subType === 'icon') {
-                                $subSchema[] = Forms\Components\TextInput::make($subName)
-                                    ->label($subLabel)
-                                    ->required($subField['required'] ?? false);
+                                case 'rich_text':
+                                    $subFormField = Forms\Components\RichEditor::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+
+                                case 'select':
+                                    $options = $subField['options'] ?? [];
+                                    $subFormField = Forms\Components\Select::make($subName)
+                                        ->label($subLabel)
+                                        ->options($options)
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->searchable()
+                                        ->preload()
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+
+                                case 'radio':
+                                    $subFormField = Forms\Components\Toggle::make($subName)
+                                        ->label($subLabel)
+                                        ->default($subDefault)
+                                        ->inline(false)
+                                        ->helperText($subHelp);
+                                    break;
+
+                                case 'image':
+                                    // إنشاء حقل الصورة باستخدام نفس WebpUploadFixedSizeBuilder
+                                    $subFormField = WebpUploadFixedSizeBuilder::make($subName)
+                                        ->label($subLabel)
+                                        ->setRequiredUpload($subRequired)
+                                        ->helperText($subHelp);
+
+                                    // إضافة إعدادات إضافية إذا كانت متوفرة
+                                    if ($img_width && $img_height) {
+                                        $subFormField->setResize((int)$img_width, (int)$img_height, 90);
+                                        $subFormField->imageCropAspectRatio(calcRatio((int)$img_width, (int)$img_height));
+                                    }
+
+                                    if ($with_thumbnail) {
+                                        $subFormField->setThumbnail($with_thumbnail);
+                                        if ($thumb_width && $thumb_height) {
+                                            $subFormField->setThumbnailSize((int)$thumb_width, (int)$thumb_height);
+                                        }
+                                        
+                                        // إضافة حقل مخفي للصورة المصغرة - مهم وضع المسار الكامل
+                                        $thumbnailFieldName = $subName . '_thumbnail';
+                                        $subSchema[] = Forms\Components\Hidden::make($thumbnailFieldName);
+                                    }
+                                    break;
+
+                                case 'date':
+                                    $subFormField = Forms\Components\DatePicker::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+
+                                case 'time':
+                                    $subFormField = Forms\Components\TimePicker::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+
+                                case 'color':
+                                    $subFormField = Forms\Components\ColorPicker::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+
+                                case 'icon':
+                                    $subFormField = IconPicker::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->searchLabels()
+                                        ->preload()
+                                        ->helperText($subHelp ?: __('site-builder/block.icon_help'))
+                                        ->columns([
+                                            'default' => 2,
+                                            'lg' => 3,
+                                            '2xl' => 4,
+                                        ])
+                                        ->sets(['fas', 'fab', "fontawesome-solid", "fontawesome-brands"]);
+                                    break;
+
+                                case 'link':
+                                    $subFormField = Forms\Components\Group::make([
+                                        Forms\Components\TextInput::make("{$subName}.text")
+                                            ->label(__('site-builder/block.link_text'))
+                                            ->required($subRequired)
+                                            ->placeholder(__('site-builder/block.link_text_placeholder'))
+                                            ->default($subDefault['text'] ?? null),
+
+                                        Forms\Components\TextInput::make("{$subName}.url")
+                                            ->label(__('site-builder/block.link_url'))
+                                            ->required($subRequired)
+                                            ->placeholder(__('site-builder/block.link_url_placeholder'))
+                                            ->default($subDefault['url'] ?? null),
+                                    ])->columns(2)->label($subLabel);
+                                    break;
+
+                                case 'number':
+                                    $subFormField = Forms\Components\TextInput::make($subName)
+                                        ->label($subLabel)
+                                        ->numeric()
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+
+                                default:
+                                    // Default to text input
+                                    $subFormField = Forms\Components\TextInput::make($subName)
+                                        ->label($subLabel)
+                                        ->required($subRequired)
+                                        ->placeholder($subPlaceholder)
+                                        ->helperText($subHelp)
+                                        ->default($subDefault);
+                                    break;
+                            }
+
+                            // Set column span based on field width
+                            if ($subFormField) {
+                                $subFormField->columnSpan($subFieldWidth);
+                                $subSchema[] = $subFormField;
                             }
                         }
                     } else {
@@ -221,9 +374,11 @@ class FormFieldsService {
                     $formField = Forms\Components\Repeater::make("data.{$name}")
                         ->label($label)
                         ->schema($subSchema)
+                        ->columns(12) // Use a 12-column grid for nested fields
                         ->required($required)
                         ->helperText($help)
                         ->collapsible()
+                        ->itemLabel(fn (array $state): ?string => $state['h1'] ?? $state['title'] ?? null)
                         ->defaultItems(1);
                     break;
 
