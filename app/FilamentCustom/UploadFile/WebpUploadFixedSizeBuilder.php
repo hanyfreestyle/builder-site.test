@@ -202,30 +202,106 @@ class WebpUploadFixedSizeBuilder extends FileUpload {
 
             // تحديث بيانات النموذج
             if ($livewire) {
+                $statePath = $this->getStatePath();
                 $fieldName = $this->getFieldName();
                 $thumbnailField = $fieldName . $this->thumbnailSuffix;
-                $statePath = $this->getStatePath();
 
-                // التعديل هنا: دعم UUID في المكرر
-                if (preg_match('/data\.([a-zA-Z0-9_]+)\.([a-fA-F0-9\-]+)\.([a-zA-Z0-9_]+)$/', $statePath, $matches)) {
+                // سجلات للتصحيح
+                Log::info('=== بدء عملية التحميل ===');
+                Log::info('StatePath: ' . $statePath);
+                Log::info('توليد الصورة المصغرة مفعل - Thumbnail: ' . $thumbnailPath);
+                Log::info('اسم الحقل: ' . $fieldName . ' | حقل الصورة المصغرة: ' . $thumbnailField);
+
+                // التعامل مع أنماط مختلفة من المسارات
+
+                // نمط 1: المكرر مع UUID (مثل data.data.icons.6c56b753-f969-443b-b72f-6d6fca849f4b.photo)
+                if (preg_match('/data\.data\.([a-zA-Z0-9_]+)\.([a-fA-F0-9\-]+)\.([a-zA-Z0-9_]+)$/', $statePath, $matches)) {
                     $repeaterName = $matches[1]; // اسم المكرر (مثال: "icons")
                     $itemUuid = $matches[2];     // UUID الخاص بالعنصر
                     $fieldInRepeater = $matches[3]; // اسم الحقل (مثال: "photo")
+                    $thumbnailFieldName = $fieldInRepeater . $this->thumbnailSuffix;
 
-                    // بناء مسار الصورة المصغرة داخل المكرر
-                    $thumbnailFieldPath = "data.{$repeaterName}.{$itemUuid}.{$fieldInRepeater}_thumbnail";
+                    // بناء المسار الكامل للصورة المصغرة في المكرر
+                    $thumbnailPathInData = "data.{$repeaterName}.{$itemUuid}.{$thumbnailFieldName}";
+                    
+                    Log::info('نمط المكرر مع UUID: ' . $statePath);
+                    Log::info('مسار الـ thumbnail: ' . $thumbnailPathInData);
+                    
+                    // 1. التحقق من موجودات data
+                    if (isset($livewire->data['data'][$repeaterName])) {
+                        Log::info('العناصر الموجودة في المكرر: ' . implode(', ', array_keys($livewire->data['data'][$repeaterName])));
 
-                    // تحديث بيانات الـ Livewire
-                    data_set($livewire, $thumbnailFieldPath, $thumbnailPath);
+                        // 2. التحقق من وجود العنصر المحدد في المكرر
+                        if (isset($livewire->data['data'][$repeaterName][$itemUuid])) {
+                            // 3. إضافة الصورة المصغرة إلى العنصر
+                            $livewire->data['data'][$repeaterName][$itemUuid][$thumbnailFieldName] = $thumbnailPath;
+                            Log::info('تم تحديث البيانات المتداخلة مع UUID: ' . $thumbnailFieldName . ' = ' . $thumbnailPath);
+                        } else {
+                            Log::warning('لم يتم العثور على العنصر في المكرر: ' . $itemUuid);
+                            // المحاولة باستخدام data_set
+                            data_set($livewire, $thumbnailPathInData, $thumbnailPath);
+                            Log::info('محاولة تحديث باستخدام data_set: ' . $thumbnailPathInData);
+                        }
+                    } else {
+                        Log::warning('لم يتم العثور على المكرر: ' . $repeaterName);
+                        // المحاولة باستخدام data_set
+                        data_set($livewire, $thumbnailPathInData, $thumbnailPath);
+                        Log::info('محاولة تحديث باستخدام data_set: ' . $thumbnailPathInData);
+                    }
 
-                    // طباعة معلومات التصحيح (يمكن حذفها لاحقًا)
-                    Log::info("Thumbnail Path in Repeater: {$thumbnailFieldPath} = {$thumbnailPath}");
-
-                } else if (strpos($statePath, 'data.') === 0) {
-                    // الحقول العادية خارج المكرر
-                    $livewire->data['data'][$thumbnailField] = $thumbnailPath;
-                   Log::info("Thumbnail Path in Main: {$thumbnailField} = {$thumbnailPath}");
+                    // 4. طريقة بديلة باستخدام data_set مباشرة
+                    data_set($livewire, $thumbnailPathInData, $thumbnailPath);
+                    Log::info('تم استخدام data_set أيضًا: ' . $thumbnailPathInData . ' = ' . $thumbnailPath);
                 }
+                // نمط 2: المكرر بدون data.data (مثل data.icons.6c56b753-f969-443b-b72f-6d6fca849f4b.photo)
+                else if (preg_match('/data\.([a-zA-Z0-9_]+)\.([a-fA-F0-9\-]+)\.([a-zA-Z0-9_]+)$/', $statePath, $matches)) {
+                    $repeaterName = $matches[1];
+                    $itemUuid = $matches[2];
+                    $fieldInRepeater = $matches[3];
+                    $thumbnailFieldName = $fieldInRepeater . $this->thumbnailSuffix;
+
+                    $thumbnailPathInData = "data.{$repeaterName}.{$itemUuid}.{$thumbnailFieldName}";
+                    
+                    Log::info('نمط المكرر بدون data.data: ' . $statePath);
+                    Log::info('مسار الـ thumbnail: ' . $thumbnailPathInData);
+                    
+                    // التحقق والتحديث
+                    if (isset($livewire->data[$repeaterName][$itemUuid])) {
+                        $livewire->data[$repeaterName][$itemUuid][$thumbnailFieldName] = $thumbnailPath;
+                        Log::info('تم تحديث البيانات في المكرر بدون data.data: ' . $thumbnailFieldName . ' = ' . $thumbnailPath);
+                    } else {
+                        data_set($livewire, $thumbnailPathInData, $thumbnailPath);
+                        Log::info('تم استخدام data_set للنمط 2: ' . $thumbnailPathInData . ' = ' . $thumbnailPath);
+                    }
+                }
+                // نمط 3: الحقل العادي في data.data (مثل data.data.hany)
+                else if (strpos($statePath, 'data.data.') === 0) {
+                    $livewire->data['data'][$thumbnailField] = $thumbnailPath;
+                    Log::info('نمط الحقل العادي في data.data: ' . $statePath);
+                    Log::info('العناصر الموجودة في data: ' . implode(', ', array_keys($livewire->data['data'])));
+                    Log::info('تم تحديث الحقل الرئيسي: ' . $thumbnailField . ' = ' . $thumbnailPath);
+                    Log::info('التحقق من النتيجة للحقل الرئيسي: ' . $livewire->data['data'][$thumbnailField]);
+                }
+                // نمط 4: الحقل العادي في data (مثل data.hany)
+                else if (strpos($statePath, 'data.') === 0) {
+                    $livewire->data[$thumbnailField] = $thumbnailPath;
+                    Log::info('نمط الحقل العادي في data: ' . $statePath);
+                    Log::info('تم تحديث الحقل الرئيسي في data: ' . $thumbnailField . ' = ' . $thumbnailPath);
+                }
+                // نمط 5: أي حالة أخرى - استخدام data_set للتأكد
+                else {
+                    $pathParts = explode('.', $statePath);
+                    array_pop($pathParts); // إزالة اسم الحقل
+                    $basePath = implode('.', $pathParts);
+                    $thumbnailPath_full = $basePath . '.' . $thumbnailField;
+                    
+                    Log::info('نمط آخر: ' . $statePath);
+                    Log::info('محاولة تحديث في المسار: ' . $thumbnailPath_full);
+                    
+                    data_set($livewire, $thumbnailPath_full, $thumbnailPath);
+                }
+
+                Log::info('=== انتهت عملية التحميل ===');
             }
         }
 
