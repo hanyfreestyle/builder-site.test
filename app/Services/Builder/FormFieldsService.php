@@ -3,10 +3,13 @@
 namespace App\Services\Builder;
 
 use App\FilamentCustom\UploadFile\WebpUploadFixedSizeBuilder;
+use App\Services\Builder\Form\FormInputHelper;
 use Filament\Forms;
+
+
 use Guava\FilamentIconPicker\Forms\IconPicker;
 
-class FormFieldsService {
+class FormFieldsService extends FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -35,12 +38,13 @@ class FormFieldsService {
             // Create field based on type
             switch ($type) {
                 case 'text':
-                    $formField = Forms\Components\TextInput::make("data.{$name}")
-                        ->label($label)
-                        ->required($required)
-                        ->placeholder($placeholder)
-                        ->helperText($help)
-                        ->default($defaultValue);
+                    $formField = self::TextInputHelper($field);
+//                    $formField = Forms\Components\TextInput::make("data.{$name}")
+//                        ->label($label)
+//                        ->required($required)
+//                        ->placeholder($placeholder)
+//                        ->helperText($help)
+//                        ->default($defaultValue);
                     break;
 
                 case 'textarea':
@@ -94,7 +98,7 @@ class FormFieldsService {
                     // إضافة إعدادات إضافية إذا كانت متوفرة
                     if ($img_width && $img_height) {
                         $formField->setResize($img_width, $img_height, 90);
-                        $formField->imageCropAspectRatio(calcRatio($img_width,$img_height));
+                        $formField->imageCropAspectRatio(calcRatio($img_width, $img_height));
                     }
 
                     if ($with_thumbnail && $thumb_width && $thumb_height) {
@@ -203,12 +207,13 @@ class FormFieldsService {
                             // Create field based on type (similar to the main switch)
                             switch ($subType) {
                                 case 'text':
-                                    $subFormField = Forms\Components\TextInput::make($subName)
-                                        ->label($subLabel)
-                                        ->required($subRequired)
-                                        ->placeholder($subPlaceholder)
-                                        ->helperText($subHelp)
-                                        ->default($subDefault);
+                                    $subFormField = self::TextInputHelper($subField);
+//                                    $subFormField = Forms\Components\TextInput::make($subName)
+//                                        ->label($subLabel)
+//                                        ->required($subRequired)
+//                                        ->placeholder($subPlaceholder)
+//                                        ->helperText($subHelp)
+//                                        ->default($subDefault);
                                     break;
 
                                 case 'textarea':
@@ -381,7 +386,7 @@ class FormFieldsService {
                         ->required($required)
                         ->helperText($help)
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['h1'] ?? $state['title'] ?? null)
+                        ->itemLabel(fn(array $state): ?string => $state['h1'] ?? $state['title'] ?? null)
                         ->defaultItems(1);
                     break;
 
@@ -404,7 +409,6 @@ class FormFieldsService {
         }
         return $formFields;
     }
-
 
 
     /**

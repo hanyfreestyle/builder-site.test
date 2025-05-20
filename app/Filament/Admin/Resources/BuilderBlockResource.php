@@ -192,8 +192,9 @@ class BuilderBlockResource extends Resource {
                     ->visible(fn(Forms\Get $get) => $get('block_type_id'))
                     ->collapsible(),
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
                 // Translations Section
-
                 Group::make()->schema(function (Forms\Get $get) {
                     $blockTypeId = $get('block_type_id');
 
@@ -252,6 +253,8 @@ class BuilderBlockResource extends Resource {
             ]);
     }
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {
         return $table
             ->columns([
