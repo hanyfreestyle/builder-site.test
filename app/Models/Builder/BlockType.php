@@ -9,8 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class BlockType extends Model
-{
+class BlockType extends Model {
     use HasFactory, SoftDeletes;
 
     /**
@@ -43,6 +42,7 @@ class BlockType extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'name' => 'array',
         'schema' => 'array',
         'default_data' => 'array',
         'is_active' => 'boolean',
@@ -50,19 +50,22 @@ class BlockType extends Model
         'category' => BlockCategory::class,
     ];
 
+    public function getTranslatedNameAttribute(): string {
+        $locale = app()->getLocale(); // مثلاً "ar" أو "en"
+        return $this->name[$locale] ?? reset($this->name); // fallback لأول قيمة لو مش موجودة
+    }
+
     /**
      * Get the blocks that use this block type.
      */
-    public function blocks(): HasMany
-    {
+    public function blocks(): HasMany {
         return $this->hasMany(Block::class, 'block_type_id');
     }
 
     /**
      * Get the templates that use this block type.
      */
-    public function templates(): BelongsToMany
-    {
+    public function templates(): BelongsToMany {
         return $this->belongsToMany(Template::class, 'builder_template_block_types', 'block_type_id', 'template_id')
             ->withPivot(['view_versions', 'default_view_version', 'is_enabled', 'sort_order'])
             ->withTimestamps();
@@ -71,8 +74,7 @@ class BlockType extends Model
     /**
      * Get the default data for this block type.
      */
-    public function getDefaultData(): array
-    {
+    public function getDefaultData(): array {
         $defaultData = $this->default_data ?: [];
         \Illuminate\Support\Facades\Log::info('BlockType ' . $this->id . ' default_data: ' . json_encode($defaultData));
         return $defaultData;
@@ -81,36 +83,33 @@ class BlockType extends Model
     /**
      * Get the schema fields for this block type.
      */
-    public function getSchemaFields(): array
-    {
+    public function getSchemaFields(): array {
         return $this->schema ?: [];
     }
 
     /**
      * Check if this block type is available for a template.
      */
-    public function isAvailableForTemplate(int $templateId): bool
-    {
+    public function isAvailableForTemplate(int $templateId): bool {
         $relation = $this->templates()->where('template_id', $templateId)->first();
-        
+
         if (!$relation) {
             return false;
         }
-        
-        return (bool) $relation->pivot->is_enabled;
+
+        return (bool)$relation->pivot->is_enabled;
     }
 
     /**
      * Get the available view versions for a specific template.
      */
-    public function getAvailableViewVersionsForTemplate(int $templateId): array
-    {
+    public function getAvailableViewVersionsForTemplate(int $templateId): array {
         $relation = $this->templates()->where('template_id', $templateId)->first();
-        
+
         if (!$relation) {
             return ['default'];
         }
-        
+
         return json_decode($relation->pivot->view_versions, true) ?: ['default'];
     }
 }

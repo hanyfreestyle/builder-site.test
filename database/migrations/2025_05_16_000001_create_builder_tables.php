@@ -29,7 +29,7 @@ return new class extends Migration
         // 2. جدول أنواع البلوكات (builder_block_types)
         Schema::create('builder_block_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->json('name');
             $table->string('slug')->unique();
             $table->string('description')->nullable();
             $table->string('icon')->nullable();

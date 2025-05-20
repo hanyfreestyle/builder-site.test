@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder {
         $this->call(ConfigDataSeeder::class);
         loadSeederFromFileWithLang('user_guide', true);
         loadSeederFromFileWithLang('user_guide_photo', true);
-        
+
         // Run Site Builder seeders
         $this->call(BuilderSeeder::class);
     }

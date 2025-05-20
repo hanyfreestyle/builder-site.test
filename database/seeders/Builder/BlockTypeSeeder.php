@@ -12,7 +12,7 @@ class BlockTypeSeeder extends Seeder {
     public function run(): void {
         // 1. Hero Block
         BlockType::create([
-            'name' => 'Hero Section',
+            'name' => ['ar'=>'Hero Section Ar','en'=>'Hero Section'],
             'slug' => 'hero',
             'description' => 'Hero section with title, subtitle, buttons and optional image/video',
             'icon' => 'fas fa-heading',
@@ -92,7 +92,7 @@ class BlockTypeSeeder extends Seeder {
 
         // 2. Features Block
         BlockType::create([
-            'name' => 'Features',
+            'name' => ['ar'=>'Features ar','en'=>'Features'],
             'slug' => 'features',
             'description' => 'Showcase multiple features with icons and descriptions',
             'icon' => 'fas fa-list',
@@ -153,7 +153,7 @@ class BlockTypeSeeder extends Seeder {
 
         // 3. Content Block
         BlockType::create([
-            'name' => 'Text Content',
+            'name' => ['ar'=>'Text Content ar','en'=>'Text Content'],
             'slug' => 'content',
             'description' => 'Rich text content block with optional image',
             'icon' => 'fas fa-align-left',
@@ -221,7 +221,7 @@ class BlockTypeSeeder extends Seeder {
 
         // 4. Image Gallery Block
         BlockType::create([
-            'name' => 'Image Gallery',
+            'name' => ['ar'=>'Image Gallery ar','en'=>'Image Gallery'],
             'slug' => 'gallery',
             'description' => 'Image gallery with optional lightbox',
             'icon' => 'fas fa-images',
@@ -283,7 +283,7 @@ class BlockTypeSeeder extends Seeder {
 
         // 5. Call to Action Block
         BlockType::create([
-            'name' => 'Call to Action',
+            'name' => ['ar'=>'Call to Action ar','en'=>'Call to Action'],
             'slug' => 'cta',
             'description' => 'Call to action block with button',
             'icon' => 'fas fa-bullhorn',
@@ -352,7 +352,7 @@ class BlockTypeSeeder extends Seeder {
 
         // إنشاء بلوك Slider Carousel
         BlockType::create([
-            'name' => 'Slider Carousel',
+            'name' => ['ar'=>'Slider Carousel ar','en'=>'Slider Carousel'],
             'slug' => 'slider_carousel',
             'description' => 'Slider carousel with image background, title, description and buttons',
             'icon' => 'heroicon-o-photo',
@@ -473,7 +473,7 @@ class BlockTypeSeeder extends Seeder {
 
         // إنشاء بلوك Slider Carousel
         BlockType::create([
-            'name' => 'Test Block',
+            'name' => ['ar'=>'Test Block ar','en'=>'Test Block'],
             'slug' => 'test_block',
             'category' => 'Basic',
             'schema' => [

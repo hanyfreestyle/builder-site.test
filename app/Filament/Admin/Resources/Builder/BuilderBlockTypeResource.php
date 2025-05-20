@@ -6,6 +6,9 @@ use App\Enums\SiteBuilder\BlockCategory;
 use App\Enums\SiteBuilder\BlockTypeField;
 use App\Enums\SiteBuilder\FieldWidth;
 use App\Filament\Admin\Resources\Builder\BuilderBlockTypeResource\TableBuilderBlockType;
+use App\FilamentCustom\Form\Inputs\SlugInput;
+use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
+use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
 use App\Models\Builder\BlockType;
 use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
@@ -51,36 +54,50 @@ class BuilderBlockTypeResource extends Resource {
         return __('site-builder/general.block_types');
     }
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function form(Form $form): Form {
         return $form
             ->schema([
                 // Basic Information Section
                 Section::make(__('site-builder/block-type.tabs.basic_info'))
                     ->schema([
+
                         Group::make()->schema([
-                            TextInput::make('name')
-                                ->label(__('site-builder/general.name'))
-                                ->required()
-                                ->maxLength(255),
-
-                            TextInput::make('slug')
-                                ->label(__('site-builder/general.slug'))
-                                ->required()
-                                ->maxLength(255)
-                                ->unique(BlockType::class, 'slug', fn($record) => $record)
-                                ->alphaDash(),
-
+                            SlugInput::make('slug')->columnSpan(1),
                             Select::make('category')
                                 ->label(__('site-builder/block-type.labels.category'))
                                 ->options(BlockCategory::options())
                                 ->default(BlockCategory::BASIC)
                                 ->searchable()
-                                ->helperText(__('site-builder/block-type.help_text.category')),
+//                                ->helperText(__('site-builder/block-type.help_text.category')),
+                        ])->columns(2),
+                        Group::make()->schema([
+                            ...SoftTranslatableInput::make()->getColumns(),
+
+                        ])->columns(2),
+
+
+
+//                        Group::make()->schema([
+//                            TextInput::make('name')
+//                                ->label(__('site-builder/general.name'))
+//                                ->required()
+//                                ->maxLength(255),
+//
+//                            TextInput::make('slug')
+//                                ->label(__('site-builder/general.slug'))
+//                                ->required()
+//                                ->maxLength(255)
+//                                ->unique(BlockType::class, 'slug', fn($record) => $record)
+//                                ->alphaDash(),
+//
+//
 //                            Toggle::make('is_active')
 //                                ->inline(false)
 //                                ->label(__('site-builder/general.is_active'))
 //                                ->default(true),
-                        ])->columns(3),
+//                        ])->columns(3),
                     ]),
 
 

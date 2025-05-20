@@ -47,7 +47,7 @@ class BuilderBlockResourceForm {
                         Select::make('block_type_id')
                             ->label(__('site-builder/block.block_type'))
                             ->placeholder(__('site-builder/block.select_block_type'))
-                            ->options(BlockType::where('is_active', true)->pluck('name', 'id'))
+                            ->options(BlockType::where('is_active', true)->get()->pluck('translated_name', 'id'))
                             ->required()
                             ->searchable()
                             ->preload()

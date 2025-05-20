@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 class SlugInput extends TextInput {
     protected ?string $locale = 'en';
     protected ?string $permission = "no-edit";
+    protected ?string $columnSpanCol = "full";
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -25,6 +26,7 @@ class SlugInput extends TextInput {
             ->beforeStateDehydrated(function ($state) {
                 return Url_Slug($state);
             })
+
             ->required();
         return $instance;
     }
@@ -36,7 +38,16 @@ class SlugInput extends TextInput {
         parent::setUp();
         $this->extraAttributes(fn() => rtlIfArabic($this->locale));
         $this->disabled(fn($record) => $this->handlePermission($record));
+
     }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public function setColumnSpan(string $columnSpan): static {
+        $this->columnSpanCol = $columnSpan;
+        return $this;
+    }
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

@@ -25,9 +25,10 @@ trait TableBuilderBlockType {
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {
+        $thisLang = app()->getLocale();
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('name.'.$thisLang)
                     ->label(__('site-builder/general.name'))
                     ->searchable(),
 
