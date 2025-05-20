@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources\Builder;
 use App\Enums\SiteBuilder\BlockCategory;
 use App\Enums\SiteBuilder\BlockTypeField;
 use App\Enums\SiteBuilder\FieldWidth;
+use App\Filament\Admin\Resources\Builder\BuilderBlockTypeResource\TableBuilderBlockType;
 use App\Models\Builder\BlockType;
 use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
@@ -28,6 +29,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderBlockTypeResource\Pages;
 
 class BuilderBlockTypeResource extends Resource {
+    use TableBuilderBlockType;
+
     protected static ?string $model = BlockType::class;
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
     protected static ?string $navigationGroup = 'Site Builder';
@@ -288,53 +291,6 @@ class BuilderBlockTypeResource extends Resource {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function table(Table $table): Table {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('site-builder/general.name'))
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('slug')
-                    ->label(__('site-builder/general.slug'))
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('category')
-                    ->label(__('site-builder/block-type.labels.category'))
-                    ->searchable(),
-
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label(__('site-builder/general.is_active'))
-                    ->boolean()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('site-builder/general.created_at'))
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('site-builder/general.updated_at'))
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                Tables\Filters\TrashedFilter::make(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
-                ]),
-            ]);
-    }
-
     public static function getRelations(): array {
         return [
             //

@@ -2,9 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Builder;
 
-
-
-use App\Filament\Admin\Resources\Builder\BuilderBlockResource\TableBuilderBlockType;
+use App\Filament\Admin\Resources\Builder\BuilderBlockResource\TableBuilderBlock;
 use App\Models\Builder\Block;
 use App\Services\Builder\Form\BuilderBlockResourceForm;
 use Filament\Forms\Form;
@@ -14,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderBlockResource\Pages;
 
 class BuilderBlockResource extends Resource {
-    use TableBuilderBlockType;
+    use TableBuilderBlock;
 
 
     protected static ?string $model = Block::class;
@@ -56,14 +54,14 @@ class BuilderBlockResource extends Resource {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
-
     public static function getRelations(): array {
         return [
             //
         ];
     }
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function getPages(): array {
         return [
             'index' => Pages\ListBuilderBlocks::route('/'),
@@ -72,6 +70,8 @@ class BuilderBlockResource extends Resource {
         ];
     }
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function getEloquentQuery(): Builder {
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
