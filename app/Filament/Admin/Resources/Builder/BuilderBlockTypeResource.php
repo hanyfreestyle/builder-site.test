@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Admin\Resources;
+namespace App\Filament\Admin\Resources\Builder;
 
 use App\Enums\SiteBuilder\BlockCategory;
 use App\Enums\SiteBuilder\BlockTypeField;
@@ -84,7 +84,7 @@ class BuilderBlockTypeResource extends Resource {
                 // Schema Section
                 Repeater::make('schema')
                     ->label(__('site-builder/block-type.labels.schema'))
-                    ->schema(fn () => self::getSchemaFieldsComponents('schema'))
+                    ->schema(fn() => self::getSchemaFieldsComponents('schema'))
                     ->columns(2)
                     ->columnSpanFull()
                     ->collapsible()
@@ -101,7 +101,7 @@ class BuilderBlockTypeResource extends Resource {
      */
     public static function getSchemaFieldsComponents(string $statePath = 'schema', bool $isNested = false): array {
         // Helper function to build state path
-        $path = function($field) use ($statePath) {
+        $path = function ($field) use ($statePath) {
             return "{$statePath}.{$field}";
         };
 
@@ -276,7 +276,7 @@ class BuilderBlockTypeResource extends Resource {
         if (!$isNested) {
             $baseComponents[] = Repeater::make('config.fields')
                 ->label(__('site-builder/block-type.repeater_fields'))
-                ->schema(fn () => self::getSchemaFieldsComponents('config.fields', true))
+                ->schema(fn() => self::getSchemaFieldsComponents('config.fields', true))
                 ->collapsible()
                 ->itemLabel(fn(array $state): ?string => $state['label'] ?? null)
                 ->visible(fn(Get $get) => $get('type') === 'repeater')
