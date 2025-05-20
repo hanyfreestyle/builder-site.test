@@ -217,7 +217,7 @@ class FormInputHelper {
     public static function RepeaterImageHelper($field): WebpUploadFixedSizeBuilder {
         $config = self::LoadFormConfig($field);
 
-        $formField = WebpUploadFixedSizeBuilder::make("data.{$config['name']}")
+        $formField = WebpUploadFixedSizeBuilder::make("{$config['name']}")
             ->label($config['label'])
             ->required($config['required'])
             ->helperText($config['help']);
