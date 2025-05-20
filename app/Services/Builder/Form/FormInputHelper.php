@@ -13,8 +13,65 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Guava\FilamentIconPicker\Forms\IconPicker;
+use Filament\Forms\Components\Component;
 
 class FormInputHelper {
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public static function buildFieldSwitch($type, $field): ?Component {
+        switch ($type) {
+            case 'text':
+                $formField = self::TextInputHelper($field);
+                break;
+            case 'textarea':
+                $formField = self::TextareaHelper($field);
+                break;
+            case 'rich_text':
+                $formField = self::RichEditorHelper($field);
+                break;
+            case 'select':
+                $formField = self::SelectHelper($field);
+                break;
+            case 'radio':
+                $formField = self::RadioHelper($field);
+                break;
+            case 'date':
+                $formField = self::DatePickerHelper($field);
+                break;
+            case 'time':
+                $formField = self::TimePickerHelper($field);
+                break;
+            case 'color':
+                $formField = self::ColorPickerHelper($field);
+                break;
+            case 'icon':
+                $formField = self::IconPickerHelper($field);
+                break;
+            case 'number':
+                $formField = self::NumberInputHelper($field);
+                break;
+            case 'link':
+                $formField = self::LinkInputHelper($field);
+                break;
+            default:
+                $formField = self::TextInputHelper($field);
+                break;
+        }
+        return $formField;
+    }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public static function DefaultRepeaterFields(): array {
+        return [
+            TextInput::make('title')
+                ->label(__('site-builder/general.title'))
+                ->required(),
+            Textarea::make('description')
+                ->label(__('site-builder/general.description')),
+        ];
+    }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -39,7 +96,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function TextInputHelper($field): TextInput {
+    public
+    static function TextInputHelper($field): TextInput {
         $config = self::LoadFormConfig($field);
         return TextInput::make("data.{$config['name']}")
             ->label($config['label'])
@@ -51,7 +109,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function TextareaHelper($field): Textarea {
+    public
+    static function TextareaHelper($field): Textarea {
         $config = self::LoadFormConfig($field);
         return Textarea::make("data.{$config['name']}")
             ->label($config['label'])
@@ -61,9 +120,11 @@ class FormInputHelper {
             ->default($config['defaultValue'])
             ->rows(6);
     }
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function SelectHelper($field): Select {
+    public
+    static function SelectHelper($field): Select {
         $config = self::LoadFormConfig($field);
         $options = $field['options'] ?? [];
 
@@ -80,7 +141,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function RadioHelper($field): Toggle {
+    public
+    static function RadioHelper($field): Toggle {
         $config = self::LoadFormConfig($field);
         return Toggle::make("data.{$config['name']}")
             ->label($config['label'])
@@ -91,7 +153,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function DatePickerHelper($field): DatePicker {
+    public
+    static function DatePickerHelper($field): DatePicker {
         $config = self::LoadFormConfig($field);
 
         return DatePicker::make("data.{$config['name']}")
@@ -104,7 +167,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function RichEditorHelper($field): RichEditor {
+    public
+    static function RichEditorHelper($field): RichEditor {
         $config = self::LoadFormConfig($field);
         return RichEditor::make("data.{$config['name']}")
             ->label($config['label'])
@@ -117,7 +181,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function TimePickerHelper($field): TimePicker {
+    public
+    static function TimePickerHelper($field): TimePicker {
         $config = self::LoadFormConfig($field);
         return TimePicker::make("data.{$config['name']}")
             ->label($config['label'])
@@ -129,7 +194,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function ColorPickerHelper($field): ColorPicker {
+    public
+    static function ColorPickerHelper($field): ColorPicker {
         $config = self::LoadFormConfig($field);
         return ColorPicker::make("data.{$config['name']}")
             ->label($config['label'])
@@ -140,7 +206,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function IconPickerHelper($field): IconPicker {
+    public
+    static function IconPickerHelper($field): IconPicker {
         $config = self::LoadFormConfig($field);
         return IconPicker::make("data.{$config['name']}")
             ->label($config['label'])
@@ -158,7 +225,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function NumberInputHelper($field): TextInput {
+    public
+    static function NumberInputHelper($field): TextInput {
         $config = self::LoadFormConfig($field);
         return TextInput::make("data.{$config['name']}")
             ->label($config['label'])
@@ -171,7 +239,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function LinkInputHelper($field): Group {
+    public
+    static function LinkInputHelper($field): Group {
         $config = self::LoadFormConfig($field);
         return Group::make([
             TextInput::make("data.{$config['name']}.text")
@@ -191,7 +260,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function SingleImageHelper($field): WebpUploadFixedSizeBuilder {
+    public
+    static function SingleImageHelper($field): WebpUploadFixedSizeBuilder {
         $config = self::LoadFormConfig($field);
 
         $formField = WebpUploadFixedSizeBuilder::make("data.{$config['name']}")
@@ -214,7 +284,8 @@ class FormInputHelper {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function RepeaterImageHelper($field): WebpUploadFixedSizeBuilder {
+    public
+    static function RepeaterImageHelper($field): WebpUploadFixedSizeBuilder {
         $config = self::LoadFormConfig($field);
 
         $formField = WebpUploadFixedSizeBuilder::make("{$config['name']}")
@@ -246,7 +317,8 @@ class FormInputHelper {
      * @param string $width Width string ('1/2', '1/3', '2/3', '1/4', '3/4', 'full', etc.)
      * @return int Column span value for Filament 3 (1-12)
      */
-    public static function convertWidthToColumnSpan(string $width): int {
+    public
+    static function convertWidthToColumnSpan(string $width): int {
         // Map width values to column spans for a 12-column grid
         $result = match (strtolower(trim($width))) {
             '1/1', 'full', '100%' => 12,  // Full width (12 of 12 columns)

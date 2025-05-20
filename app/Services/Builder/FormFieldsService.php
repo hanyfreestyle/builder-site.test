@@ -2,12 +2,10 @@
 
 namespace App\Services\Builder;
 
-
 use App\Services\Builder\Form\FormInputHelper;
 use Filament\Forms;
 
 class FormFieldsService extends FormInputHelper {
-
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -19,150 +17,58 @@ class FormFieldsService extends FormInputHelper {
             $type = $field['type'] ?? 'text';
             $width = $field['width'] ?? 'full';
             $name = $field['name'] ?? '';
+            $label = $field['label'] ?? $name;
 
             // Convert width to Filament column span value
             $fieldWidth = self::convertWidthToColumnSpan($width);
 
-            // Create field based on type
-            switch ($type) {
-                case 'text':
-                    $formField = self::TextInputHelper($field);
-                    break;
-                case 'textarea':
-                    $formField = self::TextareaHelper($field);
-                    break;
-                case 'rich_text':
-                    $formField = self::RichEditorHelper($field);
-                    break;
-                case 'select':
-                    $formField = self::SelectHelper($field);
-                    break;
-                case 'radio':
-                    $formField = self::RadioHelper($field);
-                    break;
-                case 'date':
-                    $formField = self::DatePickerHelper($field);
-                    break;
-                case 'time':
-                    $formField = self::TimePickerHelper($field);
-                    break;
-                case 'color':
-                    $formField = self::ColorPickerHelper($field);
-                    break;
-                case 'icon':
-                    $formField = self::IconPickerHelper($field);
-                    break;
-                case 'number':
-                    $formField = self::NumberInputHelper($field);
-                    break;
-                case 'link':
-                    $formField = self::LinkInputHelper($field);
-                    break;
-                case 'image':
-                    $formField = self::SingleImageHelper($field);
-                    if ($field['config']['with_thumbnail'] ?? false) {
-                        $thumbnailFieldName = $name . '_thumbnail';
-                        $formFields[] = Forms\Components\Hidden::make("data.{$thumbnailFieldName}");
-                    }
-                    break;
+            if ($type == 'image') {
+                $formField = self::SingleImageHelper($field);
+                if ($field['config']['with_thumbnail'] ?? false) {
+                    $thumbnailFieldName = $name . '_thumbnail';
+                    $formFields[] = Forms\Components\Hidden::make("data.{$thumbnailFieldName}");
+                }
 
-
-                case 'repeater':
-                    $subSchema = [];
-                    // If we have nested fields, create them
-                    if (isset($field['config']['fields']) && is_array($field['config']['fields'])) {
-                        foreach ($field['config']['fields'] as $subField) {
-                            $subType = $subField['type'] ?? 'text';
-                            $subWidth = $subField['width'] ?? 'full';
-                            $subFieldWidth = self::convertWidthToColumnSpan($subWidth);
-                            $subName = $subField['name'] ?? '';
-
-                            // Create field based on type (similar to the main switch)
-                            switch ($subType) {
-                                case 'text':
-                                    $subFormField = self::TextInputHelper($subField);
-                                    break;
-                                case 'textarea':
-                                    $subFormField = self::TextareaHelper($subField);
-                                    break;
-                                case 'rich_text':
-                                    $subFormField = self::RichEditorHelper($subField);
-                                    break;
-                                case 'select':
-                                    $subFormField = self::SelectHelper($subField);
-                                    break;
-                                case 'radio':
-                                    $subFormField = self::RadioHelper($subField);
-                                    break;
-                                case 'date':
-                                    $subFormField = self::DatePickerHelper($subField);
-                                    break;
-                                case 'time':
-                                    $subFormField = self::TimePickerHelper($subField);
-                                    break;
-                                case 'color':
-                                    $subFormField = self::ColorPickerHelper($subField);
-                                    break;
-                                case 'icon':
-                                    $subFormField = self::IconPickerHelper($subField);
-                                    break;
-                                case 'number':
-                                    $subFormField = self::NumberInputHelper($subField);
-                                    break;
-                                case 'link':
-                                    $subFormField = self::LinkInputHelper($subField);
-                                    break;
-
-                                case 'image':
-                                    $subFormField = self::RepeaterImageHelper($subField);
-                                    if ($field['config']['with_thumbnail'] ?? false) {
-                                        // عند إضافة الحقل المخفي داخل المكرر
-                                        $thumbnailFieldName = $subName . '_thumbnail';
-                                        $subSchema[] = Forms\Components\Hidden::make($thumbnailFieldName)
-                                            ->reactive()
-                                            ->dehydrated(true)
-                                            ->statePath("{$subName}_thumbnail"); // تحديد المسار بدون UUID (سيتم إدارته تلقائيًا)
-                                    }
-                                    break;
-
-                                default:
-                                    // Default to text input
-                                    $subFormField = self::TextInputHelper($subField);
-                                    break;
+            } elseif ($type == 'repeater') {
+                $subSchema = [];
+                // If we have nested fields, create them
+                if (isset($field['config']['fields']) && is_array($field['config']['fields'])) {
+                    foreach ($field['config']['fields'] as $subField) {
+                        $subType = $subField['type'] ?? 'text';
+                        $subWidth = $subField['width'] ?? 'full';
+                        $subFieldWidth = self::convertWidthToColumnSpan($subWidth);
+                        $subName = $subField['name'] ?? '';
+                        if ($subType == 'image') {
+                            $subFormField = self::RepeaterImageHelper($subField);
+                            if ($field['config']['with_thumbnail'] ?? false) {
+                                // عند إضافة الحقل المخفي داخل المكرر
+                                $thumbnailFieldName = $subName . '_thumbnail';
+                                $subSchema[] = Forms\Components\Hidden::make($thumbnailFieldName)
+                                    ->reactive()
+                                    ->dehydrated(true)
+                                    ->statePath("{$subName}_thumbnail"); // تحديد المسار بدون UUID (سيتم إدارته تلقائيًا)
                             }
-
-                            // Set column span based on field width
-                            if ($subFormField) {
-                                $subFormField->columnSpan($subFieldWidth);
-                                $subSchema[] = $subFormField;
-                            }
+                        } else {
+                            $subFormField = self::buildFieldSwitch($type, $subField);
                         }
-                    } else {
-                        // Default fields for a repeater
-                        $subSchema = [
-                            Forms\Components\TextInput::make('title')
-                                ->label(__('site-builder/general.title'))
-                                ->required(),
-                            Forms\Components\Textarea::make('description')
-                                ->label(__('site-builder/general.description')),
-                        ];
+                        if ($subFormField) {
+                            $subFormField->columnSpan($subFieldWidth);
+                            $subSchema[] = $subFormField;
+                        }
                     }
+                } else {
+                    $subSchema = self::DefaultRepeaterFields();
+                }
 
-                    $formField = Forms\Components\Repeater::make("data.{$name}")
-                        ->label("hhhhhhhhh")
-//                        ->label($label)
-                        ->schema($subSchema)
-                        ->columns(12) // Use a 12-column grid for nested fields
-//                        ->required($required)
-//                        ->helperText($help)
-                        ->collapsible()
-                        ->itemLabel(fn(array $state): ?string => $state['h1'] ?? $state['title'] ?? null)
-                        ->defaultItems(1);
-                    break;
-
-                default:
-                    $formField = self::TextInputHelper($field);
-                    break;
+                $formField = Forms\Components\Repeater::make("data.{$name}")
+                    ->label($label)
+                    ->schema($subSchema)
+                    ->columns(12) // Use a 12-column grid for nested fields
+                    ->collapsible()
+                    ->itemLabel(fn(array $state): ?string => $state['h1'] ?? $state['title'] ?? null)
+                    ->defaultItems(1);
+            } else {
+                $formField = self::buildFieldSwitch($type, $field);
             }
 
             // Set column span based on field width
