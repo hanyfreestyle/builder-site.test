@@ -4,44 +4,30 @@ namespace App\Filament\Admin\Resources\Builder\BuilderTemplateResource;
 
 use App\Enums\SiteBuilder\BlockCategory;
 use App\FilamentCustom\Table\CreatedDates;
+use App\FilamentCustom\Table\ImageColumnDef;
 use App\Models\Builder\Template;
 use App\Services\Builder\TemplateService;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\ForceDeleteBulkAction;
-use Filament\Tables\Actions\RestoreAction;
-use Filament\Tables\Actions\RestoreBulkAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Collection;
 use Filament\Tables;
 
 trait TableBuilderTemplate {
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function table(Table $table): Table {
+        $thisLang = app()->getLocale();
+
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                ImageColumnDef::make('photo_thumbnail')->width(60)->height(80),
+
+                Tables\Columns\TextColumn::make('name.' . $thisLang)
                     ->label(__('site-builder/general.name'))
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('slug')
                     ->label(__('site-builder/general.slug'))
                     ->searchable(),
-
-                Tables\Columns\ImageColumn::make('thumbnail')
-                    ->label(__('site-builder/general.thumbnail'))
-                    ->square(),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label(__('site-builder/general.is_active'))
@@ -53,23 +39,19 @@ trait TableBuilderTemplate {
                     ->boolean()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('site-builder/general.created_at'))
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('site-builder/general.updated_at'))
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                ...CreatedDates::make()->toggleable(true)->getColumns(),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label(__('site-builder/general.is_active'))
+                    ->searchable()
+                    ->preload(),
+
+                Tables\Filters\TrashedFilter::make()->searchable()->preload(),
             ])
             ->actions([
                 Tables\Actions\Action::make('set_default')
+                    ->hidden(fn($record) => $record->trashed())
                     ->label(__('site-builder/template.actions.set_default'))
                     ->icon('heroicon-o-star')
                     ->color('warning')
@@ -77,7 +59,6 @@ trait TableBuilderTemplate {
                     ->requiresConfirmation()
                     ->action(function (Template $record) {
                         $record->setAsDefault();
-
                         Notification::make()
                             ->title(__('site-builder/template.notifications.set_default_success'))
                             ->success()
@@ -85,6 +66,7 @@ trait TableBuilderTemplate {
                     }),
 
                 Tables\Actions\Action::make('migrate_pages')
+                    ->hidden(fn($record) => $record->trashed())
                     ->label(__('site-builder/template.actions.migrate_pages'))
                     ->icon('heroicon-o-document-duplicate')
                     ->color('info')
@@ -110,8 +92,14 @@ trait TableBuilderTemplate {
                         }
                     }),
 
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->hidden(fn($record) => $record->trashed()),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->persistSortInSession()
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

@@ -18,14 +18,15 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderTemplateResource\Pages;
 
 class BuilderTemplateResource extends Resource {
     use SmartResourceTrait;
-
-//    use TableBuilderTemplate;
+    use TableBuilderTemplate;
 
     protected static ?string $model = Template::class;
     protected static ?string $navigationIcon = 'heroicon-s-paint-brush';
@@ -40,6 +41,12 @@ class BuilderTemplateResource extends Resource {
         ];
     }
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public static function getRecordTitle(?Model $record): Htmlable|string|null {
+        return getTranslatedValue($record->name) ?? null;
+    }
+    
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function form(Form $form): Form {

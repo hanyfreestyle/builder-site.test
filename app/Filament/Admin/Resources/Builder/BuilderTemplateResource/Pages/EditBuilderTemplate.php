@@ -7,6 +7,7 @@ use App\Traits\Admin\FormAction\WithNextAndPreviousActions;
 use App\Traits\Admin\FormAction\WithSaveAndClose;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditBuilderTemplate extends EditRecord {
     use WithSaveAndClose;
@@ -16,10 +17,9 @@ class EditBuilderTemplate extends EditRecord {
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-//    public function getRecordTitle(): string {
-//        return $this->record->translate(app()->getLocale())->name ?? "";
-//    }
-
+    public function getRecordTitle(): Htmlable|string {
+        return getTranslatedValue($this->record->name) ?? "";
+    }
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     protected function getHeaderActions(): array {
