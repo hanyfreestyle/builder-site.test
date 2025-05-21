@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Resources\BuilderTemplateResource\Pages;
 
-use App\Filament\Admin\Resources\BuilderTemplateResource;
+use App\Filament\Admin\Resources\Builder\BuilderTemplateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
