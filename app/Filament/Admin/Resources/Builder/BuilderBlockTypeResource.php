@@ -9,9 +9,7 @@ use App\Filament\Admin\Resources\Builder\BuilderBlockTypeResource\TableBuilderBl
 use App\FilamentCustom\Form\Inputs\SlugInput;
 use App\FilamentCustom\Form\Inputs\SoftFinedTranslations;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
-use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
 use App\Models\Builder\BlockType;
-use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
@@ -26,8 +24,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\BuilderBlockTypeResource\Pages;
@@ -164,7 +160,6 @@ class BuilderBlockTypeResource extends Resource {
                 Toggle::make('config.with_thumbnail')
                     ->label(__('site-builder/block-type.image_with_thumbnail'))
                     ->default(false)
-                    ->dehydrated(fn (Get $get) => $get('type') === 'image')
                     ->reactive()
                     ->inline(),
 
@@ -174,7 +169,6 @@ class BuilderBlockTypeResource extends Resource {
                         ->numeric()
                         ->default(800)
                         ->minValue(1)
-                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->columnSpan(3),
 
                     TextInput::make('config.height')
@@ -182,7 +176,6 @@ class BuilderBlockTypeResource extends Resource {
                         ->numeric()
                         ->default(600)
                         ->minValue(1)
-                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->columnSpan(3),
 
                     TextInput::make('config.thumb_width')
@@ -191,7 +184,6 @@ class BuilderBlockTypeResource extends Resource {
                         ->default(200)
                         ->minValue(1)
                         ->columnSpan(3)
-                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->visible(fn(Get $get) => $get('config.with_thumbnail') === true),
 
                     TextInput::make('config.thumb_height')
@@ -200,12 +192,10 @@ class BuilderBlockTypeResource extends Resource {
                         ->default(150)
                         ->minValue(1)
                         ->columnSpan(3)
-                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->visible(fn(Get $get) => $get('config.with_thumbnail') === true),
                 ]),
             ])
                 ->columnSpanFull()
-                ->dehydrated(fn(Get $get) => $get('type') === 'image')
                 ->visible(fn(Get $get) => $get('type') === 'image'),
 
             // Default text value
