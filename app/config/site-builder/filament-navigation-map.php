@@ -4,18 +4,18 @@
 return [
 
     "TemplateResource" => [
-        \App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateResource::class,
-        \App\Filament\Admin\Resources\SiteBuilder\BuilderTemplateLayoutResource::class,
+        \App\Filament\Admin\Resources\Builder\BuilderTemplateResource::class,
+
     ],
 
     "manageData" => [
-        \App\Filament\Admin\Resources\RealEstate\LocationResource::class,
-        \App\Filament\Admin\Resources\RealEstate\AmenityResource::class,
-        \App\Filament\Admin\Resources\RealEstate\DataProjectTypeResource::class,
-        \App\Filament\Admin\Resources\RealEstate\DataProjectStatusResource::class,
-        \App\Filament\Admin\Resources\RealEstate\DataUnitTypeResource::class,
-        \App\Filament\Admin\Resources\RealEstate\DataUnitViewResource::class,
-        \App\Filament\Admin\Resources\Data\DataCountryResource::class,
+//        \App\Filament\Admin\Resources\RealEstate\LocationResource::class,
+//        \App\Filament\Admin\Resources\RealEstate\AmenityResource::class,
+//        \App\Filament\Admin\Resources\RealEstate\DataProjectTypeResource::class,
+//        \App\Filament\Admin\Resources\RealEstate\DataProjectStatusResource::class,
+//        \App\Filament\Admin\Resources\RealEstate\DataUnitTypeResource::class,
+//        \App\Filament\Admin\Resources\RealEstate\DataUnitViewResource::class,
+//        \App\Filament\Admin\Resources\Data\DataCountryResource::class,
     ],
 
     "webSettings" => [

@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Filament\Admin\Resources\BuilderTemplateResource\RelationManagers;
+
+namespace App\Filament\Admin\Resources\Builder\BuilderTemplateResource\RelationManagers;
 
 use App\Models\Builder\BlockType;
 use Filament\Forms;

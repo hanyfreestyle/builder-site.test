@@ -2,13 +2,14 @@
 
 return [
     // Navigation and General Labels
+    'navigation_group' => 'Site Builder',
     'site_builder' => 'Site Builder',
     'templates' => 'Templates',
     'block_types' => 'Block Types',
     'blocks' => 'Blocks',
     'pages' => 'Pages',
     'menus' => 'Menus',
-    
+
     // Common Actions
     'create' => 'Create',
     'edit' => 'Edit',
@@ -23,19 +24,19 @@ return [
     'back' => 'Back',
     'move_up' => 'Move Up',
     'move_down' => 'Move Down',
-    
+
     // States
     'active' => 'Active',
     'inactive' => 'Inactive',
     'yes' => 'Yes',
     'no' => 'No',
-    
+
     // Messages
     'success_create' => 'Created successfully',
     'success_update' => 'Updated successfully',
     'success_delete' => 'Deleted successfully',
     'confirm_delete' => 'Are you sure you want to delete?',
-    
+
     // Common Fields
     'name' => 'Name',
     'title' => 'Title',
