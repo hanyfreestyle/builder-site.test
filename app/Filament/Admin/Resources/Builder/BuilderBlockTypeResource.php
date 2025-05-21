@@ -7,6 +7,7 @@ use App\Enums\SiteBuilder\BlockTypeField;
 use App\Enums\SiteBuilder\FieldWidth;
 use App\Filament\Admin\Resources\Builder\BuilderBlockTypeResource\TableBuilderBlockType;
 use App\FilamentCustom\Form\Inputs\SlugInput;
+use App\FilamentCustom\Form\Inputs\SoftFinedTranslations;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
 use App\Models\Builder\BlockType;
@@ -62,7 +63,6 @@ class BuilderBlockTypeResource extends Resource {
                 // Basic Information Section
                 Section::make(__('site-builder/block-type.tabs.basic_info'))
                     ->schema([
-
                         Group::make()->schema([
                             SlugInput::make('slug')->columnSpan(1),
                             Select::make('category')
@@ -70,34 +70,11 @@ class BuilderBlockTypeResource extends Resource {
                                 ->options(BlockCategory::options())
                                 ->default(BlockCategory::BASIC)
                                 ->searchable()
-//                                ->helperText(__('site-builder/block-type.help_text.category')),
                         ])->columns(2),
                         Group::make()->schema([
                             ...SoftTranslatableInput::make()->getColumns(),
 
                         ])->columns(2),
-
-
-
-//                        Group::make()->schema([
-//                            TextInput::make('name')
-//                                ->label(__('site-builder/general.name'))
-//                                ->required()
-//                                ->maxLength(255),
-//
-//                            TextInput::make('slug')
-//                                ->label(__('site-builder/general.slug'))
-//                                ->required()
-//                                ->maxLength(255)
-//                                ->unique(BlockType::class, 'slug', fn($record) => $record)
-//                                ->alphaDash(),
-//
-//
-//                            Toggle::make('is_active')
-//                                ->inline(false)
-//                                ->label(__('site-builder/general.is_active'))
-//                                ->default(true),
-//                        ])->columns(3),
                     ]),
 
 
@@ -108,7 +85,9 @@ class BuilderBlockTypeResource extends Resource {
                     ->columns(2)
                     ->columnSpanFull()
                     ->collapsible()
-                    ->itemLabel(fn(array $state): ?string => $state['label'] ?? null),
+//                    ->collapsed()
+                    ->itemLabel(fn(array $state): ?string => getTranslatedValue($state['label'] ?? null))
+                ,
             ]);
     }
 
@@ -136,7 +115,14 @@ class BuilderBlockTypeResource extends Resource {
                     ->searchable()
                     ->preload()
                     ->required()
+                    ->columnSpan(2)
                     ->reactive(),
+
+                TextInput::make('name')
+                    ->label(__('site-builder/block-type.labels.field_name'))
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(2),
 
                 Select::make('width')
                     ->label(__('site-builder/block-type.labels.field_width'))
@@ -144,6 +130,7 @@ class BuilderBlockTypeResource extends Resource {
                     ->default(FieldWidth::FULL)
                     ->searchable()
                     ->preload()
+                    ->columnSpan(2)
                     ->required(),
 
                 Toggle::make('required')
@@ -155,34 +142,20 @@ class BuilderBlockTypeResource extends Resource {
                     ->label(__('site-builder/block-type.labels.field_translatable'))
                     ->default(false)
                     ->inline(false)
-                    ->helperText(__('site-builder/block-type.help_text.field_translatable'))
                     ->visible(fn(Get $get) => in_array($get('type'), ['text', 'textarea', 'rich_text'])),
 
-            ])->columnSpanFull()->columns(4),
+            ])->columnSpanFull()->columns(8),
 
             Group::make()->schema([
-                TextInput::make('name')
-                    ->label(__('site-builder/block-type.labels.field_name'))
-                    ->required()
-                    ->maxLength(255)
-                    ->helperText(__('site-builder/block-type.help_text.field_name')),
-
-                TextInput::make('label')
-                    ->label(__('site-builder/block-type.labels.field_label'))
-                    ->required()
-                    ->maxLength(255)
-                    ->helperText(__('site-builder/block-type.help_text.field_label')),
-
-                TextInput::make('help')
-                    ->label(__('site-builder/block-type.labels.field_help'))
-                    ->maxLength(255)
-                    ->helperText(__('site-builder/block-type.help_text.field_help')),
-
-                // placeholder field appears for specific field types
-                TextInput::make('placeholder')
-                    ->label(__('site-builder/block-type.labels.field_placeholder'))
-                    ->maxLength(255)
-                    ->visible(fn(Get $get) => in_array($get('type'), ['text', 'textarea', 'rich_text', 'number', 'select'])),
+                ...SoftFinedTranslations::make()
+                    ->forKey('label')
+                    ->setLabel(__('site-builder/block-type.labels.field_label'))
+                    ->getColumns(),
+                ...SoftFinedTranslations::make()
+                    ->forKey('help')
+                    ->setLabel(__('site-builder/block-type.labels.field_help'))
+                    ->setDataRequired(false)
+                    ->getColumns(),
 
             ])->columnSpanFull()->columns(4),
 
@@ -191,6 +164,7 @@ class BuilderBlockTypeResource extends Resource {
                 Toggle::make('config.with_thumbnail')
                     ->label(__('site-builder/block-type.image_with_thumbnail'))
                     ->default(false)
+                    ->dehydrated(fn (Get $get) => $get('type') === 'image')
                     ->reactive()
                     ->inline(),
 
@@ -200,6 +174,7 @@ class BuilderBlockTypeResource extends Resource {
                         ->numeric()
                         ->default(800)
                         ->minValue(1)
+                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->columnSpan(3),
 
                     TextInput::make('config.height')
@@ -207,6 +182,7 @@ class BuilderBlockTypeResource extends Resource {
                         ->numeric()
                         ->default(600)
                         ->minValue(1)
+                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->columnSpan(3),
 
                     TextInput::make('config.thumb_width')
@@ -215,6 +191,7 @@ class BuilderBlockTypeResource extends Resource {
                         ->default(200)
                         ->minValue(1)
                         ->columnSpan(3)
+                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->visible(fn(Get $get) => $get('config.with_thumbnail') === true),
 
                     TextInput::make('config.thumb_height')
@@ -223,9 +200,13 @@ class BuilderBlockTypeResource extends Resource {
                         ->default(150)
                         ->minValue(1)
                         ->columnSpan(3)
+                        ->dehydrated(fn (Get $get) => $get('type') === 'image')
                         ->visible(fn(Get $get) => $get('config.with_thumbnail') === true),
                 ]),
-            ])->columnSpanFull()->visible(fn(Get $get) => $get('type') === 'image'),
+            ])
+                ->columnSpanFull()
+                ->dehydrated(fn(Get $get) => $get('type') === 'image')
+                ->visible(fn(Get $get) => $get('type') === 'image'),
 
             // Default text value
             TextInput::make('default')
