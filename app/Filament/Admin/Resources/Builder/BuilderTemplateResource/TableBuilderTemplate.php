@@ -2,7 +2,6 @@
 
 namespace App\Filament\Admin\Resources\Builder\BuilderTemplateResource;
 
-use App\Enums\SiteBuilder\BlockCategory;
 use App\FilamentCustom\Table\CreatedDates;
 use App\FilamentCustom\Table\ImageColumnDef;
 use App\Models\Builder\Template;

@@ -3,14 +3,16 @@
 namespace App\Filament\Admin\Resources\BuilderBlockTypeResource\Pages;
 
 use App\Filament\Admin\Resources\Builder\BuilderBlockTypeResource;
+use App\Traits\Admin\FormAction\WithSaveAndCreateAnother;
 use App\Traits\SiteBuilder\CleansBlockSchema;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateBuilderBlockType extends CreateRecord {
+    use WithSaveAndCreateAnother;
     use CleansBlockSchema;
 
     protected static string $resource = BuilderBlockTypeResource::class;
+    protected static bool $canCreateAnother = false;
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -18,4 +20,7 @@ class CreateBuilderBlockType extends CreateRecord {
         return $this->applySchemaCleaning($data);
     }
 
+    public function getRedirectUrl(): string{
+        return $this->getResource()::getUrl('index');
+    }
 }

@@ -40,13 +40,6 @@ class BuilderTemplateResource extends Resource {
             'edit' => Pages\EditBuilderTemplate::route('/{record}/edit'),
         ];
     }
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-    public static function getRecordTitle(?Model $record): Htmlable|string|null {
-        return getTranslatedValue($record->name) ?? null;
-    }
-    
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     public static function form(Form $form): Form {
@@ -243,6 +236,12 @@ class BuilderTemplateResource extends Resource {
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    public static function getRecordTitle(?Model $record): Htmlable|string|null {
+        return getTranslatedValue($record->name) ?? null;
     }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
