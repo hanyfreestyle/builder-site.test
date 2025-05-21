@@ -3,16 +3,28 @@
 namespace App\Filament\Admin\Resources\BuilderTemplateResource\Pages;
 
 use App\Filament\Admin\Resources\Builder\BuilderTemplateResource;
+use App\Traits\Admin\FormAction\WithNextAndPreviousActions;
+use App\Traits\Admin\FormAction\WithSaveAndClose;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditBuilderTemplate extends EditRecord
-{
+class EditBuilderTemplate extends EditRecord {
+    use WithSaveAndClose;
+    use WithNextAndPreviousActions;
+
     protected static string $resource = BuilderTemplateResource::class;
 
-    protected function getHeaderActions(): array
-    {
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//    public function getRecordTitle(): string {
+//        return $this->record->translate(app()->getLocale())->name ?? "";
+//    }
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    protected function getHeaderActions(): array {
         return [
+            ...$this->getNextAndPreviousActions(),
             Actions\DeleteAction::make(),
         ];
     }

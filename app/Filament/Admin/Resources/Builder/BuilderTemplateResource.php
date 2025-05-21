@@ -2,12 +2,12 @@
 
 namespace App\Filament\Admin\Resources\Builder;
 
+use App\Filament\Admin\Resources\Builder\BuilderTemplateResource\RelationManagers\BlockTypesRelationManager;
+use App\Filament\Admin\Resources\Builder\BuilderTemplateResource\TableBuilderTemplate;
 use App\Enums\Fonts\GoogleFontsArabic;
 use App\Enums\Fonts\GoogleFontsEnglish;
 use App\Enums\Layouts\FontSizePx;
 use App\Enums\Layouts\FontSizeRem;
-use App\Filament\Admin\Resources\Builder\BuilderTemplateResource\RelationManagers\BlockTypesRelationManager;
-use App\Filament\Admin\Resources\Builder\BuilderTemplateResource\TableBuilderTemplate;
 use App\FilamentCustom\Form\Inputs\SlugInput;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableInput;
 use App\FilamentCustom\Form\Inputs\SoftTranslatableTextArea;
@@ -73,6 +73,7 @@ class BuilderTemplateResource extends Resource {
                                 Forms\Components\Select::make('settings.fonts.base_size_ar')
                                     ->label(__('site-builder/template.fonts.base_size') . " (Ar)")
                                     ->options(FontSizePx::options())
+                                    ->default(FontSizePx::Size16)
                                     ->searchable()
                                     ->required(),
                             ])->visible(fn(Get $get) => collect($get('supported_languages'))->intersect(['ar'])->isNotEmpty())
@@ -96,6 +97,7 @@ class BuilderTemplateResource extends Resource {
                                 Forms\Components\Select::make('settings.fonts.base_size')
                                     ->label(__('site-builder/template.fonts.base_size'))
                                     ->options(FontSizePx::options())
+                                    ->default(FontSizePx::Size16)
                                     ->searchable()
                                     ->required(),
                             ])
@@ -115,12 +117,14 @@ class BuilderTemplateResource extends Resource {
                                 Forms\Components\Select::make('settings.spacing.base_ar')
                                     ->label(__('site-builder/template.spacing.base') . " (Ar)")
                                     ->options(FontSizeRem::options())
+                                    ->default(FontSizeRem::Rem1)
                                     ->searchable()
                                     ->required(),
 
                                 Forms\Components\Select::make('settings.spacing.section_ar')
                                     ->label(__('site-builder/template.spacing.section') . " (Ar)")
                                     ->options(FontSizeRem::options())
+                                    ->default(FontSizeRem::Rem1)
                                     ->searchable()
                                     ->required(),
 
@@ -154,9 +158,11 @@ class BuilderTemplateResource extends Resource {
                     Forms\Components\Section::make(__('site-builder/general.thumbnail'))->schema([
                         ...WebpUploadFixedSize::make()
                             ->setFileName('photo')
-                            ->setUploadDirectory('amenity')
+                            ->setThumbnail(true)
+                            ->setUploadDirectory('builder-template')
                             ->setRequiredUpload(false)
-                            ->setResize(150, 150, 90)
+                            ->setResize(500, 500, 90)
+                            ->setThumbnailSize(200, 200, 90)
                             ->getColumns(),
 
                         Forms\Components\Toggle::make('is_active')
